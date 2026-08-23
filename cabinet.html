@@ -11,94 +11,145 @@
     >
 
     <title>
-        Особистий кабінет | Olymp State Government
+        OLYMP Government | Особистий кабінет
     </title>
 
     <meta
         name="description"
-        content="Особистий кабінет громадянина штату Olymp. Реєстрація, вхід, перегляд профілю та поданих заявок."
+        content="Особистий кабінет громадянина OLYMP Government"
     >
-
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
-
 
     <style>
 
-        /* =====================================================
-           OLYMP PERSONAL CABINET
-        ===================================================== */
+        * {
+            box-sizing: border-box;
+        }
 
-        .cabinet-page {
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+
+            margin: 0;
+
             min-height: 100vh;
-            background: #f4f6f8;
+
+            font-family:
+                Inter,
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                #f4f7fa;
+
+            color:
+                #17212b;
         }
 
 
         /* =====================================================
-           HERO
+           HEADER
         ===================================================== */
 
-        .cabinet-hero {
-            padding: 150px 0 70px;
+        .cabinet-header {
+
+            width: 100%;
+
+            background:
+                #071525;
+
+            color: #ffffff;
+
+            border-bottom:
+                1px solid rgba(255,255,255,.08);
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 100;
+        }
+
+
+        .cabinet-header-inner {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding:
+                18px 24px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 20px;
+        }
+
+
+        .cabinet-brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+        }
+
+
+        .cabinet-logo {
+
+            width: 44px;
+
+            height: 44px;
+
+            border-radius: 10px;
 
             background:
                 linear-gradient(
                     135deg,
-                    #101820,
-                    #172631
+                    #1b6ca8,
+                    #0b2944
                 );
 
-            color: #fff;
-        }
+            display: flex;
 
+            align-items: center;
 
-        .cabinet-hero-content {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
+            justify-content: center;
 
-
-        .cabinet-label {
-            display: inline-block;
-
-            margin-bottom: 15px;
-
-            font-size: 13px;
-            font-weight: 700;
-
-            letter-spacing: 2px;
-
-            color: #9fb4c7;
-        }
-
-
-        .cabinet-hero h1 {
-            margin: 0 0 15px;
-
-            font-size:
-                clamp(
-                    34px,
-                    5vw,
-                    56px
-                );
-
-            line-height: 1.1;
-        }
-
-
-        .cabinet-hero p {
-            max-width: 700px;
-
-            margin: 0;
-
-            color: #c7d1d9;
+            font-weight: 800;
 
             font-size: 17px;
 
-            line-height: 1.7;
+            box-shadow:
+                0 5px 18px rgba(0,0,0,.25);
+        }
+
+
+        .cabinet-brand-title {
+
+            font-size: 17px;
+
+            font-weight: 800;
+
+            letter-spacing: .3px;
+        }
+
+
+        .cabinet-brand-subtitle {
+
+            font-size: 12px;
+
+            color:
+                rgba(255,255,255,.6);
+
+            margin-top: 3px;
         }
 
 
@@ -107,69 +158,100 @@
         ===================================================== */
 
         .cabinet-container {
-            max-width: 1100px;
+
+            width: 100%;
+
+            max-width: 1200px;
 
             margin: 0 auto;
 
             padding:
-                50px
-                20px
-                80px;
+                45px 24px 70px;
         }
 
 
         /* =====================================================
-           LOGIN / REGISTER CARD
+           LOGIN
         ===================================================== */
 
-        .cabinet-login {
-            max-width: 620px;
+        .cabinet-login-wrapper {
+
+            max-width: 520px;
 
             margin:
-                -90px
-                auto
-                30px;
+                45px auto;
+        }
 
-            position: relative;
 
-            z-index: 2;
+        .login-card {
 
-            padding: 35px;
-
-            background: #fff;
+            background:
+                #ffffff;
 
             border-radius: 18px;
 
+            padding: 36px;
+
             box-shadow:
-                0 20px 60px
-                rgba(0, 0, 0, .12);
+                0 12px 40px rgba(18,39,57,.08);
+
+            border:
+                1px solid #e5ebf0;
         }
 
 
-        .cabinet-register {
-            margin-top: 30px;
+        .login-icon {
+
+            width: 64px;
+
+            height: 64px;
+
+            margin: 0 auto 20px;
+
+            border-radius: 16px;
+
+            background:
+                #eaf3fb;
+
+            color:
+                #125a91;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 28px;
         }
 
 
-        .cabinet-login h2 {
+        .login-title {
+
+            text-align: center;
+
+            margin: 0;
+
+            font-size: 28px;
+
+            color:
+                #071525;
+        }
+
+
+        .login-description {
+
+            text-align: center;
+
             margin:
-                0
-                0
-                10px;
+                12px 0 30px;
 
-            font-size: 26px;
-        }
-
-
-        .cabinet-login > p {
-            margin:
-                0
-                0
-                25px;
-
-            color: #68737d;
+            color:
+                #697784;
 
             line-height: 1.6;
+
+            font-size: 14px;
         }
 
 
@@ -177,155 +259,172 @@
            FORM
         ===================================================== */
 
-        .cabinet-form-group {
-            margin-bottom: 18px;
+        .form-group {
+
+            margin-bottom: 19px;
         }
 
 
-        .cabinet-form-group label {
+        .form-label {
+
             display: block;
 
             margin-bottom: 8px;
 
+            font-weight: 700;
+
             font-size: 14px;
 
-            font-weight: 700;
+            color:
+                #263746;
         }
 
 
-        .cabinet-input {
+        .form-input {
+
             width: 100%;
 
-            box-sizing: border-box;
-
-            padding:
-                14px
-                16px;
+            min-height: 52px;
 
             border:
-                1px
-                solid
-                #d7dde2;
+                1px solid #d9e1e7;
 
             border-radius: 10px;
 
+            padding:
+                0 15px;
+
             font-size: 15px;
+
+            color:
+                #17212b;
+
+            background:
+                #ffffff;
 
             outline: none;
 
             transition:
-                border-color .2s,
-                box-shadow .2s;
+                .2s ease;
         }
 
 
-        .cabinet-input:focus {
-            border-color: #607d94;
+        .form-input:focus {
+
+            border-color:
+                #17659f;
 
             box-shadow:
-                0
-                0
-                0
-                3px
-                rgba(
-                    96,
-                    125,
-                    148,
-                    .12
-                );
+                0 0 0 3px rgba(23,101,159,.1);
         }
 
 
-        .cabinet-login-button {
+        .form-input::placeholder {
+
+            color:
+                #9aa7b1;
+        }
+
+
+        .login-button {
+
             width: 100%;
 
-            margin-top: 5px;
+            min-height: 54px;
+
+            border: 0;
+
+            border-radius: 10px;
+
+            background:
+                #0b3d62;
+
+            color:
+                #ffffff;
+
+            font-size: 15px;
+
+            font-weight: 800;
+
+            cursor: pointer;
+
+            transition:
+                .2s ease;
+        }
+
+
+        .login-button:hover {
+
+            background:
+                #125a91;
+        }
+
+
+        .login-button:disabled {
+
+            opacity: .65;
+
+            cursor:
+                not-allowed;
+        }
+
+
+        .login-help {
+
+            margin-top: 22px;
+
+            padding:
+                15px 16px;
+
+            border-radius: 10px;
+
+            background:
+                #f3f7fa;
+
+            color:
+                #667581;
+
+            font-size: 13px;
+
+            line-height: 1.55;
+
+            text-align: center;
         }
 
 
         /* =====================================================
-           ERROR
+           ERRORS
         ===================================================== */
 
         .cabinet-error {
+
             display: none;
 
-            margin-top: 15px;
+            margin-bottom: 18px;
 
             padding:
-                13px
-                15px;
+                13px 15px;
 
-            border-radius: 10px;
+            border-radius: 9px;
 
-            background: #fff0f0;
+            background:
+                #fff0f0;
 
-            color: #b42318;
+            border:
+                1px solid #ffd0d0;
+
+            color:
+                #b42318;
 
             font-size: 14px;
+
+            line-height: 1.45;
         }
 
 
         .cabinet-error.visible {
+
             display: block;
-        }
-
-
-        /* =====================================================
-           SUCCESS
-        ===================================================== */
-
-        .cabinet-success {
-            display: none;
-
-            margin-top: 15px;
-
-            padding:
-                13px
-                15px;
-
-            border-radius: 10px;
-
-            background: #e8f7ed;
-
-            color: #18753d;
-
-            font-size: 14px;
-        }
-
-
-        .cabinet-success.visible {
-            display: block;
-        }
-
-
-        /* =====================================================
-           REGISTRATION INFORMATION
-        ===================================================== */
-
-        .registration-info {
-            margin-top: 20px;
-
-            padding: 18px;
-
-            border-radius: 12px;
-
-            background: #f4f6f8;
-
-            color: #59656e;
-
-            font-size: 14px;
-
-            line-height: 1.6;
-        }
-
-
-        .registration-info strong {
-            display: block;
-
-            margin-bottom: 7px;
-
-            color: #172631;
         }
 
 
@@ -333,13 +432,83 @@
            DASHBOARD
         ===================================================== */
 
-        .cabinet-dashboard {
+        #cabinetDashboard {
+
             display: none;
         }
 
 
-        .cabinet-dashboard.active {
+        #cabinetDashboard.active {
+
             display: block;
+        }
+
+
+        .dashboard-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 20px;
+
+            margin-bottom: 30px;
+        }
+
+
+        .dashboard-title {
+
+            margin: 0;
+
+            font-size: 30px;
+
+            color:
+                #071525;
+        }
+
+
+        .dashboard-subtitle {
+
+            margin:
+                7px 0 0;
+
+            color:
+                #71808c;
+
+            font-size: 14px;
+        }
+
+
+        .logout-button {
+
+            border:
+                1px solid #d7dfe5;
+
+            background:
+                #ffffff;
+
+            color:
+                #263746;
+
+            min-height: 44px;
+
+            padding:
+                0 18px;
+
+            border-radius: 9px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+
+        .logout-button:hover {
+
+            background:
+                #f3f6f8;
         }
 
 
@@ -348,48 +517,49 @@
         ===================================================== */
 
         .profile-card {
-            display: flex;
 
-            align-items: center;
+            background:
+                #ffffff;
 
-            justify-content: space-between;
+            border:
+                1px solid #e3e9ee;
 
-            gap: 25px;
+            border-radius: 16px;
 
-            margin-bottom: 30px;
+            padding: 25px;
 
-            padding: 28px;
-
-            background: #fff;
-
-            border-radius: 18px;
-
-            box-shadow:
-                0
-                10px
-                35px
-                rgba(
-                    0,
-                    0,
-                    0,
-                    .07
-                );
-        }
-
-
-        .profile-left {
             display: flex;
 
             align-items: center;
 
             gap: 20px;
+
+            box-shadow:
+                0 8px 28px rgba(18,39,57,.05);
+
+            margin-bottom: 25px;
         }
 
 
         .profile-avatar {
-            width: 70px;
 
-            height: 70px;
+            flex: 0 0 72px;
+
+            width: 72px;
+
+            height: 72px;
+
+            border-radius: 50%;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0b3d62,
+                    #176ca7
+                );
+
+            color:
+                #ffffff;
 
             display: flex;
 
@@ -397,54 +567,44 @@
 
             justify-content: center;
 
-            flex-shrink: 0;
+            font-weight: 800;
 
-            border-radius: 50%;
-
-            background: #172631;
-
-            color: #fff;
-
-            font-size: 28px;
-
-            font-weight: 700;
+            font-size: 23px;
         }
 
 
-        .profile-info small {
-            display: block;
+        .profile-info {
 
-            margin-bottom: 5px;
-
-            color: #7b8790;
-
-            font-size: 12px;
-
-            font-weight: 700;
-
-            letter-spacing: 1px;
+            flex: 1;
         }
 
 
-        .profile-info h2 {
-            margin:
-                0
-                0
-                5px;
+        .profile-name {
 
-            font-size: 24px;
-        }
-
-
-        .profile-info p {
             margin: 0;
 
-            color: #69757e;
+            font-size: 21px;
+
+            color:
+                #071525;
         }
 
 
-        .logout-button {
-            white-space: nowrap;
+        .profile-id {
+
+            margin-top: 6px;
+
+            font-size: 13px;
+
+            color:
+                #778591;
+        }
+
+
+        .profile-id strong {
+
+            color:
+                #31546b;
         }
 
 
@@ -452,97 +612,115 @@
            STATISTICS
         ===================================================== */
 
-        .cabinet-stats {
+        .statistics-grid {
+
             display: grid;
 
             grid-template-columns:
-                repeat(
-                    4,
-                    1fr
-                );
+                repeat(4, 1fr);
 
-            gap: 18px;
+            gap: 15px;
 
-            margin-bottom: 35px;
+            margin-bottom: 30px;
         }
 
 
-        .cabinet-stat {
-            padding: 24px;
+        .stat-card {
 
-            background: #fff;
+            background:
+                #ffffff;
 
-            border-radius: 15px;
+            border:
+                1px solid #e3e9ee;
+
+            border-radius: 14px;
+
+            padding: 20px;
 
             box-shadow:
-                0
-                8px
-                25px
-                rgba(
-                    0,
-                    0,
-                    0,
-                    .05
-                );
+                0 6px 22px rgba(18,39,57,.04);
         }
 
 
-        .cabinet-stat-number {
-            display: block;
+        .stat-label {
 
-            margin-bottom: 7px;
+            color:
+                #7b8994;
 
-            font-size: 30px;
+            font-size: 13px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .stat-value {
+
+            font-size: 27px;
 
             font-weight: 800;
 
-            color: #172631;
-        }
-
-
-        .cabinet-stat-label {
-            color: #707b84;
-
-            font-size: 14px;
+            color:
+                #071525;
         }
 
 
         /* =====================================================
-           APPLICATION HEADER
+           APPLICATIONS HEADER
         ===================================================== */
 
         .applications-header {
-            display: flex;
 
-            align-items: end;
+            display: flex;
 
             justify-content: space-between;
 
-            gap: 20px;
+            align-items: center;
 
-            margin-bottom: 20px;
+            margin-bottom: 18px;
+
+            gap: 15px;
         }
 
 
-        .applications-header h2 {
-            margin:
-                0
-                0
-                5px;
+        .applications-title {
 
-            font-size: 28px;
-        }
-
-
-        .applications-header p {
             margin: 0;
 
-            color: #737e87;
+            font-size: 22px;
+
+            color:
+                #071525;
         }
 
 
         .refresh-button {
-            white-space: nowrap;
+
+            border:
+                1px solid #d7dfe5;
+
+            background:
+                #ffffff;
+
+            min-height: 40px;
+
+            padding:
+                0 15px;
+
+            border-radius: 8px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            color:
+                #304656;
+        }
+
+
+        .refresh-button:hover {
+
+            background:
+                #f4f7f9;
         }
 
 
@@ -550,7 +728,8 @@
            APPLICATIONS
         ===================================================== */
 
-        .applications-list {
+        #applicationsList {
+
             display: grid;
 
             gap: 18px;
@@ -558,139 +737,29 @@
 
 
         .application-card {
-            padding: 25px;
 
-            background: #fff;
+            background:
+                #ffffff;
 
-            border-radius: 16px;
+            border:
+                1px solid #e2e8ed;
+
+            border-radius: 15px;
+
+            padding: 23px;
 
             box-shadow:
-                0
-                8px
-                30px
-                rgba(
-                    0,
-                    0,
-                    0,
-                    .06
-                );
+                0 7px 24px rgba(18,39,57,.05);
         }
 
 
         .application-card-top {
-            display: flex;
 
-            align-items: flex-start;
+            display: flex;
 
             justify-content: space-between;
 
-            gap: 20px;
-
-            margin-bottom: 20px;
-        }
-
-
-        .application-number {
-            display: block;
-
-            margin-bottom: 6px;
-
-            color: #71808b;
-
-            font-size: 13px;
-
-            font-weight: 700;
-
-            letter-spacing: .5px;
-        }
-
-
-        .application-title {
-            margin: 0;
-
-            font-size: 20px;
-        }
-
-
-        /* =====================================================
-           STATUS
-        ===================================================== */
-
-        .application-status-badge {
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 7px;
-
-            padding:
-                8px
-                13px;
-
-            border-radius: 30px;
-
-            font-size: 13px;
-
-            font-weight: 700;
-
-            white-space: nowrap;
-        }
-
-
-        .status-pending {
-            background: #fff4d6;
-
-            color: #9a6700;
-        }
-
-
-        .status-review {
-            background: #e8f1ff;
-
-            color: #2457a6;
-        }
-
-
-        .status-documents {
-            background: #fff0df;
-
-            color: #a44b00;
-        }
-
-
-        .status-approved {
-            background: #e8f7ed;
-
-            color: #18753d;
-        }
-
-
-        .status-rejected {
-            background: #ffe9e9;
-
-            color: #b42318;
-        }
-
-
-        .status-completed {
-            background: #e9f7f6;
-
-            color: #087f75;
-        }
-
-
-        /* =====================================================
-           APPLICATION INFO
-        ===================================================== */
-
-        .application-info {
-            display: grid;
-
-            grid-template-columns:
-                repeat(
-                    3,
-                    1fr
-                );
+            align-items: flex-start;
 
             gap: 15px;
 
@@ -698,101 +767,259 @@
         }
 
 
-        .application-info-item {
-            padding: 15px;
+        .application-number {
 
-            background: #f7f8f9;
+            display: block;
+
+            font-size: 12px;
+
+            color:
+                #7a8994;
+
+            margin-bottom: 5px;
+        }
+
+
+        .application-title {
+
+            margin: 0;
+
+            font-size: 18px;
+
+            color:
+                #071525;
+        }
+
+
+        .application-status-badge {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding:
+                7px 11px;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+            white-space: nowrap;
+        }
+
+
+        .status-pending {
+
+            background:
+                #fff6d7;
+
+            color:
+                #8a6500;
+        }
+
+
+        .status-approved {
+
+            background:
+                #e7f0ff;
+
+            color:
+                #245b9b;
+        }
+
+
+        .status-completed {
+
+            background:
+                #e5f7e9;
+
+            color:
+                #26733a;
+        }
+
+
+        .status-rejected {
+
+            background:
+                #ffe6e6;
+
+            color:
+                #a62c2c;
+        }
+
+
+        .status-documents {
+
+            background:
+                #eeeeff;
+
+            color:
+                #5757a0;
+        }
+
+
+        .status-review {
+
+            background:
+                #eef2f5;
+
+            color:
+                #52616d;
+        }
+
+
+        .application-info {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 15px;
+
+            padding:
+                16px;
+
+            background:
+                #f7f9fa;
 
             border-radius: 10px;
+
+            margin-bottom: 18px;
         }
 
 
         .application-info-item span {
+
             display: block;
 
-            margin-bottom: 5px;
-
-            color: #7b858e;
+            color:
+                #87939d;
 
             font-size: 12px;
+
+            margin-bottom: 5px;
         }
 
 
         .application-info-item strong {
+
+            display: block;
+
+            color:
+                #334958;
+
             font-size: 14px;
+
+            word-break: break-word;
         }
 
 
-        /* =====================================================
-           DESCRIPTION
-        ===================================================== */
-
         .application-description {
-            padding: 18px;
 
-            background: #f7f8f9;
-
-            border-radius: 10px;
-
-            margin-bottom: 15px;
+            padding-top: 3px;
         }
 
 
         .application-description strong {
+
             display: block;
 
-            margin-bottom: 8px;
+            margin-bottom: 7px;
+
+            font-size: 14px;
         }
 
 
         .application-description p {
+
             margin: 0;
 
-            color: #59656e;
+            color:
+                #657581;
 
-            line-height: 1.6;
+            line-height: 1.65;
+
+            font-size: 14px;
 
             white-space: pre-wrap;
         }
 
 
-        /* =====================================================
-           COMMENT
-        ===================================================== */
-
         .application-comment {
-            padding: 18px;
+
+            margin-top: 18px;
+
+            padding:
+                15px;
 
             border-left:
-                3px
-                solid
-                #8798a6;
+                3px solid #17659f;
 
-            background: #f4f6f8;
+            background:
+                #f3f8fc;
 
-            border-radius:
-                0
-                10px
-                10px
-                0;
+            border-radius: 5px;
         }
 
 
         .application-comment strong {
+
             display: block;
 
-            margin-bottom: 8px;
+            margin-bottom: 7px;
+
+            font-size: 13px;
         }
 
 
         .application-comment p {
+
             margin: 0;
 
-            color: #59656e;
+            color:
+                #5d6d78;
 
-            line-height: 1.6;
+            line-height: 1.55;
+
+            font-size: 14px;
 
             white-space: pre-wrap;
+        }
+
+
+        .btn-light {
+
+            min-height: 42px;
+
+            padding:
+                0 16px;
+
+            border:
+                1px solid #d7e0e6;
+
+            background:
+                #ffffff;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-weight: 700;
+
+            color:
+                #294354;
+        }
+
+
+        .btn-light:hover {
+
+            background:
+                #f2f5f7;
         }
 
 
@@ -800,45 +1027,49 @@
            EMPTY
         ===================================================== */
 
-        .applications-empty {
+        #applicationsEmpty {
+
             display: none;
 
+            background:
+                #ffffff;
+
+            border:
+                1px solid #e2e8ed;
+
+            border-radius: 15px;
+
             padding:
-                60px
-                25px;
+                50px 25px;
 
             text-align: center;
-
-            background: #fff;
-
-            border-radius: 16px;
         }
 
 
-        .applications-empty.visible {
+        #applicationsEmpty.visible {
+
             display: block;
         }
 
 
-        .empty-icon {
-            margin-bottom: 15px;
+        #applicationsEmpty h3 {
 
-            font-size: 45px;
-        }
-
-
-        .applications-empty h3 {
             margin:
-                0
-                0
-                10px;
+                0 0 10px;
+
+            color:
+                #1b2d3b;
         }
 
 
-        .applications-empty p {
+        #applicationsEmpty p {
+
             margin: 0;
 
-            color: #77818a;
+            color:
+                #7a8994;
+
+            line-height: 1.6;
         }
 
 
@@ -846,88 +1077,197 @@
            LOADING
         ===================================================== */
 
-        .cabinet-loading {
+        #cabinetLoading {
+
             display: none;
 
-            padding: 50px;
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                rgba(7,21,37,.45);
+
+            z-index: 500;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+
+        #cabinetLoading.visible {
+
+            display: flex;
+        }
+
+
+        .loading-box {
+
+            background:
+                #ffffff;
+
+            border-radius: 14px;
+
+            padding:
+                25px 30px;
+
+            box-shadow:
+                0 15px 50px rgba(0,0,0,.2);
 
             text-align: center;
 
-            background: #fff;
-
-            border-radius: 16px;
+            font-weight: 700;
         }
 
 
-        .cabinet-loading.visible {
-            display: block;
-        }
+        .spinner {
 
+            width: 35px;
 
-        .loading-spinner {
-            width: 40px;
-
-            height: 40px;
-
-            margin:
-                0
-                auto
-                15px;
+            height: 35px;
 
             border:
-                4px
-                solid
-                #e3e7ea;
+                4px solid #e2e8ed;
 
             border-top-color:
-                #172631;
+                #17659f;
 
             border-radius: 50%;
 
             animation:
-                olympSpin
-                .8s
-                linear
-                infinite;
+                spin .8s linear infinite;
+
+            margin:
+                0 auto 15px;
         }
 
 
-        @keyframes olympSpin {
+        @keyframes spin {
 
             to {
-                transform:
-                    rotate(360deg);
+                transform: rotate(360deg);
             }
 
         }
 
 
         /* =====================================================
-           FOOTER
+           MODAL
         ===================================================== */
 
-        .cabinet-footer {
-            margin-top: 30px;
+        #cabinetApplicationModal {
 
-            padding-top: 30px;
+            display: none;
 
-            border-top:
-                1px
-                solid
-                #e1e5e8;
+            position: fixed;
 
-            text-align: center;
+            inset: 0;
 
-            color: #7b858d;
+            background:
+                rgba(7,21,37,.58);
 
-            font-size: 13px;
+            z-index: 300;
+
+            padding:
+                30px;
+
+            overflow-y: auto;
         }
 
 
-        .cabinet-footer a {
-            color: inherit;
+        #cabinetApplicationModal.active {
 
-            text-decoration: none;
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+        }
+
+
+        .application-modal-window {
+
+            width: 100%;
+
+            max-width: 680px;
+
+            max-height: 90vh;
+
+            overflow-y: auto;
+
+            background:
+                #ffffff;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 20px 70px rgba(0,0,0,.25);
+        }
+
+
+        .application-modal-header {
+
+            padding:
+                22px 25px;
+
+            border-bottom:
+                1px solid #e6ebef;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+        }
+
+
+        .application-modal-header h2 {
+
+            margin: 0;
+
+            font-size: 20px;
+
+            color:
+                #071525;
+        }
+
+
+        .modal-close {
+
+            width: 38px;
+
+            height: 38px;
+
+            border: 0;
+
+            border-radius: 8px;
+
+            background:
+                #f0f3f5;
+
+            cursor: pointer;
+
+            font-size: 20px;
+
+            color:
+                #52616d;
+        }
+
+
+        .modal-close:hover {
+
+            background:
+                #e3e8eb;
+        }
+
+
+        #detailsContent {
+
+            padding:
+                25px;
         }
 
 
@@ -936,16 +1276,13 @@
         ===================================================== */
 
         @media (
-            max-width: 850px
+            max-width: 800px
         ) {
 
-            .cabinet-stats {
+            .statistics-grid {
 
                 grid-template-columns:
-                    repeat(
-                        2,
-                        1fr
-                    );
+                    repeat(2, 1fr);
 
             }
 
@@ -953,12 +1290,12 @@
             .application-info {
 
                 grid-template-columns:
-                    1fr 1fr;
+                    1fr;
 
             }
 
 
-            .profile-card {
+            .dashboard-header {
 
                 align-items:
                     flex-start;
@@ -975,32 +1312,10 @@
             max-width: 600px
         ) {
 
-            .cabinet-hero {
+            .cabinet-header-inner {
 
                 padding:
-                    120px
-                    0
-                    80px;
-
-            }
-
-
-            .cabinet-login {
-
-                margin-top:
-                    -55px;
-
-                padding:
-                    25px
-                    20px;
-
-            }
-
-
-            .cabinet-register {
-
-                margin-top:
-                    25px;
+                    14px 16px;
 
             }
 
@@ -1008,38 +1323,27 @@
             .cabinet-container {
 
                 padding:
-                    35px
-                    15px
-                    60px;
+                    25px 15px 50px;
 
             }
 
 
-            .cabinet-stats {
+            .login-card {
 
-                grid-template-columns:
-                    1fr 1fr;
-
-                gap: 10px;
+                padding:
+                    25px 20px;
 
             }
 
 
-            .cabinet-stat {
+            .login-title {
 
-                padding: 18px;
-
-            }
-
-
-            .cabinet-stat-number {
-
-                font-size: 25px;
+                font-size: 24px;
 
             }
 
 
-            .profile-left {
+            .profile-card {
 
                 align-items:
                     flex-start;
@@ -1049,36 +1353,52 @@
 
             .profile-avatar {
 
-                width: 55px;
+                flex-basis:
+                    58px;
 
-                height: 55px;
+                width:
+                    58px;
 
-                font-size: 22px;
+                height:
+                    58px;
+
+                font-size:
+                    19px;
 
             }
 
 
-            .profile-info h2 {
+            .statistics-grid {
 
-                font-size: 20px;
+                grid-template-columns:
+                    1fr 1fr;
+
+                gap:
+                    10px;
 
             }
 
 
-            .applications-header {
+            .stat-card {
 
-                align-items:
-                    flex-start;
+                padding:
+                    15px;
 
-                flex-direction:
-                    column;
+            }
+
+
+            .stat-value {
+
+                font-size:
+                    22px;
 
             }
 
 
             .application-card {
 
-                padding: 20px;
+                padding:
+                    17px;
 
             }
 
@@ -1091,10 +1411,18 @@
             }
 
 
-            .application-info {
+            .application-status-badge {
 
-                grid-template-columns:
-                    1fr;
+                align-self:
+                    flex-start;
+
+            }
+
+
+            #cabinetApplicationModal {
+
+                padding:
+                    12px;
 
             }
 
@@ -1105,561 +1433,307 @@
 </head>
 
 
-<body class="cabinet-page">
+<body>
 
 
-<!-- =====================================================
+<!-- =========================================================
      HEADER
-===================================================== -->
+========================================================= -->
 
-<header
-    class="header"
-    id="header">
+<header class="cabinet-header">
 
-    <div class="container nav">
+    <div class="cabinet-header-inner">
 
+        <div class="cabinet-brand">
 
-        <a
-            href="index.html"
-            class="logo">
-
-            <div class="logo-symbol">
+            <div class="cabinet-logo">
                 O
             </div>
 
-            <div class="logo-text">
+            <div>
 
-                <strong>
-                    OLYMP
-                </strong>
+                <div class="cabinet-brand-title">
+                    OLYMP GOVERNMENT
+                </div>
 
-                <span>
-                    STATE GOVERNMENT
-                </span>
+                <div class="cabinet-brand-subtitle">
+                    Державний портал
+                </div>
 
             </div>
 
-        </a>
-
-
-        <nav
-            class="menu"
-            id="mainMenu">
-
-            <a href="index.html">
-                Головна
-            </a>
-
-            <a href="index.html#government">
-                Уряд
-            </a>
-
-            <a href="index.html#services">
-                Послуги
-            </a>
-
-            <a href="index.html#laws">
-                Законодавство
-            </a>
-
-            <a href="index.html#news">
-                Новини
-            </a>
-
-            <a href="index.html#contacts">
-                Контакти
-            </a>
-
-        </nav>
-
-
-        <button
-            class="menu-button"
-            id="menuButton"
-            aria-label="Відкрити меню">
-
-            ☰
-
-        </button>
+        </div>
 
     </div>
 
 </header>
 
 
-<!-- =====================================================
-     HERO
-===================================================== -->
-
-<section class="cabinet-hero">
-
-    <div class="container">
-
-        <div class="cabinet-hero-content">
-
-            <span class="cabinet-label">
-                ДЕРЖАВНИЙ ПОРТАЛ OLYMP
-            </span>
-
-
-            <h1>
-                Особистий кабінет
-            </h1>
-
-
-            <p>
-                Реєструйте громадянський профіль,
-                подавайте заявки до державних органів,
-                перевіряйте їх статус та отримуйте
-                офіційні рішення.
-            </p>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
+<!-- =========================================================
      MAIN
-===================================================== -->
+========================================================= -->
 
 <main class="cabinet-container">
 
 
-    <!-- =================================================
+    <!-- =====================================================
          LOGIN
-    ================================================= -->
+    ====================================================== -->
 
     <section
-        class="cabinet-login"
-        id="cabinetLogin">
+        id="cabinetLogin"
+        class="cabinet-login-wrapper"
+    >
 
-        <h2>
-            Вхід до кабінету
-        </h2>
+        <div class="login-card">
 
-
-        <p>
-            Увійдіть до особистого кабінету за номером
-            посвідчення та паролем.
-        </p>
-
-
-        <form id="cabinetLoginForm">
-
-
-            <!-- ID -->
-
-            <div class="cabinet-form-group">
-
-                <label for="cabinetIdNumber">
-                    Номер посвідчення
-                </label>
-
-
-                <input
-                    type="text"
-                    class="cabinet-input"
-                    id="cabinetIdNumber"
-                    placeholder="Наприклад: OLYMP-0001"
-                    autocomplete="username"
-                    required>
-
+            <div class="login-icon">
+                🔐
             </div>
 
+            <h1 class="login-title">
+                Особистий кабінет
+            </h1>
 
-            <!-- PASSWORD -->
+            <p class="login-description">
 
-            <div class="cabinet-form-group">
+                Для входу використовуйте
+                <strong>номер заявки</strong>
+                та
+                <strong>код доступу</strong>,
+                які були надані після подання заявки.
 
-                <label for="cabinetPassword">
-                    Пароль
-                </label>
+            </p>
 
 
-                <input
-                    type="password"
-                    class="cabinet-input"
-                    id="cabinetPassword"
-                    placeholder="Введіть пароль"
-                    autocomplete="current-password"
-                    required>
+            <div
+                id="cabinetLoginError"
+                class="cabinet-error"
+            ></div>
+
+
+            <form
+                id="cabinetLoginForm"
+                autocomplete="off"
+            >
+
+
+                <div class="form-group">
+
+                    <label
+                        class="form-label"
+                        for="cabinetApplicationNumber"
+                    >
+                        Номер заявки
+                    </label>
+
+                    <input
+                        type="text"
+                        id="cabinetApplicationNumber"
+                        class="form-input"
+                        placeholder="Наприклад: OLYMP-000127"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label
+                        class="form-label"
+                        for="cabinetAccessCode"
+                    >
+                        Код доступу
+                    </label>
+
+                    <input
+                        type="password"
+                        id="cabinetAccessCode"
+                        class="form-input"
+                        placeholder="Введіть код доступу"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    id="cabinetLoginButton"
+                    class="login-button"
+                >
+                    Увійти до кабінету
+                </button>
+
+            </form>
+
+
+            <div class="login-help">
+
+                <strong>
+                    Важливо:
+                </strong>
+
+                <br>
+
+                Номер заявки та код доступу
+                зберігайте до завершення розгляду
+                вашого звернення.
 
             </div>
-
-
-            <!-- LOGIN -->
-
-            <button
-                type="submit"
-                class="btn btn-primary cabinet-login-button"
-                id="cabinetLoginButton">
-
-                Увійти до кабінету
-
-            </button>
-
-
-        </form>
-
-
-        <div
-            class="cabinet-error"
-            id="cabinetLoginError">
-
-            Не вдалося виконати вхід.
 
         </div>
 
     </section>
 
 
-    <!-- =================================================
-         REGISTRATION
-    ================================================= -->
-
-    <section
-        class="cabinet-login cabinet-register"
-        id="cabinetRegister">
-
-        <h2>
-            Реєстрація громадянина
-        </h2>
-
-
-        <p>
-            Створіть особистий профіль громадянина
-            штату Olymp. Після реєстрації система
-            автоматично створить номер посвідчення.
-        </p>
-
-
-        <form id="cabinetRegisterForm">
-
-
-            <!-- FULL NAME -->
-
-            <div class="cabinet-form-group">
-
-                <label for="registerFullName">
-                    ПІБ *
-                </label>
-
-
-                <input
-                    type="text"
-                    class="cabinet-input"
-                    id="registerFullName"
-                    placeholder="Ім'я Прізвище"
-                    autocomplete="name"
-                    required>
-
-            </div>
-
-
-            <!-- BIRTH DATE -->
-
-            <div class="cabinet-form-group">
-
-                <label for="registerBirthDate">
-                    Дата народження *
-                </label>
-
-
-                <input
-                    type="date"
-                    class="cabinet-input"
-                    id="registerBirthDate"
-                    required>
-
-            </div>
-
-
-            <!-- PHONE -->
-
-            <div class="cabinet-form-group">
-
-                <label for="registerPhone">
-                    Телефон
-                </label>
-
-
-                <input
-                    type="tel"
-                    class="cabinet-input"
-                    id="registerPhone"
-                    placeholder="+380..."
-                    autocomplete="tel">
-
-            </div>
-
-
-            <!-- DISCORD -->
-
-            <div class="cabinet-form-group">
-
-                <label for="registerDiscord">
-                    Discord
-                </label>
-
-
-                <input
-                    type="text"
-                    class="cabinet-input"
-                    id="registerDiscord"
-                    placeholder="Ваш Discord">
-
-            </div>
-
-
-            <!-- EMAIL -->
-
-            <div class="cabinet-form-group">
-
-                <label for="registerEmail">
-                    Email
-                </label>
-
-
-                <input
-                    type="email"
-                    class="cabinet-input"
-                    id="registerEmail"
-                    placeholder="example@email.com"
-                    autocomplete="email">
-
-            </div>
-
-
-            <!-- PASSWORD -->
-
-            <div class="cabinet-form-group">
-
-                <label for="registerPassword">
-                    Пароль *
-                </label>
-
-
-                <input
-                    type="password"
-                    class="cabinet-input"
-                    id="registerPassword"
-                    minlength="6"
-                    placeholder="Мінімум 6 символів"
-                    autocomplete="new-password"
-                    required>
-
-            </div>
-
-
-            <!-- PASSWORD CONFIRM -->
-
-            <div class="cabinet-form-group">
-
-                <label for="registerPasswordConfirm">
-                    Повторіть пароль *
-                </label>
-
-
-                <input
-    type="password"
-    class="cabinet-input"
-    id="registerPasswordRepeat"
-    minlength="6"
-    placeholder="Повторіть пароль"
-    autocomplete="new-password"
-    required>
-
-            </div>
-
-
-            <!-- REGISTER -->
-
-            <button
-                type="submit"
-                class="btn btn-primary cabinet-login-button"
-                id="registerButton">
-
-                Зареєструватися
-
-            </button>
-
-
-        </form>
-
-
-        <div
-    class="cabinet-error"
-    id="cabinetRegisterError">
-</div>
-
-
-        <div
-            class="cabinet-success"
-            id="registerSuccess">
-        </div>
-
-
-        <div class="registration-info">
-
-            <strong>
-                Що відбувається після реєстрації?
-            </strong>
-
-            Система створює ваш громадянський профіль,
-            присвоює унікальний номер посвідчення
-            формату <strong>OLYMP-0001</strong> та
-            дозволяє користуватися державними послугами
-            навіть якщо ви ще не подавали жодної заявки.
-
-        </div>
-
-    </section>
-
-
-    <!-- =================================================
+    <!-- =====================================================
          DASHBOARD
-    ================================================= -->
+    ====================================================== -->
 
     <section
-        class="cabinet-dashboard"
-        id="cabinetDashboard">
+        id="cabinetDashboard"
+    >
 
 
-        <!-- PROFILE -->
+        <!-- HEADER -->
 
-        <div class="profile-card">
+        <div class="dashboard-header">
 
+            <div>
 
-            <div class="profile-left">
+                <h1 class="dashboard-title">
+                    Особистий кабінет
+                </h1>
 
-
-                <div
-                    class="profile-avatar"
-                    id="profileAvatar">
-
-                    O
-
-                </div>
-
-
-                <div class="profile-info">
-
-                    <small>
-                        ГРОМАДЯНИН ШТАТУ OLYMP
-                    </small>
-
-
-                    <h2 id="profileName">
-                        —
-                    </h2>
-
-
-                    <p>
-
-                        Посвідчення:
-
-                        <strong id="profileId">
-                            —
-                        </strong>
-
-                    </p>
-
-                </div>
+                <p class="dashboard-subtitle">
+                    Інформація про ваші звернення до державних органів
+                </p>
 
             </div>
 
 
             <button
                 type="button"
-                class="btn btn-light logout-button"
-                id="logoutButton">
-
+                id="logoutButton"
+                class="logout-button"
+            >
                 Вийти
-
             </button>
 
+        </div>
+
+
+        <!-- PROFILE -->
+
+        <div class="profile-card">
+
+            <div
+                id="profileAvatar"
+                class="profile-avatar"
+            >
+                O
+            </div>
+
+
+            <div class="profile-info">
+
+                <h2
+                    id="profileName"
+                    class="profile-name"
+                >
+                    Громадянин
+                </h2>
+
+
+                <div class="profile-id">
+
+                    Номер заявки:
+
+                    <strong
+                        id="profileId"
+                    >
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
 
         </div>
 
 
         <!-- STATISTICS -->
 
-        <div class="cabinet-stats">
+        <div class="statistics-grid">
 
 
-            <div class="cabinet-stat">
+            <div class="stat-card">
 
-                <span
-                    class="cabinet-stat-number"
-                    id="totalApplications">
+                <div class="stat-label">
+                    Всього заявок
+                </div>
 
+                <div
+                    id="totalApplications"
+                    class="stat-value"
+                >
                     0
-
-                </span>
-
-
-                <span class="cabinet-stat-label">
-                    Усього заявок
-                </span>
+                </div>
 
             </div>
 
 
-            <div class="cabinet-stat">
+            <div class="stat-card">
 
-                <span
-                    class="cabinet-stat-number"
-                    id="pendingApplications">
-
-                    0
-
-                </span>
-
-
-                <span class="cabinet-stat-label">
+                <div class="stat-label">
                     На розгляді
-                </span>
+                </div>
+
+                <div
+                    id="pendingApplications"
+                    class="stat-value"
+                >
+                    0
+                </div>
 
             </div>
 
 
-            <div class="cabinet-stat">
+            <div class="stat-card">
 
-                <span
-                    class="cabinet-stat-number"
-                    id="approvedApplications">
+                <div class="stat-label">
+                    Виконано
+                </div>
 
+                <div
+                    id="approvedApplications"
+                    class="stat-value"
+                >
                     0
-
-                </span>
-
-
-                <span class="cabinet-stat-label">
-                    Схвалено
-                </span>
+                </div>
 
             </div>
 
 
-            <div class="cabinet-stat">
+            <div class="stat-card">
 
-                <span
-                    class="cabinet-stat-number"
-                    id="rejectedApplications">
-
-                    0
-
-                </span>
-
-
-                <span class="cabinet-stat-label">
+                <div class="stat-label">
                     Відхилено
-                </span>
+                </div>
+
+                <div
+                    id="rejectedApplications"
+                    class="stat-value"
+                >
+                    0
+                </div>
 
             </div>
+
 
         </div>
 
@@ -1668,102 +1742,38 @@
 
         <div class="applications-header">
 
-
-            <div>
-
-                <h2>
-                    Мої заявки
-                </h2>
-
-
-                <p>
-                    Історія звернень до державних органів.
-                </p>
-
-            </div>
+            <h2 class="applications-title">
+                Мої заявки
+            </h2>
 
 
             <button
                 type="button"
-                class="btn btn-light refresh-button"
-                id="refreshApplications">
-
+                id="refreshApplications"
+                class="refresh-button"
+            >
                 ↻ Оновити
-
             </button>
 
         </div>
 
 
-        <!-- LOADING -->
-
-        <div
-            class="cabinet-loading"
-            id="cabinetLoading">
-
-            <div class="loading-spinner"></div>
-
-
-            <strong>
-                Завантаження заявок...
-            </strong>
-
-
-            <p>
-                Зачекайте, система отримує
-                актуальну інформацію.
-            </p>
-
-        </div>
-
-
-        <!-- APPLICATION LIST -->
-
-        <div
-            class="applications-list"
-            id="applicationsList">
-        </div>
+        <div id="applicationsList"></div>
 
 
         <!-- EMPTY -->
 
         <div
-            class="applications-empty"
-            id="applicationsEmpty">
-
-            <div class="empty-icon">
-                📭
-            </div>
-
+            id="applicationsEmpty"
+        >
 
             <h3>
-                Заявок не знайдено
+                Заявки відсутні
             </h3>
 
-
             <p>
-                За вашим профілем поки що немає
-                зареєстрованих заявок.
-            </p>
-
-        </div>
-
-
-        <!-- FOOTER -->
-
-        <div class="cabinet-footer">
-
-            <p>
-                Офіційний портал Уряду штату Olymp
-            </p>
-
-
-            <p>
-
-                <a href="index.html">
-                    ← Повернутися на головну
-                </a>
-
+                Інформація про ваші заявки
+                з'явиться після їх реєстрації.
             </p>
 
         </div>
@@ -1771,63 +1781,79 @@
 
     </section>
 
+
 </main>
 
 
-<!-- =====================================================
-     APPLICATION DETAILS MODAL
-===================================================== -->
+<!-- =========================================================
+     LOADING
+========================================================= -->
 
 <div
-    class="modal"
+    id="cabinetLoading"
+>
+
+    <div class="loading-box">
+
+        <div class="spinner"></div>
+
+        Завантаження...
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     APPLICATION MODAL
+========================================================= -->
+
+<div
     id="cabinetApplicationModal"
-    aria-hidden="true">
+    aria-hidden="true"
+>
 
 
-    <div
-        class="modal-content"
-        style="max-width:700px;">
+    <div class="application-modal-window">
 
 
-        <button
-            class="modal-close"
-            id="closeCabinetApplicationModal"
-            type="button">
+        <div class="application-modal-header">
 
-            ×
-
-        </button>
+            <h2 id="detailsTitle">
+                Заявка
+            </h2>
 
 
-        <span class="modal-category">
-            ДЕРЖАВНА ЗАЯВКА
-        </span>
-
-
-        <h2 id="detailsTitle">
-            Заявка
-        </h2>
-
-
-        <div
-            id="detailsContent"
-            style="margin-top:25px;">
+            <button
+                type="button"
+                id="closeCabinetApplicationModal"
+                class="modal-close"
+                aria-label="Закрити"
+            >
+                ×
+            </button>
 
         </div>
 
 
         <div
-            class="modal-actions"
-            style="margin-top:25px;">
+            id="detailsContent"
+        ></div>
 
+
+        <div
+            style="
+                padding: 0 25px 25px;
+                text-align: right;
+            "
+        >
 
             <button
-                class="btn btn-light"
+                type="button"
                 id="closeCabinetApplicationModalButton"
-                type="button">
-
+                class="btn-light"
+            >
                 Закрити
-
             </button>
 
         </div>
@@ -1837,9 +1863,9 @@
 </div>
 
 
-<!-- =====================================================
+<!-- =========================================================
      JAVASCRIPT
-===================================================== -->
+========================================================= -->
 
 <script src="cabinet.js"></script>
 
