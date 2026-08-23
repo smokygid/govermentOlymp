@@ -335,20 +335,27 @@ async function loginCitizen() {
          * Если заявок нет
          */
 
-        if (
-            rows.length === 0
-        ) {
+        /*
+ * Заявок может не быть.
+ * Это не является ошибкой.
+ */
 
-            showLoginError(
-                "За номером посвідчення " +
-                idNumber +
-                " заявок не знайдено."
-            );
+currentApplications = rows;
 
+currentCitizen = createCitizenProfile(
+    idNumber,
+    rows
+);
 
-            return;
+saveSession();
 
-        }
+showDashboard();
+
+renderCitizenProfile();
+
+renderStatistics();
+
+renderApplications();
 
 
         /*
