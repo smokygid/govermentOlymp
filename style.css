@@ -2163,4 +2163,1132 @@ button {
         padding: 12px 18px;
     }
 
+   /* =========================================================
+   OLYMP GOVERNMENT
+   PERSONAL CABINET
+========================================================= */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================================================
+   CABINET HEADER
+========================================================= */
+
+.cabinet-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    background: rgba(7, 21, 37, 0.96);
+
+    backdrop-filter: blur(18px);
+
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+
+.header-inner {
+    max-width: 1250px;
+
+    margin: 0 auto;
+
+    padding: 18px 24px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 30px;
+}
+
+
+.brand {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    color: white;
+
+    text-decoration: none;
+}
+
+
+.brand-emblem {
+    width: 42px;
+    height: 42px;
+
+    border: 2px solid #ffffff;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-weight: 800;
+
+    font-size: 20px;
+}
+
+
+.brand-text {
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+.brand-text strong {
+    font-size: 17px;
+
+    letter-spacing: 2px;
+}
+
+
+.brand-text span {
+    font-size: 9px;
+
+    letter-spacing: 2px;
+
+    opacity: .65;
+}
+
+
+.cabinet-nav {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.cabinet-nav a {
+    color: rgba(255,255,255,.75);
+
+    text-decoration: none;
+
+    padding: 10px 14px;
+
+    border-radius: 8px;
+
+    transition: .2s;
+}
+
+
+.cabinet-nav a:hover,
+.cabinet-nav a.active {
+    color: white;
+
+    background: rgba(255,255,255,.08);
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.cabinet-main {
+    min-height: calc(100vh - 150px);
+
+    background:
+        linear-gradient(
+            180deg,
+            #f5f7fa 0%,
+            #eef2f6 100%
+        );
+
+    padding: 70px 20px;
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+.login-section {
+    max-width: 520px;
+
+    margin: 30px auto;
+}
+
+
+.login-container {
+    background: white;
+
+    border-radius: 20px;
+
+    padding: 42px;
+
+    box-shadow:
+        0 20px 60px rgba(7,21,37,.10);
+
+    border: 1px solid #e4e8ed;
+}
+
+
+.login-icon {
+    width: 70px;
+    height: 70px;
+
+    margin: 0 auto 20px;
+
+    border-radius: 18px;
+
+    background: #071525;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 30px;
+}
+
+
+.section-label {
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    color: #667085;
+
+    margin-bottom: 8px;
+}
+
+
+.login-container h1,
+.cabinet-title-row h1 {
+    margin: 0;
+
+    color: #071525;
+
+    font-size: 32px;
+}
+
+
+.login-description {
+    color: #667085;
+
+    line-height: 1.7;
+
+    margin: 15px 0 30px;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.login-form {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 18px;
+}
+
+
+.form-group {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+.form-group label {
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: #273444;
+}
+
+
+.form-group input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 15px 16px;
+
+    border: 1px solid #d8dee6;
+
+    border-radius: 10px;
+
+    outline: none;
+
+    font-size: 15px;
+
+    transition: .2s;
+}
+
+
+.form-group input:focus {
+    border-color: #071525;
+
+    box-shadow:
+        0 0 0 3px rgba(7,21,37,.08);
+}
+
+
+.primary-button {
+    border: 0;
+
+    border-radius: 10px;
+
+    background: #071525;
+
+    color: white;
+
+    padding: 15px 20px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+
+.primary-button:hover {
+    transform: translateY(-1px);
+
+    background: #10263d;
+}
+
+
+.primary-button:disabled {
+    opacity: .65;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+.form-error {
+    display: none;
+
+    padding: 12px 14px;
+
+    border-radius: 9px;
+
+    background: #fff0f0;
+
+    color: #b42318;
+
+    border: 1px solid #ffd1d1;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+.form-error.visible {
+    display: block;
+}
+
+
+.login-help {
+    margin-top: 28px;
+
+    padding-top: 22px;
+
+    border-top: 1px solid #edf0f3;
+
+    color: #667085;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+.login-help strong {
+    color: #273444;
+}
+
+
+/* =========================================================
+   CABINET
+========================================================= */
+
+.cabinet-section {
+    max-width: 1250px;
+
+    margin: 0 auto;
+}
+
+
+.cabinet-title-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-end;
+
+    gap: 30px;
+
+    margin-bottom: 30px;
+}
+
+
+.cabinet-title-row p {
+    margin: 10px 0 0;
+
+    color: #667085;
+}
+
+
+.logout-button {
+    border: 1px solid #d8dee6;
+
+    background: white;
+
+    color: #273444;
+
+    padding: 12px 20px;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    font-weight: 700;
+
+    transition: .2s;
+}
+
+
+.logout-button:hover {
+    background: #f8fafc;
+
+    border-color: #b9c1cc;
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.profile-card,
+.application-card {
+    background: white;
+
+    border: 1px solid #e1e6ec;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 12px 35px rgba(7,21,37,.06);
+}
+
+
+.profile-card {
+    margin-bottom: 35px;
+}
+
+
+.card-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 28px 30px;
+
+    border-bottom: 1px solid #edf0f3;
+}
+
+
+.card-header h2,
+.section-heading h2 {
+    margin: 4px 0 0;
+
+    color: #071525;
+
+    font-size: 23px;
+}
+
+
+.card-label {
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.7px;
+
+    color: #87909d;
+}
+
+
+.profile-avatar {
+    width: 52px;
+    height: 52px;
+
+    border-radius: 14px;
+
+    background: #071525;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 23px;
+}
+
+
+.profile-grid,
+.application-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 1px;
+
+    background: #edf0f3;
+}
+
+
+.info-item {
+    background: white;
+
+    padding: 22px 25px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    min-width: 0;
+}
+
+
+.info-item span {
+    color: #87909d;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+.info-item strong {
+    color: #1d2939;
+
+    font-size: 15px;
+
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   APPLICATION
+========================================================= */
+
+.applications-section {
+    margin-top: 35px;
+}
+
+
+.section-heading {
+    margin-bottom: 16px;
+}
+
+
+.application-card {
+    overflow: hidden;
+}
+
+
+.application-top {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 28px 30px;
+
+    border-bottom: 1px solid #edf0f3;
+}
+
+
+.application-label {
+    display: block;
+
+    color: #87909d;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+
+    margin-bottom: 8px;
+}
+
+
+.application-number-row {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.application-number-row strong {
+    font-size: 24px;
+
+    color: #071525;
+
+    letter-spacing: .5px;
+}
+
+
+.copy-button {
+    border: 1px solid #d8dee6;
+
+    background: #fff;
+
+    padding: 7px 11px;
+
+    border-radius: 7px;
+
+    font-size: 12px;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+
+.copy-button:hover {
+    background: #f5f7fa;
+}
+
+
+.status-badge {
+    padding: 9px 14px;
+
+    border-radius: 999px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+.status-pending {
+    background: #fff4c2;
+
+    color: #8a6500;
+}
+
+
+.status-accepted {
+    background: #e6f0ff;
+
+    color: #175cd3;
+}
+
+
+.status-completed {
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+
+.status-rejected {
+    background: #fee2e2;
+
+    color: #b42318;
+}
+
+
+.status-closed {
+    background: #e5e7eb;
+
+    color: #374151;
+}
+
+
+.application-grid {
+    grid-template-columns:
+        repeat(4, 1fr);
+}
+
+
+.application-block {
+    padding: 24px 30px;
+
+    border-top: 1px solid #edf0f3;
+}
+
+
+.application-block > span {
+    display: block;
+
+    color: #87909d;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    margin-bottom: 10px;
+}
+
+
+.text-box {
+    color: #273444;
+
+    line-height: 1.7;
+
+    white-space: pre-wrap;
+
+    word-break: break-word;
+
+    background: #f8fafc;
+
+    border: 1px solid #edf0f3;
+
+    border-radius: 10px;
+
+    padding: 15px;
+}
+
+
+.government-answer {
+    min-height: 45px;
+}
+
+
+/* =========================================================
+   HISTORY
+========================================================= */
+
+.history-empty {
+    background: white;
+
+    border: 1px solid #e1e6ec;
+
+    border-radius: 18px;
+
+    padding: 45px 25px;
+
+    text-align: center;
+
+    box-shadow:
+        0 12px 35px rgba(7,21,37,.05);
+}
+
+
+.history-icon {
+    font-size: 35px;
+
+    margin-bottom: 10px;
+}
+
+
+.history-empty h3 {
+    margin: 0 0 8px;
+
+    color: #071525;
+}
+
+
+.history-empty p {
+    max-width: 520px;
+
+    margin: 0 auto;
+
+    color: #667085;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   SECURITY
+========================================================= */
+
+.security-notice {
+    margin-top: 35px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 18px 20px;
+
+    background: #eef6ff;
+
+    border: 1px solid #d7e9ff;
+
+    border-radius: 12px;
+
+    color: #174a7c;
+}
+
+
+.security-icon {
+    font-size: 25px;
+}
+
+
+.security-notice strong {
+    display: block;
+
+    margin-bottom: 3px;
+}
+
+
+.security-notice p {
+    margin: 0;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.loading-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 5000;
+
+    background: rgba(7,21,37,.55);
+
+    backdrop-filter: blur(5px);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+.loading-box {
+    min-width: 240px;
+
+    background: white;
+
+    border-radius: 16px;
+
+    padding: 30px;
+
+    text-align: center;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.2);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.loading-box span {
+    color: #667085;
+
+    font-size: 13px;
+}
+
+
+.loader {
+    width: 38px;
+    height: 38px;
+
+    border: 4px solid #e6e9ed;
+
+    border-top-color: #071525;
+
+    border-radius: 50%;
+
+    animation:
+        olympSpin .8s linear infinite;
+
+    margin-bottom: 5px;
+}
+
+
+@keyframes olympSpin {
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+.button-loader {
+    display: inline-block;
+
+    width: 14px;
+    height: 14px;
+
+    border: 2px solid rgba(255,255,255,.4);
+
+    border-top-color: white;
+
+    border-radius: 50%;
+
+    animation:
+        olympSpin .7s linear infinite;
+
+    vertical-align: -2px;
+
+    margin-right: 6px;
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast {
+    position: fixed;
+
+    right: 25px;
+
+    bottom: 25px;
+
+    z-index: 6000;
+
+    background: #071525;
+
+    color: white;
+
+    padding: 13px 18px;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.18);
+
+    transform:
+        translateY(20px);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: .25s;
+
+    font-size: 14px;
+}
+
+
+.toast.visible {
+    opacity: 1;
+
+    transform:
+        translateY(0);
+}
+
+
+.toast.success {
+    background: #126b3f;
+}
+
+
+.toast.error {
+    background: #b42318;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.cabinet-footer {
+    background: #071525;
+
+    color: white;
+
+    padding: 25px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    font-size: 13px;
+}
+
+
+.cabinet-footer div:first-child {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.cabinet-footer span {
+    opacity: .55;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (
+    max-width: 850px
+) {
+
+    .header-inner {
+        padding: 15px;
+    }
+
+
+    .cabinet-nav {
+        display: none;
+    }
+
+
+    .cabinet-main {
+        padding: 40px 15px;
+    }
+
+
+    .profile-grid,
+    .application-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+
+    .cabinet-title-row {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .logout-button {
+        width: 100%;
+    }
+
+}
+
+
+@media (
+    max-width: 600px
+) {
+
+    .login-container {
+        padding: 28px 20px;
+    }
+
+
+    .login-container h1,
+    .cabinet-title-row h1 {
+        font-size: 26px;
+    }
+
+
+    .profile-grid,
+    .application-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .card-header {
+        padding: 22px 20px;
+    }
+
+
+    .application-top {
+        padding: 22px 20px;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+
+    .application-block {
+        padding: 20px;
+    }
+
+
+    .application-number-row {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+
+    .application-number-row strong {
+        font-size: 21px;
+    }
+
+
+    .cabinet-footer {
+        flex-direction: column;
+    }
+
+
+    .toast {
+        left: 15px;
+
+        right: 15px;
+
+        bottom: 15px;
+
+        text-align: center;
+    }
+
+}
+
 }
