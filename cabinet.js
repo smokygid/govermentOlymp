@@ -1,6 +1,6 @@
 /* =========================================================
    OLYMP STATE GOVERNMENT
-   PERSONAL CABINET 3.0
+   PERSONAL CABINET 3.1
    ---------------------------------------------------------
    Функции:
 
@@ -13,7 +13,9 @@
    • Просмотр подробностей заявки
    • Выход
    • Обновление заявок
-   • Кабинет работает даже при 0 заявок
+   • Работа при 0 заявок
+   • Email при регистрации
+   • Совместимость с текущим cabinet.html
 ========================================================= */
 
 
@@ -79,7 +81,7 @@ const cabinetRegister =
 
 const registerForm =
     document.getElementById(
-        "cabinetRegisterForm"
+        "citizenRegisterForm"
     );
 
 const registerFullName =
@@ -102,14 +104,19 @@ const registerDiscord =
         "registerDiscord"
     );
 
+const registerEmail =
+    document.getElementById(
+        "registerEmail"
+    );
+
 const registerPassword =
     document.getElementById(
         "registerPassword"
     );
 
-const registerPasswordRepeat =
+const registerPasswordConfirm =
     document.getElementById(
-        "registerPasswordRepeat"
+        "registerPasswordConfirm"
     );
 
 const registerButton =
@@ -119,17 +126,12 @@ const registerButton =
 
 const registerError =
     document.getElementById(
-        "cabinetRegisterError"
+        "registerError"
     );
 
-const openRegistrationButton =
+const registerSuccess =
     document.getElementById(
-        "openRegistrationButton"
-    );
-
-const backToLoginButton =
-    document.getElementById(
-        "backToLoginButton"
+        "registerSuccess"
     );
 
 
@@ -261,9 +263,9 @@ document.addEventListener(
 function initEvents() {
 
 
-    /* =========================
+    /* =====================================================
        LOGIN
-    ========================= */
+    ===================================================== */
 
     if (loginForm) {
 
@@ -275,9 +277,9 @@ function initEvents() {
     }
 
 
-    /* =========================
+    /* =====================================================
        REGISTRATION
-    ========================= */
+    ===================================================== */
 
     if (registerForm) {
 
@@ -289,45 +291,9 @@ function initEvents() {
     }
 
 
-    /* =========================
-       OPEN REGISTRATION
-    ========================= */
-
-    if (openRegistrationButton) {
-
-        openRegistrationButton.addEventListener(
-            "click",
-            function () {
-
-                showRegistration();
-
-            }
-        );
-
-    }
-
-
-    /* =========================
-       BACK TO LOGIN
-    ========================= */
-
-    if (backToLoginButton) {
-
-        backToLoginButton.addEventListener(
-            "click",
-            function () {
-
-                showLogin();
-
-            }
-        );
-
-    }
-
-
-    /* =========================
+    /* =====================================================
        LOGOUT
-    ========================= */
+    ===================================================== */
 
     if (logoutButton) {
 
@@ -339,9 +305,9 @@ function initEvents() {
     }
 
 
-    /* =========================
-       REFRESH
-    ========================= */
+    /* =====================================================
+       REFRESH APPLICATIONS
+    ===================================================== */
 
     if (refreshApplications) {
 
@@ -370,9 +336,9 @@ function initEvents() {
     }
 
 
-    /* =========================
+    /* =====================================================
        MODAL CLOSE
-    ========================= */
+    ===================================================== */
 
     if (closeModal) {
 
@@ -415,9 +381,9 @@ function initEvents() {
     }
 
 
-    /* =========================
+    /* =====================================================
        ESC
-    ========================= */
+    ===================================================== */
 
     document.addEventListener(
         "keydown",
@@ -447,7 +413,6 @@ async function handleLogin(
 
     event.preventDefault();
 
-
     hideError();
 
 
@@ -465,9 +430,9 @@ async function handleLogin(
         );
 
 
-    /* =========================
+    /* =====================================================
        VALIDATION
-    ========================= */
+    ===================================================== */
 
     if (!idNumber) {
 
@@ -491,9 +456,7 @@ async function handleLogin(
     }
 
 
-    setLoginLoading(
-        true
-    );
+    setLoginLoading(true);
 
 
     try {
@@ -528,9 +491,9 @@ async function handleLogin(
         }
 
 
-        /* =========================
+        /* =================================================
            SAVE CITIZEN
-        ========================= */
+        ================================================= */
 
         if (
             response.citizen
@@ -543,16 +506,29 @@ async function handleLogin(
         }
 
 
-        /* =========================
-           SHOW CABINET
-        ========================= */
+        /* =================================================
+           SHOW DASHBOARD
+        ================================================= */
 
         showDashboard();
 
 
-        await loadCabinet(
+        if (
+            response.citizen &&
             response.citizen.idNumber
-        );
+        ) {
+
+            await loadCabinet(
+                response.citizen.idNumber
+            );
+
+        } else {
+
+            showError(
+                "Сервер не повернув дані громадянина."
+            );
+
+        }
 
 
     } catch (error) {
@@ -570,9 +546,7 @@ async function handleLogin(
 
     } finally {
 
-        setLoginLoading(
-            false
-        );
+        setLoginLoading(false);
 
     }
 
@@ -589,8 +563,9 @@ async function handleRegistration(
 
     event.preventDefault();
 
-
     hideRegisterError();
+
+    hideRegisterSuccess();
 
 
     const fullName =
@@ -621,21 +596,28 @@ async function handleRegistration(
         .trim();
 
 
+    const email =
+        String(
+            registerEmail?.value || ""
+        )
+        .trim();
+
+
     const password =
         String(
             registerPassword?.value || ""
         );
 
 
-    const passwordRepeat =
+    const passwordConfirm =
         String(
-            registerPasswordRepeat?.value || ""
+            registerPasswordConfirm?.value || ""
         );
 
 
-    /* =========================
+    /* =====================================================
        VALIDATION
-    ========================= */
+    ===================================================== */
 
     if (!fullName) {
 
@@ -694,6 +676,17 @@ async function handleRegistration(
     }
 
 
+    if (!email) {
+
+        showRegisterError(
+            "Вкажіть Email."
+        );
+
+        return;
+
+    }
+
+
     if (!password) {
 
         showRegisterError(
@@ -720,7 +713,7 @@ async function handleRegistration(
 
     if (
         password !==
-        passwordRepeat
+        passwordConfirm
     ) {
 
         showRegisterError(
@@ -732,9 +725,7 @@ async function handleRegistration(
     }
 
 
-    setRegisterLoading(
-        true
-    );
+    setRegisterLoading(true);
 
 
     try {
@@ -757,6 +748,9 @@ async function handleRegistration(
                 discord:
                     discord,
 
+                email:
+                    email,
+
                 password:
                     password
 
@@ -778,9 +772,9 @@ async function handleRegistration(
         }
 
 
-        /* =========================
-           REGISTRATION SUCCESS
-        ========================= */
+        /* =================================================
+           SAVE CITIZEN
+        ================================================= */
 
         if (
             response.citizen
@@ -793,9 +787,9 @@ async function handleRegistration(
         }
 
 
-        /* =========================
-           CLEAR FORM
-        ========================= */
+        /* =================================================
+           SUCCESS
+        ================================================= */
 
         if (registerForm) {
 
@@ -804,37 +798,41 @@ async function handleRegistration(
         }
 
 
-        /* =========================
-           SHOW CABINET
-        ========================= */
-
-        showDashboard();
-
-
         if (
             response.citizen &&
             response.citizen.idNumber
         ) {
 
-            await loadCabinet(
+            showRegisterSuccess(
+
+                "Профіль успішно створено! " +
+                "Ваш номер посвідчення: " +
                 response.citizen.idNumber
+
+            );
+
+        } else {
+
+            showRegisterSuccess(
+                "Профіль успішно створено!"
             );
 
         }
 
 
-        /* =========================
-           SUCCESS MESSAGE
-        ========================= */
+        /* =================================================
+           OPEN CABINET
+        ================================================= */
 
         if (
             response.citizen &&
             response.citizen.idNumber
         ) {
 
-            alert(
-                "Профіль успішно створено!\n\n" +
-                "Ваш номер посвідчення:\n" +
+            showDashboard();
+
+
+            await loadCabinet(
                 response.citizen.idNumber
             );
 
@@ -856,87 +854,9 @@ async function handleRegistration(
 
     } finally {
 
-        setRegisterLoading(
-            false
-        );
+        setRegisterLoading(false);
 
     }
-
-}
-
-
-/* =========================================================
-   SHOW LOGIN
-========================================================= */
-
-function showLogin() {
-
-    if (cabinetRegister) {
-
-        cabinetRegister.style.display =
-            "none";
-
-    }
-
-
-    if (cabinetLogin) {
-
-        cabinetLogin.style.display =
-            "block";
-
-    }
-
-
-    hideRegisterError();
-
-    hideError();
-
-
-    window.scrollTo({
-
-        top: 0,
-
-        behavior: "smooth"
-
-    });
-
-}
-
-
-/* =========================================================
-   SHOW REGISTRATION
-========================================================= */
-
-function showRegistration() {
-
-    if (cabinetLogin) {
-
-        cabinetLogin.style.display =
-            "none";
-
-    }
-
-
-    if (cabinetRegister) {
-
-        cabinetRegister.style.display =
-            "block";
-
-    }
-
-
-    hideError();
-
-    hideRegisterError();
-
-
-    window.scrollTo({
-
-        top: 0,
-
-        behavior: "smooth"
-
-    });
 
 }
 
@@ -986,9 +906,7 @@ async function loadCabinet(
     }
 
 
-    showLoading(
-        true
-    );
+    showLoading(true);
 
 
     try {
@@ -1029,9 +947,9 @@ async function loadCabinet(
         }
 
 
-        /* =========================
-           SAVE UPDATED CITIZEN
-        ========================= */
+        /* =================================================
+           SAVE UPDATED PROFILE
+        ================================================= */
 
         if (
             response.citizen
@@ -1044,18 +962,18 @@ async function loadCabinet(
         }
 
 
-        /* =========================
+        /* =================================================
            PROFILE
-        ========================= */
+        ================================================= */
 
         renderProfile(
             response.citizen
         );
 
 
-        /* =========================
+        /* =================================================
            APPLICATIONS
-        ========================= */
+        ================================================= */
 
         renderApplications(
             response.applications || []
@@ -1070,16 +988,19 @@ async function loadCabinet(
         );
 
 
-        showError(
-            "Не вдалося завантажити особистий кабінет."
+        /*
+         * Если сервер временно недоступен,
+         * НЕ удаляем пользователя из localStorage.
+         */
+
+        showCabinetError(
+            "Не вдалося завантажити актуальні дані кабінету. Спробуйте оновити сторінку."
         );
 
 
     } finally {
 
-        showLoading(
-            false
-        );
+        showLoading(false);
 
     }
 
@@ -1087,7 +1008,7 @@ async function loadCabinet(
 
 
 /* =========================================================
-   RENDER PROFILE
+   PROFILE
 ========================================================= */
 
 function renderProfile(
@@ -1132,7 +1053,7 @@ function renderProfile(
 
 
 /* =========================================================
-   RENDER APPLICATIONS
+   APPLICATIONS
 ========================================================= */
 
 function renderApplications(
@@ -1161,7 +1082,7 @@ function renderApplications(
 
 
     /* =====================================================
-       ZERO APPLICATIONS
+       NO APPLICATIONS
     ===================================================== */
 
     if (
@@ -1174,10 +1095,12 @@ function renderApplications(
                 "visible"
             );
 
+
             const title =
                 applicationsEmpty.querySelector(
                     "h3"
                 );
+
 
             const text =
                 applicationsEmpty.querySelector(
@@ -1223,11 +1146,9 @@ function renderApplications(
             if (applicationsList) {
 
                 applicationsList.appendChild(
-
                     createApplicationCard(
                         application
                     )
-
                 );
 
             }
@@ -1239,7 +1160,7 @@ function renderApplications(
 
 
 /* =========================================================
-   CREATE APPLICATION CARD
+   APPLICATION CARD
 ========================================================= */
 
 function createApplicationCard(
@@ -1368,33 +1289,27 @@ function createApplicationCard(
 
 
     info.appendChild(
-
         createInfoItem(
             "Дата",
             application.date
         )
-
     );
 
 
     info.appendChild(
-
         createInfoItem(
             "Посвідчення",
             application.idNumber
         )
-
     );
 
 
     info.appendChild(
-
         createInfoItem(
             "Відповідальний",
             application.responsible ||
             "Ще не призначено"
         )
-
     );
 
 
@@ -1509,7 +1424,7 @@ function createApplicationCard(
 
 
     /* =====================================================
-       DETAILS BUTTON
+       DETAILS
     ===================================================== */
 
     const actions =
@@ -1645,26 +1560,21 @@ function updateStatistics(
                     application.status ||
                     ""
                 )
-                .toLowerCase();
+                .toLowerCase()
+                .trim();
 
 
-            /* =========================
-               PENDING
-            ========================= */
+            /* PENDING */
 
             if (
 
-                status.includes(
-                    "розгляді"
-                ) ||
+                status.includes("розгляді") ||
 
-                status.includes(
-                    "очіку"
-                ) ||
+                status.includes("очіку") ||
 
-                status.includes(
-                    "нов"
-                )
+                status.includes("нов") ||
+
+                status.includes("pending")
 
             ) {
 
@@ -1673,23 +1583,17 @@ function updateStatistics(
             }
 
 
-            /* =========================
-               APPROVED
-            ========================= */
+            /* APPROVED */
 
             if (
 
-                status.includes(
-                    "прийнято"
-                ) ||
+                status.includes("прийнято") ||
 
-                status.includes(
-                    "схвалено"
-                ) ||
+                status.includes("схвалено") ||
 
-                status.includes(
-                    "виконано"
-                )
+                status.includes("затверджено") ||
+
+                status.includes("approved")
 
             ) {
 
@@ -1698,19 +1602,15 @@ function updateStatistics(
             }
 
 
-            /* =========================
-               REJECTED
-            ========================= */
+            /* REJECTED */
 
             if (
 
-                status.includes(
-                    "відхилено"
-                ) ||
+                status.includes("відхилено") ||
 
-                status.includes(
-                    "відмовлено"
-                )
+                status.includes("відмовлено") ||
+
+                status.includes("rejected")
 
             ) {
 
@@ -1768,22 +1668,19 @@ function getStatusClass(
         String(
             status || ""
         )
-        .toLowerCase();
+        .toLowerCase()
+        .trim();
 
 
     if (
 
-        value.includes(
-            "розгляді"
-        ) ||
+        value.includes("розгляді") ||
 
-        value.includes(
-            "очіку"
-        ) ||
+        value.includes("очіку") ||
 
-        value.includes(
-            "нов"
-        )
+        value.includes("нов") ||
+
+        value.includes("pending")
 
     ) {
 
@@ -1794,13 +1691,13 @@ function getStatusClass(
 
     if (
 
-        value.includes(
-            "прийнято"
-        ) ||
+        value.includes("прийнято") ||
 
-        value.includes(
-            "схвалено"
-        )
+        value.includes("схвалено") ||
+
+        value.includes("затверджено") ||
+
+        value.includes("approved")
 
     ) {
 
@@ -1810,9 +1707,13 @@ function getStatusClass(
 
 
     if (
-        value.includes(
-            "виконано"
-        )
+
+        value.includes("виконано") ||
+
+        value.includes("завершено") ||
+
+        value.includes("completed")
+
     ) {
 
         return "status-completed";
@@ -1822,13 +1723,11 @@ function getStatusClass(
 
     if (
 
-        value.includes(
-            "відхилено"
-        ) ||
+        value.includes("відхилено") ||
 
-        value.includes(
-            "відмовлено"
-        )
+        value.includes("відмовлено") ||
+
+        value.includes("rejected")
 
     ) {
 
@@ -1838,20 +1737,11 @@ function getStatusClass(
 
 
     if (
-        value.includes(
-            "закрито"
-        )
-    ) {
 
-        return "status-review";
+        value.includes("документ") ||
 
-    }
+        value.includes("documents")
 
-
-    if (
-        value.includes(
-            "документ"
-        )
     ) {
 
         return "status-documents";
@@ -1895,104 +1785,86 @@ function openApplicationDetails(
 
 
         detailsContent.appendChild(
-
             createDetail(
                 "Номер заявки",
                 application.number
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
                 "Дата подання",
                 application.date
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
                 "ПІБ",
                 application.fullName
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
                 "Посвідчення",
                 application.idNumber
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
                 "Послуга",
                 application.service
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
                 "Контакт",
-                application.contact
+                application.contact ||
+                application.phone ||
+                application.email
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
                 "Статус",
                 application.status
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
                 "Відповідальний",
                 application.responsible ||
                 "Не призначено"
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
                 "Опис звернення",
                 application.message
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
                 "Коментар",
                 application.comment ||
                 "Коментар відсутній."
             )
-
         );
 
     }
@@ -2125,12 +1997,40 @@ function saveCitizen(
 
     try {
 
+        /*
+         * Сохраняем только профиль.
+         * Пароль сюда не сохраняем.
+         */
+
+        const safeCitizen = {
+
+            idNumber:
+                citizen.idNumber || "",
+
+            fullName:
+                citizen.fullName || "",
+
+            birthDate:
+                citizen.birthDate || "",
+
+            phone:
+                citizen.phone || "",
+
+            discord:
+                citizen.discord || "",
+
+            email:
+                citizen.email || ""
+
+        };
+
+
         localStorage.setItem(
 
             STORAGE_KEY,
 
             JSON.stringify(
-                citizen
+                safeCitizen
             )
 
         );
@@ -2138,7 +2038,7 @@ function saveCitizen(
     } catch (error) {
 
         console.error(
-            "STORAGE ERROR:",
+            "STORAGE SAVE ERROR:",
             error
         );
 
@@ -2174,6 +2074,11 @@ function getSavedCitizen() {
         console.error(
             "STORAGE READ ERROR:",
             error
+        );
+
+
+        localStorage.removeItem(
+            STORAGE_KEY
         );
 
 
@@ -2215,7 +2120,7 @@ function logout() {
     if (cabinetRegister) {
 
         cabinetRegister.style.display =
-            "none";
+            "block";
 
     }
 
@@ -2236,17 +2141,31 @@ function logout() {
     }
 
 
-    hideError();
-
-    hideRegisterError();
-
-
     if (applicationsList) {
 
         applicationsList.innerHTML =
             "";
 
     }
+
+
+    if (applicationsEmpty) {
+
+        applicationsEmpty.classList.remove(
+            "visible"
+        );
+
+    }
+
+
+    hideError();
+
+    hideRegisterError();
+
+    hideRegisterSuccess();
+
+
+    updateStatistics([]);
 
 
     window.scrollTo({
@@ -2256,6 +2175,42 @@ function logout() {
         behavior: "smooth"
 
     });
+
+}
+
+
+/* =========================================================
+   SHOW LOGIN
+========================================================= */
+
+function showLogin() {
+
+    if (cabinetDashboard) {
+
+        cabinetDashboard.classList.remove(
+            "active"
+        );
+
+    }
+
+
+    if (cabinetLogin) {
+
+        cabinetLogin.style.display =
+            "block";
+
+    }
+
+
+    if (cabinetRegister) {
+
+        cabinetRegister.style.display =
+            "block";
+
+    }
+
+
+    hideError();
 
 }
 
@@ -2346,16 +2301,14 @@ function setLoginLoading(
 
     loginButton.textContent =
         loading
-
             ? "Вхід..."
-
             : "Увійти до кабінету";
 
 }
 
 
 /* =========================================================
-   REGISTRATION LOADING
+   REGISTER LOADING
 ========================================================= */
 
 function setRegisterLoading(
@@ -2375,10 +2328,8 @@ function setRegisterLoading(
 
     registerButton.textContent =
         loading
-
             ? "Створення профілю..."
-
-            : "Зареєструвати профіль";
+            : "Зареєструватися";
 
 }
 
@@ -2430,7 +2381,7 @@ function hideError() {
 
 
 /* =========================================================
-   REGISTRATION ERROR
+   REGISTER ERROR
 ========================================================= */
 
 function showRegisterError(
@@ -2476,6 +2427,83 @@ function hideRegisterError() {
 
 
 /* =========================================================
+   REGISTER SUCCESS
+========================================================= */
+
+function showRegisterSuccess(
+    message
+) {
+
+    if (!registerSuccess) {
+
+        return;
+
+    }
+
+
+    registerSuccess.textContent =
+        message;
+
+
+    registerSuccess.classList.add(
+        "visible"
+    );
+
+}
+
+
+function hideRegisterSuccess() {
+
+    if (!registerSuccess) {
+
+        return;
+
+    }
+
+
+    registerSuccess.textContent =
+        "";
+
+
+    registerSuccess.classList.remove(
+        "visible"
+    );
+
+}
+
+
+/* =========================================================
+   CABINET LOAD ERROR
+========================================================= */
+
+function showCabinetError(
+    message
+) {
+
+    /*
+     * Используем loginError как универсальное
+     * сообщение, если отдельного блока нет.
+     */
+
+    if (!loginError) {
+
+        return;
+
+    }
+
+
+    loginError.textContent =
+        message;
+
+
+    loginError.classList.add(
+        "visible"
+    );
+
+}
+
+
+/* =========================================================
    INITIALS
 ========================================================= */
 
@@ -2488,7 +2516,8 @@ function getInitials(
             fullName || "O"
         )
         .trim()
-        .split(/\s+/);
+        .split(/\s+/)
+        .filter(Boolean);
 
 
     if (
@@ -2556,14 +2585,35 @@ async function getRequest(
 
 
     const query =
-        new URLSearchParams(
-            params
-        );
+        new URLSearchParams();
+
+
+    Object.keys(
+        params || {}
+    ).forEach(
+        function (key) {
+
+            query.append(
+
+                key,
+
+                params[key] ?? ""
+
+            );
+
+        }
+    );
+
+
+    const separator =
+        CABINET_API_URL.includes("?")
+            ? "&"
+            : "?";
 
 
     const url =
         CABINET_API_URL +
-        "?" +
+        separator +
         query.toString();
 
 
@@ -2578,7 +2628,10 @@ async function getRequest(
                     "GET",
 
                 cache:
-                    "no-store"
+                    "no-store",
+
+                redirect:
+                    "follow"
 
             }
 
@@ -2595,7 +2648,29 @@ async function getRequest(
     }
 
 
-    return response.json();
+    const text =
+        await response.text();
+
+
+    try {
+
+        return JSON.parse(
+            text
+        );
+
+    } catch (error) {
+
+        console.error(
+            "INVALID JSON:",
+            text
+        );
+
+
+        throw new Error(
+            "Сервер повернув некоректну відповідь."
+        );
+
+    }
 
 }
 
@@ -2627,7 +2702,7 @@ async function postRequest(
 
 
     Object.keys(
-        params
+        params || {}
     ).forEach(
         function (key) {
 
@@ -2661,7 +2736,10 @@ async function postRequest(
                 },
 
                 body:
-                    body.toString()
+                    body.toString(),
+
+                redirect:
+                    "follow"
 
             }
 
@@ -2678,6 +2756,28 @@ async function postRequest(
     }
 
 
-    return response.json();
+    const text =
+        await response.text();
+
+
+    try {
+
+        return JSON.parse(
+            text
+        );
+
+    } catch (error) {
+
+        console.error(
+            "INVALID JSON:",
+            text
+        );
+
+
+        throw new Error(
+            "Сервер повернув некоректну відповідь."
+        );
+
+    }
 
 }
