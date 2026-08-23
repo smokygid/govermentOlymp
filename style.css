@@ -1964,53 +1964,55 @@ button {
 @media (max-width: 500px) {
 
     .section {
-
         padding: 70px 0;
-
     }
 
     .hero h1 {
-
         font-size: 45px;
-
     }
 
     .hero p {
-
         font-size: 16px;
-
     }
 
     .modal-content {
-
         padding: 30px 22px;
-
     }
 
     .category-buttons {
-
         gap: 6px;
-
     }
 
     .category-btn {
-
         font-size: 11px;
-
         padding: 8px 10px;
-
     }
-   .animate-element {
+
+}
+
+
+/* =====================================================
+   ANIMATIONS
+===================================================== */
+
+.animate-element {
+
     opacity: 0;
-    transform: translateY(20px);
+
+    transform:
+        translateY(20px);
+
     transition:
         opacity .5s ease,
         transform .5s ease;
+
 }
 
 .animate-element.show {
+
     opacity: 1;
-    transform: translateY(0);
-}
+
+    transform:
+        translateY(0);
 
 }
