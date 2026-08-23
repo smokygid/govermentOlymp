@@ -2,17 +2,13 @@
    OLYMP GOVERNMENT
    PERSONAL CABINET 4.0
 
-   СИСТЕМА:
-
-   • Вхід без реєстрації
-   • Вхід за номером заявки
-   • Вхід за кодом доступу
-   • Перегляд персональної інформації
+   • Вхід по № заявки + коду
+   • Збереження сесії
+   • Перегляд особистих даних
    • Перегляд заявки
    • Перегляд статусу
-   • Перегляд відповідального
    • Перегляд відповіді державного органу
-   • Збереження сесії
+   • Копіювання номера
    • Вихід
 ========================================================= */
 
@@ -21,7 +17,7 @@
    GOOGLE APPS SCRIPT
 ========================================================= */
 
-const CABINET_API_URL =
+const GOOGLE_SCRIPT_URL =
     "https://script.google.com/macros/s/AKfycbzET7X9XsoUnCZlhGv8YEiv1NAoCmu13U4AP3WMlmo5sFXiwlBKhfLkXBfQKcFJh-RGog/exec";
 
 
@@ -39,11 +35,7 @@ const SESSION_KEY =
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
-
-        initializeCabinet();
-
-    }
+    initializeCabinet
 );
 
 
@@ -54,7 +46,8 @@ document.addEventListener(
 function initializeCabinet() {
 
     console.log(
-        "OLYMP Government Cabinet 4.0 запущено."
+        "%cOLYMP Government Cabinet",
+        "font-weight:bold;font-size:18px;"
     );
 
 
@@ -63,8 +56,6 @@ function initializeCabinet() {
     initializeLogout();
 
     initializeCopyButton();
-
-    initializeHeader();
 
     restoreSession();
 
@@ -94,64 +85,6 @@ function initializeLoginForm() {
         "submit",
         handleLogin
     );
-
-
-    /*
-     * Автоматически переводим
-     * код в верхний регистр.
-     */
-
-    const codeInput =
-        document.getElementById(
-            "loginCode"
-        );
-
-
-    if (codeInput) {
-
-        codeInput.addEventListener(
-            "input",
-            () => {
-
-                codeInput.value =
-                    codeInput.value
-                        .toUpperCase()
-                        .replace(
-                            /[^A-Z0-9]/g,
-                            ""
-                        );
-
-            }
-        );
-
-    }
-
-
-    /*
-     * Номер заявки тоже
-     * приводим к верхнему регистру.
-     */
-
-    const numberInput =
-        document.getElementById(
-            "loginNumber"
-        );
-
-
-    if (numberInput) {
-
-        numberInput.addEventListener(
-            "input",
-            () => {
-
-                numberInput.value =
-                    numberInput.value
-                        .toUpperCase();
-
-            }
-        );
-
-    }
 
 }
 
@@ -202,9 +135,9 @@ async function handleLogin(event) {
     clearLoginError();
 
 
-    /*
-     * Проверка номера
-     */
+    /* =====================================================
+       VALIDATION
+    ===================================================== */
 
     if (!number) {
 
@@ -212,45 +145,16 @@ async function handleLogin(event) {
             "Вкажіть номер заявки."
         );
 
+        if (numberInput) {
 
-        focusElement(
-            numberInput
-        );
+            numberInput.focus();
 
-
-        return;
-
-    }
-
-
-    /*
-     * Проверка формата номера
-     */
-
-    if (
-        !/^OLYMP-\d{6}$/i.test(
-            number
-        )
-    ) {
-
-        showLoginError(
-            "Номер заявки має формат OLYMP-000001."
-        );
-
-
-        focusElement(
-            numberInput
-        );
-
+        }
 
         return;
 
     }
 
-
-    /*
-     * Проверка кода
-     */
 
     if (!accessCode) {
 
@@ -258,11 +162,11 @@ async function handleLogin(event) {
             "Вкажіть код доступу."
         );
 
+        if (codeInput) {
 
-        focusElement(
-            codeInput
-        );
+            codeInput.focus();
 
+        }
 
         return;
 
@@ -270,27 +174,21 @@ async function handleLogin(event) {
 
 
     if (
-        accessCode.length !== 8
+        !GOOGLE_SCRIPT_URL
     ) {
 
         showLoginError(
-            "Код доступу повинен містити 8 символів."
+            "Система кабінету не налаштована."
         );
-
-
-        focusElement(
-            codeInput
-        );
-
 
         return;
 
     }
 
 
-    /*
-     * Состояние кнопки
-     */
+    /* =====================================================
+       BUTTON
+    ===================================================== */
 
     setLoginLoading(
         loginButton,
@@ -298,22 +196,19 @@ async function handleLogin(event) {
     );
 
 
-    /*
-     * Показываем загрузку
-     */
-
     showLoading();
 
 
     try {
 
-        /*
-         * Формируем URL
-         */
+
+        /* =================================================
+           REQUEST
+        ================================================= */
 
         const url =
             new URL(
-                CABINET_API_URL
+                GOOGLE_SCRIPT_URL
             );
 
 
@@ -335,22 +230,17 @@ async function handleLogin(event) {
         );
 
 
-        /*
-         * GET запрос
-         */
-
         const response =
             await fetch(
                 url.toString(),
                 {
-                    method: "GET"
+                    method: "GET",
+                    cache: "no-store"
                 }
             );
 
 
-        if (
-            !response.ok
-        ) {
+        if (!response.ok) {
 
             throw new Error(
                 "HTTP " +
@@ -364,9 +254,11 @@ async function handleLogin(event) {
             await response.json();
 
 
-        /*
-         * Проверяем ответ
-         */
+        console.log(
+            "OLYMP Cabinet response:",
+            result
+        );
+
 
         if (
             !result ||
@@ -378,27 +270,42 @@ async function handleLogin(event) {
                 result &&
                 result.message
                     ? result.message
-                    : "Невірний номер заявки або код доступу."
+                    : "Не вдалося виконати вхід."
             );
 
         }
 
 
-        /*
-         * Сохраняем сессию
-         */
+        /* =================================================
+           SAVE SESSION
+        ================================================= */
 
-        saveSession(
+        saveSession({
+
+            number:
+                result.application.number,
+
+            accessCode:
+                result.application.accessCode,
+
+            application:
+                result.application
+
+        });
+
+
+        /* =================================================
+           SHOW CABINET
+        ================================================= */
+
+        renderCabinet(
             result.application
         );
 
 
-        /*
-         * Показываем кабинет
-         */
-
-        renderCabinet(
-            result.application
+        showToast(
+            "Вхід успішний.",
+            "success"
         );
 
 
@@ -412,68 +319,18 @@ async function handleLogin(event) {
 
         showLoginError(
             error.message ||
-            "Не вдалося виконати вхід. Спробуйте ще раз."
+            "Не вдалося увійти до кабінету."
         );
-
-
-        hideLoading();
 
 
     } finally {
 
+        hideLoading();
+
+
         setLoginLoading(
             loginButton,
             false
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   SAVE SESSION
-========================================================= */
-
-function saveSession(
-    application
-) {
-
-    if (!application) {
-
-        return;
-
-    }
-
-
-    const session = {
-
-        number:
-            application.number || "",
-
-        accessCode:
-            application.accessCode || "",
-
-        savedAt:
-            Date.now()
-
-    };
-
-
-    try {
-
-        localStorage.setItem(
-            SESSION_KEY,
-            JSON.stringify(
-                session
-            )
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "Не вдалося зберегти сесію:",
-            error
         );
 
     }
@@ -487,33 +344,13 @@ function saveSession(
 
 async function restoreSession() {
 
-    let session = null;
+    const session =
+        getSession();
 
 
-    try {
+    if (!session) {
 
-        const raw =
-            localStorage.getItem(
-                SESSION_KEY
-            );
-
-
-        if (!raw) {
-
-            return;
-
-        }
-
-
-        session =
-            JSON.parse(
-                raw
-            );
-
-
-    } catch (error) {
-
-        clearSession();
+        showLoginSection();
 
         return;
 
@@ -521,49 +358,18 @@ async function restoreSession() {
 
 
     if (
-        !session ||
         !session.number ||
         !session.accessCode
     ) {
 
         clearSession();
 
-        return;
-
-    }
-
-
-    /*
-     * Проверяем срок сессии.
-     *
-     * 30 дней.
-     */
-
-    const SESSION_DURATION =
-        30 *
-        24 *
-        60 *
-        60 *
-        1000;
-
-
-    if (
-        session.savedAt &&
-        Date.now() -
-        session.savedAt >
-        SESSION_DURATION
-    ) {
-
-        clearSession();
+        showLoginSection();
 
         return;
 
     }
 
-
-    /*
-     * Автоматический вход
-     */
 
     showLoading();
 
@@ -571,21 +377,40 @@ async function restoreSession() {
     try {
 
         const application =
-            await fetchApplication(
+            await getApplicationFromServer(
+
                 session.number,
+
                 session.accessCode
+
             );
 
 
-        if (!application) {
+        if (
+            !application
+        ) {
 
             clearSession();
 
-            hideLoading();
+            showLoginSection();
 
             return;
 
         }
+
+
+        saveSession({
+
+            number:
+                application.number,
+
+            accessCode:
+                application.accessCode,
+
+            application:
+                application
+
+        });
 
 
         renderCabinet(
@@ -595,17 +420,34 @@ async function restoreSession() {
 
     } catch (error) {
 
-        console.warn(
-            "Не вдалося відновити сесію:",
+        console.error(
+            "Session restore error:",
             error
         );
 
 
         /*
-         * Если сервер временно
-         * недоступен, возвращаем
-         * пользователя на форму.
+         * Если сервер временно недоступен,
+         * используем сохранённые данные.
          */
+
+        if (
+            session.application
+        ) {
+
+            renderCabinet(
+                session.application
+            );
+
+        } else {
+
+            clearSession();
+
+            showLoginSection();
+
+        }
+
+    } finally {
 
         hideLoading();
 
@@ -615,17 +457,21 @@ async function restoreSession() {
 
 
 /* =========================================================
-   FETCH APPLICATION
+   GET APPLICATION
 ========================================================= */
 
-async function fetchApplication(
+async function getApplicationFromServer(
+
     number,
+
     accessCode
+
 ) {
+
 
     const url =
         new URL(
-            CABINET_API_URL
+            GOOGLE_SCRIPT_URL
         );
 
 
@@ -651,14 +497,13 @@ async function fetchApplication(
         await fetch(
             url.toString(),
             {
-                method: "GET"
+                method: "GET",
+                cache: "no-store"
             }
         );
 
 
-    if (
-        !response.ok
-    ) {
+    if (!response.ok) {
 
         throw new Error(
             "HTTP " +
@@ -678,7 +523,12 @@ async function fetchApplication(
         !result.application
     ) {
 
-        return null;
+        throw new Error(
+            result &&
+            result.message
+                ? result.message
+                : "Заявку не знайдено."
+        );
 
     }
 
@@ -703,9 +553,9 @@ function renderCabinet(
     }
 
 
-    /*
-     * Заполняем профиль
-     */
+    /* =====================================================
+       PROFILE
+    ===================================================== */
 
     setText(
         "profileFullName",
@@ -743,15 +593,14 @@ function renderCabinet(
     );
 
 
-    /*
-     * Заявка
-     */
+    /* =====================================================
+       APPLICATION
+    ===================================================== */
 
     setText(
         "applicationNumber",
         application.number
-            ? "№ " +
-              application.number
+            ? "№ " + application.number
             : "—"
     );
 
@@ -770,9 +619,14 @@ function renderCabinet(
 
     setText(
         "applicationResponsible",
-        application.responsible
-            ? application.responsible
-            : "Не призначено"
+        application.responsible ||
+        "Не призначено"
+    );
+
+
+    setText(
+        "applicationAccessCode",
+        application.accessCode
     );
 
 
@@ -782,18 +636,18 @@ function renderCabinet(
     );
 
 
-    /*
-     * Статус
-     */
+    /* =====================================================
+       STATUS
+    ===================================================== */
 
-    renderStatus(
+    setStatus(
         application.status
     );
 
 
-    /*
-     * Ответ государственного органа
-     */
+    /* =====================================================
+       COMMENT / ANSWER
+    ===================================================== */
 
     const comment =
         application.comment
@@ -802,67 +656,28 @@ function renderCabinet(
 
 
     setText(
-        "governmentComment",
+        "applicationComment",
         comment
     );
 
 
-    /*
-     * Код доступа
-     */
+    /* =====================================================
+       SHOW CABINET
+    ===================================================== */
 
-    setText(
-        "accessCodeDisplay",
-        application.accessCode
-            ? application.accessCode
-            : "—"
-    );
+    showCabinetSection();
 
 
     /*
-     * Переключаем интерфейс
-     */
-
-    const loginSection =
-        document.getElementById(
-            "loginSection"
-        );
-
-
-    const cabinetSection =
-        document.getElementById(
-            "cabinetSection"
-        );
-
-
-    if (loginSection) {
-
-        loginSection.classList.add(
-            "hidden"
-        );
-
-    }
-
-
-    if (cabinetSection) {
-
-        cabinetSection.classList.remove(
-            "hidden"
-        );
-
-    }
-
-
-    hideLoading();
-
-
-    /*
-     * Возвращаемся в начало
+     * Прокручуємо сторінку вгору
      */
 
     window.scrollTo({
+
         top: 0,
+
         behavior: "smooth"
+
     });
 
 }
@@ -872,7 +687,7 @@ function renderCabinet(
    STATUS
 ========================================================= */
 
-function renderStatus(
+function setStatus(
     status
 ) {
 
@@ -898,76 +713,71 @@ function renderStatus(
         currentStatus;
 
 
-    /*
-     * Удаляем старые классы
-     */
-
-    element.classList.remove(
-
-        "status-review",
-
-        "status-accepted",
-
-        "status-completed",
-
-        "status-rejected",
-
-        "status-closed"
-
-    );
+    element.className =
+        "status-badge";
 
 
-    /*
-     * Добавляем класс
-     */
-
-    switch (
-        currentStatus
+    if (
+        currentStatus.includes(
+            "На розгляді"
+        )
     ) {
 
-        case "🟡 На розгляді":
+        element.classList.add(
+            "status-pending"
+        );
 
-            element.classList.add(
-                "status-review"
-            );
-
-            break;
+    }
 
 
-        case "🔵 Прийнято":
+    else if (
+        currentStatus.includes(
+            "Прийнято"
+        )
+    ) {
 
-            element.classList.add(
-                "status-accepted"
-            );
+        element.classList.add(
+            "status-accepted"
+        );
 
-            break;
-
-
-        case "🟢 Виконано":
-
-            element.classList.add(
-                "status-completed"
-            );
-
-            break;
+    }
 
 
-        case "🔴 Відхилено":
+    else if (
+        currentStatus.includes(
+            "Виконано"
+        )
+    ) {
 
-            element.classList.add(
-                "status-rejected"
-            );
+        element.classList.add(
+            "status-completed"
+        );
 
-            break;
+    }
 
 
-        case "⚫ Закрито":
+    else if (
+        currentStatus.includes(
+            "Відхилено"
+        )
+    ) {
 
-            element.classList.add(
-                "status-closed"
-            );
+        element.classList.add(
+            "status-rejected"
+        );
 
-            break;
+    }
+
+
+    else if (
+        currentStatus.includes(
+            "Закрито"
+        )
+    ) {
+
+        element.classList.add(
+            "status-closed"
+        );
 
     }
 
@@ -1010,56 +820,31 @@ function logout() {
     clearSession();
 
 
-    /*
-     * Очищаем данные кабинета
-     */
-
-    clearCabinetData();
+    showLoginSection();
 
 
-    const cabinetSection =
+    const numberInput =
         document.getElementById(
-            "cabinetSection"
+            "loginNumber"
         );
 
 
-    const loginSection =
+    const codeInput =
         document.getElementById(
-            "loginSection"
+            "loginCode"
         );
 
 
-    if (cabinetSection) {
+    if (numberInput) {
 
-        cabinetSection.classList.add(
-            "hidden"
-        );
+        numberInput.value = "";
 
     }
 
 
-    if (loginSection) {
+    if (codeInput) {
 
-        loginSection.classList.remove(
-            "hidden"
-        );
-
-    }
-
-
-    /*
-     * Очищаем форму
-     */
-
-    const form =
-        document.getElementById(
-            "loginForm"
-        );
-
-
-    if (form) {
-
-        form.reset();
+        codeInput.value = "";
 
     }
 
@@ -1067,10 +852,92 @@ function logout() {
     clearLoginError();
 
 
+    showToast(
+        "Ви вийшли з особистого кабінету.",
+        "success"
+    );
+
+
     window.scrollTo({
+
         top: 0,
+
         behavior: "smooth"
+
     });
+
+}
+
+
+/* =========================================================
+   SAVE SESSION
+========================================================= */
+
+function saveSession(
+    session
+) {
+
+    try {
+
+        localStorage.setItem(
+
+            SESSION_KEY,
+
+            JSON.stringify(
+                session
+            )
+
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Не вдалося зберегти сесію:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   GET SESSION
+========================================================= */
+
+function getSession() {
+
+    try {
+
+        const value =
+            localStorage.getItem(
+                SESSION_KEY
+            );
+
+
+        if (!value) {
+
+            return null;
+
+        }
+
+
+        return JSON.parse(
+            value
+        );
+
+
+    } catch (error) {
+
+        console.warn(
+            "Помилка читання сесії:",
+            error
+        );
+
+
+        return null;
+
+    }
 
 }
 
@@ -1090,68 +957,11 @@ function clearSession() {
     } catch (error) {
 
         console.warn(
-            "Не вдалося очистити сесію:",
+            "Помилка очищення сесії:",
             error
         );
 
     }
-
-}
-
-
-/* =========================================================
-   CLEAR CABINET DATA
-========================================================= */
-
-function clearCabinetData() {
-
-    const ids = [
-
-        "profileFullName",
-
-        "profileBirthDate",
-
-        "profilePhone",
-
-        "profileEmail",
-
-        "profileDiscord",
-
-        "profileContact",
-
-        "applicationNumber",
-
-        "applicationDate",
-
-        "applicationService",
-
-        "applicationResponsible",
-
-        "applicationMessage",
-
-        "governmentComment",
-
-        "accessCodeDisplay"
-
-    ];
-
-
-    ids.forEach(
-        id => {
-
-            setText(
-                id,
-                "—"
-            );
-
-        }
-    );
-
-
-    setText(
-        "applicationStatus",
-        "🟡 На розгляді"
-    );
 
 }
 
@@ -1184,7 +994,7 @@ function initializeCopyButton() {
 
 
 /* =========================================================
-   COPY NUMBER
+   COPY
 ========================================================= */
 
 async function copyApplicationNumber() {
@@ -1202,7 +1012,7 @@ async function copyApplicationNumber() {
     }
 
 
-    const number =
+    let text =
         element.textContent
             .replace(
                 "№",
@@ -1211,7 +1021,7 @@ async function copyApplicationNumber() {
             .trim();
 
 
-    if (!number) {
+    if (!text) {
 
         return;
 
@@ -1220,47 +1030,190 @@ async function copyApplicationNumber() {
 
     try {
 
-        await navigator.clipboard.writeText(
-            number
-        );
+
+        if (
+            navigator.clipboard &&
+            navigator.clipboard.writeText
+        ) {
+
+            await navigator.clipboard.writeText(
+                text
+            );
+
+        } else {
+
+            const textarea =
+                document.createElement(
+                    "textarea"
+                );
 
 
-        const button =
-            document.getElementById(
-                "copyNumberButton"
+            textarea.value =
+                text;
+
+
+            textarea.style.position =
+                "fixed";
+
+
+            textarea.style.opacity =
+                "0";
+
+
+            document.body.appendChild(
+                textarea
             );
 
 
-        if (button) {
-
-            const oldText =
-                button.textContent;
+            textarea.focus();
 
 
-            button.textContent =
-                "Скопійовано ✓";
+            textarea.select();
 
 
-            setTimeout(
-                () => {
-
-                    button.textContent =
-                        oldText;
-
-                },
-                2000
+            document.execCommand(
+                "copy"
             );
+
+
+            textarea.remove();
 
         }
 
+
+        showToast(
+            "Номер заявки скопійовано.",
+            "success"
+        );
+
+
     } catch (error) {
 
-        console.warn(
-            "Не вдалося скопіювати номер:",
+        console.error(
             error
         );
 
+
+        showToast(
+            "Не вдалося скопіювати номер.",
+            "error"
+        );
+
     }
+
+}
+
+
+/* =========================================================
+   SHOW LOGIN
+========================================================= */
+
+function showLoginSection() {
+
+    const login =
+        document.getElementById(
+            "loginSection"
+        );
+
+
+    const cabinet =
+        document.getElementById(
+            "cabinetSection"
+        );
+
+
+    if (login) {
+
+        login.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    if (cabinet) {
+
+        cabinet.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SHOW CABINET
+========================================================= */
+
+function showCabinetSection() {
+
+    const login =
+        document.getElementById(
+            "loginSection"
+        );
+
+
+    const cabinet =
+        document.getElementById(
+            "cabinetSection"
+        );
+
+
+    if (login) {
+
+        login.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    if (cabinet) {
+
+        cabinet.classList.remove(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   TEXT
+========================================================= */
+
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    const text =
+        value !== undefined &&
+        value !== null &&
+        String(value).trim() !== ""
+
+            ? String(value)
+
+            : "—";
+
+
+    element.textContent =
+        text;
 
 }
 
@@ -1273,24 +1226,24 @@ function showLoginError(
     message
 ) {
 
-    const errorElement =
+    const element =
         document.getElementById(
             "loginError"
         );
 
 
-    if (!errorElement) {
+    if (!element) {
 
         return;
 
     }
 
 
-    errorElement.textContent =
+    element.textContent =
         message;
 
 
-    errorElement.classList.add(
+    element.classList.add(
         "visible"
     );
 
@@ -1303,24 +1256,24 @@ function showLoginError(
 
 function clearLoginError() {
 
-    const errorElement =
+    const element =
         document.getElementById(
             "loginError"
         );
 
 
-    if (!errorElement) {
+    if (!element) {
 
         return;
 
     }
 
 
-    errorElement.textContent =
+    element.textContent =
         "";
 
 
-    errorElement.classList.remove(
+    element.classList.remove(
         "visible"
     );
 
@@ -1355,8 +1308,8 @@ function setLoginLoading(
 
         button.innerHTML =
             `
-                <span class="button-spinner"></span>
-                Перевірка...
+                <span class="button-loader"></span>
+                Виконується вхід...
             `;
 
     } else {
@@ -1380,20 +1333,20 @@ function setLoginLoading(
 
 function showLoading() {
 
-    const loading =
+    const overlay =
         document.getElementById(
-            "cabinetLoading"
+            "loadingOverlay"
         );
 
 
-    if (!loading) {
+    if (!overlay) {
 
         return;
 
     }
 
 
-    loading.classList.remove(
+    overlay.classList.remove(
         "hidden"
     );
 
@@ -1406,20 +1359,20 @@ function showLoading() {
 
 function hideLoading() {
 
-    const loading =
+    const overlay =
         document.getElementById(
-            "cabinetLoading"
+            "loadingOverlay"
         );
 
 
-    if (!loading) {
+    if (!overlay) {
 
         return;
 
     }
 
 
-    loading.classList.add(
+    overlay.classList.add(
         "hidden"
     );
 
@@ -1427,132 +1380,82 @@ function hideLoading() {
 
 
 /* =========================================================
-   SET TEXT
+   TOAST
 ========================================================= */
 
-function setText(
-    id,
-    value
+let toastTimer = null;
+
+
+function showToast(
+    message,
+    type = "success"
 ) {
 
-    const element =
+    const toast =
         document.getElementById(
-            id
+            "toast"
         );
 
 
-    if (!element) {
+    if (!toast) {
 
         return;
 
     }
 
 
-    if (
-        value === undefined ||
-        value === null ||
-        String(value).trim() === ""
-    ) {
-
-        element.textContent =
-            "—";
-
-        return;
-
-    }
+    toast.textContent =
+        message;
 
 
-    element.textContent =
-        String(value);
-
-}
+    toast.className =
+        "toast";
 
 
-/* =========================================================
-   FOCUS
-========================================================= */
-
-function focusElement(
-    element
-) {
-
-    if (
-        element &&
-        typeof element.focus ===
-        "function"
-    ) {
-
-        element.focus();
-
-    }
-
-}
-
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-function initializeHeader() {
-
-    const header =
-        document.getElementById(
-            "header"
-        );
-
-
-    if (!header) {
-
-        return;
-
-    }
-
-
-    function updateHeader() {
-
-        if (
-            window.scrollY > 50
-        ) {
-
-            header.classList.add(
-                "scrolled"
-            );
-
-        } else {
-
-            header.classList.remove(
-                "scrolled"
-            );
-
-        }
-
-    }
-
-
-    window.addEventListener(
-        "scroll",
-        updateHeader,
-        {
-            passive: true
-        }
+    toast.classList.add(
+        type
     );
 
 
-    updateHeader();
+    toast.classList.add(
+        "visible"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+
+                toast.classList.remove(
+                    "visible"
+                );
+
+            },
+            3000
+        );
 
 }
 
 
 /* =========================================================
-   PUBLIC API
+   GLOBAL API
 ========================================================= */
 
-window.logoutCabinet =
+window.logout =
     logout;
 
 
-window.fetchCabinetApplication =
-    fetchApplication;
+window.copyApplicationNumber =
+    copyApplicationNumber;
+
+
+window.getSession =
+    getSession;
 
 
 /* =========================================================
@@ -1560,11 +1463,5 @@ window.fetchCabinetApplication =
 ========================================================= */
 
 console.log(
-    "%cOLYMP Government",
-    "font-weight:bold;font-size:18px;"
-);
-
-
-console.log(
-    "Personal Cabinet 4.0 запущено."
+    "OLYMP Government Cabinet 4.0 запущено."
 );
