@@ -88,10 +88,6 @@ function initializeHeader() {
         );
 
 
-    /*
-     * Header scroll
-     */
-
     if (header) {
 
         function updateHeader() {
@@ -129,10 +125,6 @@ function initializeHeader() {
     }
 
 
-    /*
-     * Mobile menu
-     */
-
     if (
         menuButton &&
         mainMenu
@@ -155,7 +147,9 @@ function initializeHeader() {
 
                 menuButton.setAttribute(
                     "aria-expanded",
-                    opened
+                    String(
+                        opened
+                    )
                 );
 
             }
@@ -243,12 +237,6 @@ async function loginCitizen() {
         );
 
 
-    const error =
-        document.getElementById(
-            "cabinetLoginError"
-        );
-
-
     if (!input) {
 
         return;
@@ -262,16 +250,8 @@ async function loginCitizen() {
             .toUpperCase();
 
 
-    /*
-     * Hide previous error
-     */
-
     hideLoginError();
 
-
-    /*
-     * Validation
-     */
 
     if (!idNumber) {
 
@@ -287,10 +267,6 @@ async function loginCitizen() {
     }
 
 
-    /*
-     * Button loading
-     */
-
     setCabinetButtonLoading(
         button,
         true,
@@ -300,85 +276,50 @@ async function loginCitizen() {
 
     try {
 
-        const applications =
-            await fetchApplications(
+        const result =
+            await fetchProfile(
                 idNumber
             );
 
 
-        /*
-         * Если сервер вернул ошибку
-         */
-
         if (
-            !applications ||
-            applications.success !== true
+            !result ||
+            result.success !== true
         ) {
 
             throw new Error(
-                applications &&
-                applications.message
-                    ? applications.message
+                result &&
+                result.message
+                    ? result.message
                     : "Не вдалося отримати дані."
             );
 
         }
 
 
-        const rows =
-            normalizeApplications(
-                applications.applications
-            );
-
-
         /*
-         * Если заявок нет
-         */
-
-        /*
- * Заявок может не быть.
- * Это не является ошибкой.
- */
-
-currentApplications = rows;
-
-currentCitizen = createCitizenProfile(
-    idNumber,
-    rows
-);
-
-saveSession();
-
-showDashboard();
-
-renderCitizenProfile();
-
-renderStatistics();
-
-renderApplications();
-
-
-        /*
-         * Сохраняем пользователя
+         * ВАЖНО:
+         *
+         * Даже если applications = [],
+         * вход разрешён.
          */
 
         currentApplications =
-            rows;
+            normalizeApplications(
+                result.applications
+            );
 
 
         currentCitizen =
             createCitizenProfile(
                 idNumber,
-                rows
+                currentApplications,
+                result.profile
             );
 
 
         saveSession();
 
-
-        /*
-         * Показываем кабинет
-         */
 
         showDashboard();
 
@@ -387,6 +328,7 @@ renderApplications();
         renderStatistics();
 
         renderApplications();
+
 
     } catch (error) {
 
@@ -407,7 +349,7 @@ renderApplications();
         setCabinetButtonLoading(
             button,
             false,
-            "Переглянути мої заявки"
+            "Переглянути мій кабінет"
         );
 
     }
@@ -416,10 +358,10 @@ renderApplications();
 
 
 /* =========================================================
-   FETCH APPLICATIONS
+   FETCH PROFILE
 ========================================================= */
 
-async function fetchApplications(
+async function fetchProfile(
     idNumber
 ) {
 
@@ -434,19 +376,9 @@ async function fetchApplications(
     }
 
 
-    /*
-     * ВАЖНО:
-     *
-     * Code.gs должен поддерживать
-     * GET запрос:
-     *
-     * ?action=getApplications
-     * &idNumber=OLYMP-0001
-     */
-
     const url =
         GOOGLE_SCRIPT_URL +
-        "?action=getApplications" +
+        "?action=profile" +
         "&idNumber=" +
         encodeURIComponent(
             idNumber
@@ -457,9 +389,11 @@ async function fetchApplications(
         await fetch(
             url,
             {
-                method: "GET",
+                method:
+                    "GET",
 
-                cache: "no-store"
+                cache:
+                    "no-store"
             }
         );
 
@@ -531,9 +465,10 @@ function normalizeApplications(
 
     return applications
         .map(
-            item => normalizeApplication(
-                item
-            )
+            item =>
+                normalizeApplication(
+                    item
+                )
         )
         .filter(
             item =>
@@ -561,12 +496,7 @@ function normalizeApplication(
     }
 
 
-    /*
-     * Поддерживаем разные названия
-     * полей от Google Apps Script.
-     */
-
-    const application = {
+    return {
 
         number:
             getField(
@@ -578,7 +508,8 @@ function normalizeApplication(
                     "Номер",
                     "ID"
                 ]
-            ) || "OLYMP-000000",
+            ) ||
+            "OLYMP-000000",
 
 
         fullName:
@@ -590,7 +521,8 @@ function normalizeApplication(
                     "ПІБ",
                     "ФИО"
                 ]
-            ) || "Не вказано",
+            ) ||
+            "Не вказано",
 
 
         idNumber:
@@ -602,7 +534,8 @@ function normalizeApplication(
                     "Номер посвідчення",
                     "Посвідчення"
                 ]
-            ) || "",
+            ) ||
+            "",
 
 
         service:
@@ -614,7 +547,8 @@ function normalizeApplication(
                     "Тип послуги",
                     "Послуга"
                 ]
-            ) || "Державна послуга",
+            ) ||
+            "Державна послуга",
 
 
         contact:
@@ -625,7 +559,8 @@ function normalizeApplication(
                     "Контакт",
                     "Контакт для зв'язку"
                 ]
-            ) || "Не вказано",
+            ) ||
+            "Не вказано",
 
 
         message:
@@ -637,7 +572,8 @@ function normalizeApplication(
                     "Опис звернення",
                     "Опис"
                 ]
-            ) || "Опис відсутній.",
+            ) ||
+            "Опис відсутній.",
 
 
         status:
@@ -648,7 +584,20 @@ function normalizeApplication(
                     "Status",
                     "Статус"
                 ]
-            ) || "На розгляді",
+            ) ||
+            "🟡 На розгляді",
+
+
+        responsible:
+            getField(
+                item,
+                [
+                    "responsible",
+                    "employee",
+                    "Відповідальний"
+                ]
+            ) ||
+            "",
 
 
         comment:
@@ -662,7 +611,8 @@ function normalizeApplication(
                     "Коментар",
                     "Коментар співробітника"
                 ]
-            ) || "",
+            ) ||
+            "",
 
 
         createdAt:
@@ -675,7 +625,8 @@ function normalizeApplication(
                     "Дата подання",
                     "created"
                 ]
-            ) || "",
+            ) ||
+            "",
 
 
         updatedAt:
@@ -687,12 +638,10 @@ function normalizeApplication(
                     "Дата оновлення",
                     "Оновлено"
                 ]
-            ) || ""
+            ) ||
+            ""
 
     };
-
-
-    return application;
 
 }
 
@@ -736,11 +685,6 @@ function getField(
 
     }
 
-
-    /*
-     * Дополнительный поиск
-     * без учета регистра.
-     */
 
     const objectKeys =
         Object.keys(
@@ -790,29 +734,52 @@ function getField(
 
 
 /* =========================================================
-   CREATE CITIZEN PROFILE
+   CREATE PROFILE
 ========================================================= */
 
 function createCitizenProfile(
     idNumber,
-    applications
+    applications,
+    serverProfile
 ) {
 
     const firstApplication =
-        applications[0];
+        applications &&
+        applications.length
+            ? applications[0]
+            : null;
 
 
     return {
 
         fullName:
-            firstApplication &&
-            firstApplication.fullName
-                ? firstApplication.fullName
-                : "Громадянин Olymp",
+
+            serverProfile &&
+            serverProfile.fullName
+                ? serverProfile.fullName
+
+                : firstApplication &&
+                  firstApplication.fullName
+                    ? firstApplication.fullName
+
+                    : "Громадянин Olymp",
 
 
         idNumber:
-            idNumber
+            idNumber,
+
+
+        contact:
+
+            serverProfile &&
+            serverProfile.contact
+                ? serverProfile.contact
+
+                : firstApplication &&
+                  firstApplication.contact
+                    ? firstApplication.contact
+
+                    : ""
 
     };
 
@@ -914,38 +881,29 @@ function renderCitizenProfile() {
     }
 
 
-    const name =
-        document.getElementById(
-            "profileName"
-        );
+    setText(
+        "profileName",
+        currentCitizen.fullName
+    );
 
 
-    const id =
-        document.getElementById(
-            "profileId"
-        );
+    setText(
+        "profileId",
+        currentCitizen.idNumber
+    );
+
+
+    setText(
+        "profileContact",
+        currentCitizen.contact ||
+        "Не вказано"
+    );
 
 
     const avatar =
         document.getElementById(
             "profileAvatar"
         );
-
-
-    if (name) {
-
-        name.textContent =
-            currentCitizen.fullName;
-
-    }
-
-
-    if (id) {
-
-        id.textContent =
-            currentCitizen.idNumber;
-
-    }
 
 
     if (avatar) {
@@ -1096,31 +1054,6 @@ function renderStatistics() {
 
 
 /* =========================================================
-   SET TEXT
-========================================================= */
-
-function setText(
-    id,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if (element) {
-
-        element.textContent =
-            value;
-
-    }
-
-}
-
-
-/* =========================================================
    RENDER APPLICATIONS
 ========================================================= */
 
@@ -1163,6 +1096,10 @@ function renderApplications() {
     }
 
 
+    /*
+     * НЕТ ЗАЯВОК
+     */
+
     if (
         !currentApplications.length
     ) {
@@ -1172,6 +1109,35 @@ function renderApplications() {
             empty.classList.add(
                 "visible"
             );
+
+
+            empty.innerHTML = `
+
+                <div class="empty-applications-content">
+
+                    <div class="empty-applications-icon">
+                        📄
+                    </div>
+
+                    <h3>
+                        Ви ще не подавали заявок
+                    </h3>
+
+                    <p>
+                        У вашому особистому кабінеті
+                        поки що немає державних заявок.
+                    </p>
+
+                    <a
+                        href="services.html"
+                        class="btn btn-light"
+                    >
+                        Подати заявку
+                    </a>
+
+                </div>
+
+            `;
 
         }
 
@@ -1189,10 +1155,6 @@ function renderApplications() {
 
     }
 
-
-    /*
-     * Новые заявки сначала
-     */
 
     const sorted =
         [...currentApplications]
@@ -1221,7 +1183,7 @@ function renderApplications() {
 
 
 /* =========================================================
-   SORT APPLICATIONS
+   SORT
 ========================================================= */
 
 function compareApplications(
@@ -1247,7 +1209,7 @@ function compareApplications(
 
 
 /* =========================================================
-   CREATE APPLICATION CARD
+   APPLICATION CARD
 ========================================================= */
 
 function createApplicationCard(
@@ -1294,10 +1256,13 @@ function createApplicationCard(
                 application-status-badge
                 ${status.className}
             ">
+
                 ${status.icon}
+
                 ${escapeHtml(
                     status.label
                 )}
+
             </span>
 
         </div>
@@ -1377,10 +1342,11 @@ function createApplicationCard(
         ${
             application.comment
                 ? `
+
                     <div class="application-comment">
 
                         <strong>
-                            Коментар співробітника
+                            Коментар державного службовця
                         </strong>
 
                         <p>
@@ -1390,6 +1356,7 @@ function createApplicationCard(
                         </p>
 
                     </div>
+
                 `
                 : ""
         }
@@ -1403,10 +1370,9 @@ function createApplicationCard(
 
             <button
                 type="button"
-                class="btn btn-light application-details-button">
-
+                class="btn btn-light application-details-button"
+            >
                 Детальніше →
-
             </button>
 
         </div>
@@ -1442,7 +1408,7 @@ function createApplicationCard(
 
 
 /* =========================================================
-   STATUS INFORMATION
+   STATUS
 ========================================================= */
 
 function getStatusInfo(
@@ -1464,13 +1430,13 @@ function getStatusInfo(
             return {
 
                 label:
-                    "Схвалено",
+                    "Прийнято",
 
                 className:
                     "status-approved",
 
                 icon:
-                    "🟢"
+                    "🔵"
 
             };
 
@@ -1539,7 +1505,21 @@ function getStatusInfo(
             };
 
 
-        case "pending":
+        case "closed":
+
+            return {
+
+                label:
+                    "Закрито",
+
+                className:
+                    "status-closed",
+
+                icon:
+                    "⚫"
+
+            };
+
 
         default:
 
@@ -1578,18 +1558,10 @@ function normalizeStatus(
 
 
     if (
-        value.includes(
-            "схвал"
-        ) ||
-        value.includes(
-            "одобр"
-        ) ||
-        value.includes(
-            "approved"
-        ) ||
-        value.includes(
-            "approve"
-        )
+        value.includes("схвал") ||
+        value.includes("одобр") ||
+        value.includes("approved") ||
+        value.includes("approve")
     ) {
 
         return "approved";
@@ -1598,18 +1570,22 @@ function normalizeStatus(
 
 
     if (
-        value.includes(
-            "відх"
-        ) ||
-        value.includes(
-            "отказ"
-        ) ||
-        value.includes(
-            "rejected"
-        ) ||
-        value.includes(
-            "reject"
-        )
+        value.includes("прийнят") ||
+        value.includes("принят") ||
+        value.includes("accepted") ||
+        value.includes("accept")
+    ) {
+
+        return "approved";
+
+    }
+
+
+    if (
+        value.includes("відх") ||
+        value.includes("отказ") ||
+        value.includes("rejected") ||
+        value.includes("reject")
     ) {
 
         return "rejected";
@@ -1618,15 +1594,9 @@ function normalizeStatus(
 
 
     if (
-        value.includes(
-            "документ"
-        ) ||
-        value.includes(
-            "documents"
-        ) ||
-        value.includes(
-            "document"
-        )
+        value.includes("документ") ||
+        value.includes("documents") ||
+        value.includes("document")
     ) {
 
         return "documents";
@@ -1635,15 +1605,9 @@ function normalizeStatus(
 
 
     if (
-        value.includes(
-            "перевір"
-        ) ||
-        value.includes(
-            "провер"
-        ) ||
-        value.includes(
-            "review"
-        )
+        value.includes("перевір") ||
+        value.includes("провер") ||
+        value.includes("review")
     ) {
 
         return "review";
@@ -1652,21 +1616,24 @@ function normalizeStatus(
 
 
     if (
-        value.includes(
-            "викон"
-        ) ||
-        value.includes(
-            "заверш"
-        ) ||
-        value.includes(
-            "completed"
-        ) ||
-        value.includes(
-            "complete"
-        )
+        value.includes("викон") ||
+        value.includes("заверш") ||
+        value.includes("completed") ||
+        value.includes("complete")
     ) {
 
         return "completed";
+
+    }
+
+
+    if (
+        value.includes("закрит") ||
+        value.includes("closed") ||
+        value.includes("close")
+    ) {
+
+        return "closed";
 
     }
 
@@ -1677,7 +1644,7 @@ function normalizeStatus(
 
 
 /* =========================================================
-   OPEN APPLICATION DETAILS
+   APPLICATION DETAILS
 ========================================================= */
 
 function openApplicationDetails(
@@ -1815,6 +1782,7 @@ function openApplicationDetails(
                 <strong>
                     ${escapeHtml(
                         application.contact ||
+                        currentCitizen?.contact ||
                         "Не вказано"
                     )}
                 </strong>
@@ -1842,15 +1810,13 @@ function openApplicationDetails(
             <div class="application-info-item">
 
                 <span>
-                    Останнє оновлення
+                    Відповідальний
                 </span>
 
                 <strong>
                     ${escapeHtml(
-                        formatDate(
-                            application.updatedAt ||
-                            application.createdAt
-                        )
+                        application.responsible ||
+                        "Не призначено"
                     )}
                 </strong>
 
@@ -1874,37 +1840,25 @@ function openApplicationDetails(
         </div>
 
 
-        ${
-            application.comment
-                ? `
-                    <div class="application-comment">
+        <div class="application-comment">
 
-                        <strong>
-                            Коментар державного службовця
-                        </strong>
+            <strong>
+                Коментар державного службовця
+            </strong>
 
-                        <p>
-                            ${escapeHtml(
-                                application.comment
-                            )}
-                        </p>
+            <p>
 
-                    </div>
-                `
-                : `
-                    <div class="application-comment">
+                ${
+                    application.comment
+                        ? escapeHtml(
+                            application.comment
+                          )
+                        : "Коментар поки що відсутній."
+                }
 
-                        <strong>
-                            Коментар державного службовця
-                        </strong>
+            </p>
 
-                        <p>
-                            Коментар поки що відсутній.
-                        </p>
-
-                    </div>
-                `
-        }
+        </div>
 
     `;
 
@@ -1928,7 +1882,7 @@ function openApplicationDetails(
 
 
 /* =========================================================
-   APPLICATION MODAL
+   MODAL INITIALIZATION
 ========================================================= */
 
 function initializeApplicationModal() {
@@ -2012,7 +1966,7 @@ function initializeApplicationModal() {
 
 
 /* =========================================================
-   CLOSE APPLICATION DETAILS
+   CLOSE MODAL
 ========================================================= */
 
 function closeApplicationDetails() {
@@ -2041,41 +1995,9 @@ function closeApplicationDetails() {
     );
 
 
-    updateBodyModalState();
-
-}
-
-
-/* =========================================================
-   BODY MODAL STATE
-========================================================= */
-
-function updateBodyModalState() {
-
-    const modal =
-        document.getElementById(
-            "cabinetApplicationModal"
-        );
-
-
-    if (
-        modal &&
-        modal.classList.contains(
-            "active"
-        )
-    ) {
-
-        document.body.classList.add(
-            "modal-open"
-        );
-
-    } else {
-
-        document.body.classList.remove(
-            "modal-open"
-        );
-
-    }
+    document.body.classList.remove(
+        "modal-open"
+    );
 
 }
 
@@ -2172,7 +2094,7 @@ async function refreshApplications() {
     try {
 
         const result =
-            await fetchApplications(
+            await fetchProfile(
                 currentCitizen.idNumber
             );
 
@@ -2186,7 +2108,7 @@ async function refreshApplications() {
                 result &&
                 result.message
                     ? result.message
-                    : "Не вдалося оновити заявки."
+                    : "Не вдалося оновити дані."
             );
 
         }
@@ -2198,25 +2120,15 @@ async function refreshApplications() {
             );
 
 
-        /*
-         * Если после обновления
-         * гражданин всё ещё найден
-         */
-
-        if (
-            currentApplications.length
-        ) {
-
-            currentCitizen =
-                createCitizenProfile(
-                    currentCitizen.idNumber,
-                    currentApplications
-                );
+        currentCitizen =
+            createCitizenProfile(
+                currentCitizen.idNumber,
+                currentApplications,
+                result.profile
+            );
 
 
-            saveSession();
-
-        }
+        saveSession();
 
 
         renderCitizenProfile();
@@ -2224,6 +2136,7 @@ async function refreshApplications() {
         renderStatistics();
 
         renderApplications();
+
 
     } catch (error) {
 
@@ -2346,7 +2259,6 @@ function logoutCitizen() {
 
     hideLoginError();
 
-
     showLogin();
 
 
@@ -2359,7 +2271,7 @@ function logoutCitizen() {
 
 
 /* =========================================================
-   SESSION
+   SESSION SAVE
 ========================================================= */
 
 function saveSession() {
@@ -2377,15 +2289,15 @@ function saveSession() {
 
         localStorage.setItem(
             "olymp_citizen_session",
-            JSON.stringify(
-                {
-                    idNumber:
-                        currentCitizen.idNumber,
+            JSON.stringify({
 
-                    fullName:
-                        currentCitizen.fullName
-                }
-            )
+                idNumber:
+                    currentCitizen.idNumber,
+
+                fullName:
+                    currentCitizen.fullName
+
+            })
         );
 
     } catch (error) {
@@ -2406,7 +2318,8 @@ function saveSession() {
 
 async function restoreSession() {
 
-    let session = null;
+    let session =
+        null;
 
 
     try {
@@ -2466,15 +2379,10 @@ async function restoreSession() {
     }
 
 
-    /*
-     * Автоматически загружаем
-     * заявки пользователя.
-     */
-
     try {
 
         const result =
-            await fetchApplications(
+            await fetchProfile(
                 session.idNumber
             );
 
@@ -2489,29 +2397,22 @@ async function restoreSession() {
         }
 
 
-        const applications =
+        currentApplications =
             normalizeApplications(
                 result.applications
             );
 
 
-        if (
-            !applications.length
-        ) {
-
-            return;
-
-        }
-
-
-        currentApplications =
-            applications;
-
+        /*
+         * Даже при 0 заявок
+         * восстанавливаем кабинет.
+         */
 
         currentCitizen =
             createCitizenProfile(
                 session.idNumber,
-                applications
+                currentApplications,
+                result.profile
             );
 
 
@@ -2522,6 +2423,7 @@ async function restoreSession() {
         renderStatistics();
 
         renderApplications();
+
 
     } catch (error) {
 
@@ -2568,7 +2470,7 @@ function showLoginError(
 
 
 /* =========================================================
-   HIDE LOGIN ERROR
+   HIDE ERROR
 ========================================================= */
 
 function hideLoginError() {
@@ -2753,12 +2655,6 @@ function parseDate(
     }
 
 
-    /*
-     * Поддержка:
-     *
-     * 23.08.2026
-     */
-
     const match =
         String(
             value
@@ -2844,16 +2740,51 @@ function formatDate(
     return new Intl.DateTimeFormat(
         "uk-UA",
         {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
 
-            hour: "2-digit",
-            minute: "2-digit"
+            day:
+                "2-digit",
+
+            month:
+                "2-digit",
+
+            year:
+                "numeric",
+
+            hour:
+                "2-digit",
+
+            minute:
+                "2-digit"
+
         }
     ).format(
         date
     );
+
+}
+
+
+/* =========================================================
+   SET TEXT
+========================================================= */
+
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (element) {
+
+        element.textContent =
+            value;
+
+    }
 
 }
 
