@@ -2,6 +2,17 @@
    OLYMP GOVERNMENT
    Frontend JavaScript 4.0
    Державний портал
+
+   СИСТЕМА:
+   • Державні послуги
+   • Пошук послуг
+   • Категорії
+   • Модальні вікна
+   • Створення заявки
+   • Google Apps Script
+   • Автоматичний номер заявки
+   • Автоматичний код доступу
+   • Особистий кабінет
 ========================================================= */
 
 
@@ -13,14 +24,13 @@ const GOOGLE_SCRIPT_URL =
     "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec";
 
 
-
 /* =========================================================
    DOM READY
 ========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    function () {
 
         initializeGovernmentPortal();
 
@@ -46,9 +56,15 @@ function initializeGovernmentPortal() {
 
         initializeModals();
 
+        initializeApplyButton();
+
         initializeScrollAnimations();
 
         updateServiceCounter();
+
+        console.log(
+            "OLYMP Government 4.0 запущено."
+        );
 
     } catch (error) {
 
@@ -88,7 +104,7 @@ function initializeMobileMenu() {
 
     menuButton.addEventListener(
         "click",
-        () => {
+        function () {
 
             mainMenu.classList.toggle(
                 "active"
@@ -103,7 +119,7 @@ function initializeMobileMenu() {
 
             menuButton.setAttribute(
                 "aria-expanded",
-                isOpen
+                String(isOpen)
             );
 
         }
@@ -117,11 +133,11 @@ function initializeMobileMenu() {
 
 
     menuLinks.forEach(
-        link => {
+        function (link) {
 
             link.addEventListener(
                 "click",
-                () => {
+                function () {
 
                     mainMenu.classList.remove(
                         "active"
@@ -200,8 +216,9 @@ function initializeHeader() {
    SERVICES
 ========================================================= */
 
-let currentCategory =
-    "all";
+let currentCategory = "all";
+
+let selectedService = "";
 
 
 function initializeServices() {
@@ -211,10 +228,12 @@ function initializeServices() {
             "serviceSearch"
         );
 
+
     const clearSearch =
         document.getElementById(
             "clearSearch"
         );
+
 
     const categoryButtons =
         document.querySelectorAll(
@@ -222,17 +241,8 @@ function initializeServices() {
         );
 
 
-    /*
-     * Автоматически собираем
-     * услуги из карточек.
-     */
-
     syncApplicationServices();
 
-
-    /*
-     * Поиск
-     */
 
     if (searchInput) {
 
@@ -244,15 +254,11 @@ function initializeServices() {
     }
 
 
-    /*
-     * Очистка поиска
-     */
-
     if (clearSearch) {
 
         clearSearch.addEventListener(
             "click",
-            () => {
+            function () {
 
                 if (searchInput) {
 
@@ -271,19 +277,15 @@ function initializeServices() {
     }
 
 
-    /*
-     * Категории
-     */
-
     categoryButtons.forEach(
-        button => {
+        function (button) {
 
             button.addEventListener(
                 "click",
-                () => {
+                function () {
 
                     categoryButtons.forEach(
-                        item => {
+                        function (item) {
 
                             item.classList.remove(
                                 "active"
@@ -312,10 +314,6 @@ function initializeServices() {
     );
 
 
-    /*
-     * Первичная фильтрация
-     */
-
     filterServices();
 
 }
@@ -331,6 +329,7 @@ function filterServices() {
         document.getElementById(
             "serviceSearch"
         );
+
 
     const noResults =
         document.getElementById(
@@ -356,7 +355,7 @@ function filterServices() {
 
 
     serviceItems.forEach(
-        service => {
+        function (service) {
 
             const title =
                 (
@@ -386,25 +385,14 @@ function filterServices() {
 
             const matchesSearch =
                 !searchText ||
-
-                title.includes(
-                    searchText
-                ) ||
-
-                description.includes(
-                    searchText
-                ) ||
-
-                requirements.includes(
-                    searchText
-                );
+                title.includes(searchText) ||
+                description.includes(searchText) ||
+                requirements.includes(searchText);
 
 
             const matchesCategory =
                 currentCategory === "all" ||
-
-                category ===
-                currentCategory;
+                category === currentCategory;
 
 
             if (
@@ -431,10 +419,6 @@ function filterServices() {
     );
 
 
-    /*
-     * Сообщение "не найдено"
-     */
-
     if (noResults) {
 
         if (
@@ -454,16 +438,6 @@ function filterServices() {
         }
 
     }
-
-
-    /*
-     * Кнопка очистки
-     */
-
-    const clearSearch =
-        document.getElementById(
-            "clearSearch"
-        );
 
 
     if (clearSearch) {
@@ -524,14 +498,6 @@ function updateServiceCounter() {
    SYNCHRONIZE APPLICATION SERVICES
 ========================================================= */
 
-/*
- * Берём названия услуг непосредственно
- * из data-title карточек.
- *
- * Поэтому больше не нужно вручную
- * поддерживать <select>.
- */
-
 function syncApplicationServices() {
 
     const select =
@@ -557,16 +523,8 @@ function syncApplicationServices() {
         select.value;
 
 
-    /*
-     * Очищаем select
-     */
-
     select.innerHTML = "";
 
-
-    /*
-     * Первая опция
-     */
 
     const firstOption =
         document.createElement(
@@ -574,9 +532,7 @@ function syncApplicationServices() {
         );
 
 
-    firstOption.value =
-        "";
-
+    firstOption.value = "";
 
     firstOption.textContent =
         "Оберіть послугу";
@@ -587,12 +543,8 @@ function syncApplicationServices() {
     );
 
 
-    /*
-     * Добавляем услуги
-     */
-
     services.forEach(
-        service => {
+        function (service) {
 
             const title =
                 (
@@ -630,19 +582,20 @@ function syncApplicationServices() {
     );
 
 
-    /*
-     * Восстанавливаем выбранное значение
-     */
-
     if (previousValue) {
 
         const exists =
             Array.from(
                 select.options
             ).some(
-                option =>
-                    option.value ===
-                    previousValue
+                function (option) {
+
+                    return (
+                        option.value ===
+                        previousValue
+                    );
+
+                }
             );
 
 
@@ -659,11 +612,8 @@ function syncApplicationServices() {
 
 
 /* =========================================================
-   SERVICE MODAL
+   OPEN SERVICE
 ========================================================= */
-
-let selectedService = "";
-
 
 function openService(button) {
 
@@ -848,7 +798,7 @@ function closeServiceModal() {
 
 
 /* =========================================================
-   APPLICATION MODAL
+   OPEN APPLICATION MODAL
 ========================================================= */
 
 function openApplicationModal(
@@ -861,15 +811,56 @@ function openApplicationModal(
         );
 
 
+    if (!applicationModal) {
+
+        console.error(
+            "applicationModal не найден."
+        );
+
+        return;
+
+    }
+
+
+    syncApplicationServices();
+
+
     const applicationService =
         document.getElementById(
             "applicationService"
         );
 
 
-    if (!applicationModal) {
+    if (
+        serviceName &&
+        applicationService
+    ) {
 
-        return;
+        const normalizedService =
+            serviceName.trim();
+
+
+        const option =
+            Array.from(
+                applicationService.options
+            ).find(
+                function (item) {
+
+                    return (
+                        item.value ===
+                        normalizedService
+                    );
+
+                }
+            );
+
+
+        if (option) {
+
+            applicationService.value =
+                normalizedService;
+
+        }
 
     }
 
@@ -888,46 +879,6 @@ function openApplicationModal(
     document.body.classList.add(
         "modal-open"
     );
-
-
-    /*
-     * Синхронизируем услуги
-     */
-
-    syncApplicationServices();
-
-
-    /*
-     * Устанавливаем услугу
-     */
-
-    if (
-        serviceName &&
-        applicationService
-    ) {
-
-        const normalizedService =
-            serviceName.trim();
-
-
-        const option =
-            Array.from(
-                applicationService.options
-            ).find(
-                item =>
-                    item.value ===
-                    normalizedService
-            );
-
-
-        if (option) {
-
-            applicationService.value =
-                normalizedService;
-
-        }
-
-    }
 
 }
 
@@ -960,6 +911,9 @@ function closeApplicationModal() {
         "aria-hidden",
         "true"
     );
+
+
+    resetApplicationModal();
 
 
     updateBodyModalState();
@@ -1033,6 +987,10 @@ function initializeApplicationForm() {
 
     if (!form) {
 
+        console.warn(
+            "applicationForm не найден."
+        );
+
         return;
 
     }
@@ -1067,10 +1025,6 @@ async function handleApplicationSubmit(
         );
 
 
-    /*
-     * Защита от повторной отправки
-     */
-
     if (
         submitButton &&
         submitButton.disabled
@@ -1081,9 +1035,9 @@ async function handleApplicationSubmit(
     }
 
 
-    /*
-     * Получаем поля
-     */
+    /* =====================================================
+       ПОЛЯ ФОРМЫ
+    ===================================================== */
 
     const fullNameInput =
         document.getElementById(
@@ -1091,9 +1045,27 @@ async function handleApplicationSubmit(
         );
 
 
-    const idNumberInput =
+    const birthDateInput =
         document.getElementById(
-            "idNumber"
+            "birthDate"
+        );
+
+
+    const phoneInput =
+        document.getElementById(
+            "phone"
+        );
+
+
+    const emailInput =
+        document.getElementById(
+            "email"
+        );
+
+
+    const discordInput =
+        document.getElementById(
+            "discord"
         );
 
 
@@ -1115,15 +1087,37 @@ async function handleApplicationSubmit(
         );
 
 
+    /* =====================================================
+       ЗНАЧЕНИЯ
+    ===================================================== */
+
     const fullName =
         fullNameInput
             ? fullNameInput.value.trim()
             : "";
 
 
-    const idNumber =
-        idNumberInput
-            ? idNumberInput.value.trim()
+    const birthDate =
+        birthDateInput
+            ? birthDateInput.value.trim()
+            : "";
+
+
+    const phone =
+        phoneInput
+            ? phoneInput.value.trim()
+            : "";
+
+
+    const email =
+        emailInput
+            ? emailInput.value.trim()
+            : "";
+
+
+    const discord =
+        discordInput
+            ? discordInput.value.trim()
             : "";
 
 
@@ -1145,9 +1139,9 @@ async function handleApplicationSubmit(
             : "";
 
 
-    /*
-     * Проверка
-     */
+    /* =====================================================
+       ПРОВЕРКА ПІБ
+    ===================================================== */
 
     if (!fullName) {
 
@@ -1166,22 +1160,9 @@ async function handleApplicationSubmit(
     }
 
 
-    if (!idNumber) {
-
-        showFormError(
-            "Будь ласка, вкажіть номер посвідчення."
-        );
-
-
-        focusElement(
-            idNumberInput
-        );
-
-
-        return;
-
-    }
-
+    /* =====================================================
+       ПРОВЕРКА УСЛУГИ
+    ===================================================== */
 
     if (!service) {
 
@@ -1200,6 +1181,10 @@ async function handleApplicationSubmit(
     }
 
 
+    /* =====================================================
+       ПРОВЕРКА ОПИСАНИЯ
+    ===================================================== */
+
     if (!message) {
 
         showFormError(
@@ -1217,9 +1202,39 @@ async function handleApplicationSubmit(
     }
 
 
-    /*
-     * Проверка URL
-     */
+    /* =====================================================
+       КОНТАКТ
+    ===================================================== */
+
+    if (
+        !phone &&
+        !email &&
+        !discord &&
+        !contact
+    ) {
+
+        showFormError(
+            "Вкажіть хоча б один спосіб зв'язку."
+        );
+
+
+        if (phoneInput) {
+
+            focusElement(
+                phoneInput
+            );
+
+        }
+
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       GOOGLE SCRIPT URL
+    ===================================================== */
 
     if (
         !GOOGLE_SCRIPT_URL ||
@@ -1229,7 +1244,7 @@ async function handleApplicationSubmit(
     ) {
 
         showFormError(
-            "Система заявок ще не налаштована."
+            "Google Apps Script ще не підключено."
         );
 
 
@@ -1238,9 +1253,9 @@ async function handleApplicationSubmit(
     }
 
 
-    /*
-     * Блокируем кнопку
-     */
+    /* =====================================================
+       БЛОКИРОВКА КНОПКИ
+    ===================================================== */
 
     setSubmitState(
         submitButton,
@@ -1248,12 +1263,18 @@ async function handleApplicationSubmit(
     );
 
 
-    /*
-     * Формируем данные
-     */
+    /* =====================================================
+       ДАННЫЕ
+    ===================================================== */
 
     const formData =
         new URLSearchParams();
+
+
+    formData.append(
+        "action",
+        "application"
+    );
 
 
     formData.append(
@@ -1263,8 +1284,26 @@ async function handleApplicationSubmit(
 
 
     formData.append(
-        "idNumber",
-        idNumber
+        "birthDate",
+        birthDate
+    );
+
+
+    formData.append(
+        "phone",
+        phone
+    );
+
+
+    formData.append(
+        "email",
+        email
+    );
+
+
+    formData.append(
+        "discord",
+        discord
     );
 
 
@@ -1286,27 +1325,17 @@ async function handleApplicationSubmit(
     );
 
 
-    /*
-     * Дополнительные данные
-     */
-
     formData.append(
         "source",
         "OLYMP Government Website"
     );
 
 
-    formData.append(
-        "userAgent",
-        navigator.userAgent
-    );
-
+    /* =====================================================
+       ОТПРАВКА
+    ===================================================== */
 
     try {
-
-        /*
-         * Отправляем POST
-         */
 
         const response =
             await fetch(
@@ -1318,10 +1347,6 @@ async function handleApplicationSubmit(
                 }
             );
 
-
-        /*
-         * Проверяем HTTP
-         */
 
         if (
             !response.ok
@@ -1335,17 +1360,40 @@ async function handleApplicationSubmit(
         }
 
 
-        /*
-         * Получаем JSON
-         */
-
-        const result =
-            await response.json();
+        const responseText =
+            await response.text();
 
 
-        /*
-         * Проверяем результат
-         */
+        console.log(
+            "Google Apps Script response:",
+            responseText
+        );
+
+
+        let result;
+
+
+        try {
+
+            result =
+                JSON.parse(
+                    responseText
+                );
+
+        } catch (parseError) {
+
+            console.error(
+                "JSON parse error:",
+                parseError
+            );
+
+
+            throw new Error(
+                "Google Apps Script повернув некоректну відповідь."
+            );
+
+        }
+
 
         if (
             !result ||
@@ -1356,15 +1404,15 @@ async function handleApplicationSubmit(
                 result &&
                 result.message
                     ? result.message
-                    : "Сервер не підтвердив реєстрацію заявки."
+                    : "Заявку не було зареєстровано."
             );
 
         }
 
 
-        /*
-         * Успешная заявка
-         */
+        /* =================================================
+           УСПЕШНО
+        ================================================= */
 
         showApplicationSuccess(
             result
@@ -1374,19 +1422,14 @@ async function handleApplicationSubmit(
     } catch (error) {
 
         console.error(
-            "OLYMP Government:",
+            "OLYMP Government submit error:",
             error
         );
 
 
-        /*
-         * Если браузер блокирует
-         * CORS Google Apps Script,
-         * показываем понятную ошибку.
-         */
-
         showFormError(
-            "Не вдалося отримати відповідь від сервера. Перевірте підключення Google Apps Script та спробуйте ще раз."
+            error.message ||
+            "Не вдалося відправити заявку. Спробуйте ще раз."
         );
 
 
@@ -1426,6 +1469,26 @@ function showApplicationSuccess(
         );
 
 
+    const number =
+        result &&
+        result.application &&
+        result.application.number
+            ? result.application.number
+            : result.number
+                ? result.number
+                : "OLYMP-000000";
+
+
+    const accessCode =
+        result &&
+        result.application &&
+        result.application.accessCode
+            ? result.application.accessCode
+            : result.accessCode
+                ? result.accessCode
+                : "";
+
+
     if (form) {
 
         form.style.display =
@@ -1436,11 +1499,6 @@ function showApplicationSuccess(
 
     if (applicationNumber) {
 
-        const number =
-            result.number ||
-            "OLYMP-000000";
-
-
         applicationNumber.textContent =
             "№ " +
             number;
@@ -1448,12 +1506,69 @@ function showApplicationSuccess(
     }
 
 
-    if (successMessage) {
+    /* =====================================================
+       КОД ДОСТУПА
+    ===================================================== */
 
-        /*
-         * Добавляем информацию
-         * о статусе, если возможно.
-         */
+    let accessCodeElement =
+        document.getElementById(
+            "applicationAccessCode"
+        );
+
+
+    if (
+        accessCode &&
+        successMessage
+    ) {
+
+        if (!accessCodeElement) {
+
+            accessCodeElement =
+                document.createElement(
+                    "div"
+                );
+
+
+            accessCodeElement.id =
+                "applicationAccessCode";
+
+
+            accessCodeElement.className =
+                "success-access-code";
+
+
+            successMessage.insertBefore(
+                accessCodeElement,
+                successMessage.querySelector(
+                    "button"
+                )
+            );
+
+        }
+
+
+        accessCodeElement.innerHTML =
+            `
+                <strong>
+                    Код доступу:
+                </strong>
+
+                <span>
+                    ${escapeHtml(accessCode)}
+                </span>
+
+                <br>
+
+                <small>
+                    Збережіть цей код. Він потрібен
+                    для входу до особистого кабінету.
+                </small>
+            `;
+
+    }
+
+
+    if (successMessage) {
 
         let statusElement =
             document.getElementById(
@@ -1491,12 +1606,19 @@ function showApplicationSuccess(
         }
 
 
+        const status =
+            result &&
+            result.application &&
+            result.application.status
+                ? result.application.status
+                : result.status
+                    ? result.status
+                    : "🟡 На розгляді";
+
+
         statusElement.textContent =
             "Статус: " +
-            (
-                result.status ||
-                "🟡 На розгляді"
-            );
+            status;
 
 
         successMessage.classList.add(
@@ -1506,31 +1628,123 @@ function showApplicationSuccess(
     }
 
 
-    /*
-     * Сохраняем номер локально
-     */
+    /* =====================================================
+       СОХРАНЕНИЕ ДАННЫХ
+    ===================================================== */
 
-    if (
-        result.number
-    ) {
+    try {
 
-        try {
+        localStorage.setItem(
+            "olymp_last_application",
+            number
+        );
+
+
+        if (accessCode) {
 
             localStorage.setItem(
-                "olymp_last_application",
-                result.number
+                "olymp_last_access_code",
+                accessCode
             );
 
-        } catch (error) {
+        }
 
-            console.warn(
-                "LocalStorage unavailable:",
-                error
+    } catch (error) {
+
+        console.warn(
+            "LocalStorage unavailable:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RESET APPLICATION MODAL
+========================================================= */
+
+function resetApplicationModal() {
+
+    const form =
+        document.getElementById(
+            "applicationForm"
+        );
+
+
+    const successMessage =
+        document.getElementById(
+            "successMessage"
+        );
+
+
+    if (form) {
+
+        form.reset();
+
+        form.style.display =
+            "";
+
+    }
+
+
+    if (successMessage) {
+
+        successMessage.classList.remove(
+            "active"
+        );
+
+    }
+
+
+    const accessCodeElement =
+        document.getElementById(
+            "applicationAccessCode"
+        );
+
+
+    if (accessCodeElement) {
+
+        accessCodeElement.remove();
+
+    }
+
+
+    const statusElement =
+        document.getElementById(
+            "applicationStatus"
+        );
+
+
+    if (statusElement) {
+
+        statusElement.remove();
+
+    }
+
+
+    if (form) {
+
+        const button =
+            form.querySelector(
+                ".form-submit"
+            );
+
+
+        if (button) {
+
+            setSubmitState(
+                button,
+                false
             );
 
         }
 
     }
+
+
+    syncApplicationServices();
 
 }
 
@@ -1542,14 +1756,6 @@ function showApplicationSuccess(
 function showFormError(
     message
 ) {
-
-    /*
-     * На первом этапе используем
-     * обычное alert.
-     *
-     * Позже можно заменить
-     * на красивый toast.
-     */
 
     alert(
         message
@@ -1601,8 +1807,14 @@ function setSubmitState(
             true;
 
 
-        button.dataset.originalText =
-            button.textContent;
+        if (
+            !button.dataset.originalText
+        ) {
+
+            button.dataset.originalText =
+                button.textContent.trim();
+
+        }
 
 
         button.textContent =
@@ -1624,73 +1836,7 @@ function setSubmitState(
 
 
 /* =========================================================
-   RESET APPLICATION MODAL
-========================================================= */
-
-function resetApplicationModal() {
-
-    const form =
-        document.getElementById(
-            "applicationForm"
-        );
-
-
-    const successMessage =
-        document.getElementById(
-            "successMessage"
-        );
-
-
-    if (form) {
-
-        form.reset();
-
-        form.style.display =
-            "";
-
-    }
-
-
-    if (successMessage) {
-
-        successMessage.classList.remove(
-            "active"
-        );
-
-    }
-
-
-    if (form) {
-
-        const button =
-            form.querySelector(
-                ".form-submit"
-            );
-
-
-        if (button) {
-
-            setSubmitState(
-                button,
-                false
-            );
-
-        }
-
-    }
-
-
-    /*
-     * Восстанавливаем список услуг
-     */
-
-    syncApplicationServices();
-
-}
-
-
-/* =========================================================
-   MODALS INITIALIZATION
+   MODALS
 ========================================================= */
 
 function initializeModals() {
@@ -1707,15 +1853,11 @@ function initializeModals() {
         );
 
 
-    /*
-     * Клик по фону
-     */
-
     if (serviceModal) {
 
         serviceModal.addEventListener(
             "click",
-            event => {
+            function (event) {
 
                 if (
                     event.target ===
@@ -1736,7 +1878,7 @@ function initializeModals() {
 
         applicationModal.addEventListener(
             "click",
-            event => {
+            function (event) {
 
                 if (
                     event.target ===
@@ -1753,39 +1895,9 @@ function initializeModals() {
     }
 
 
-    /*
-     * Закрытие после transition
-     */
-
-    if (applicationModal) {
-
-        applicationModal.addEventListener(
-            "transitionend",
-            () => {
-
-                if (
-                    !applicationModal.classList.contains(
-                        "active"
-                    )
-                ) {
-
-                    resetApplicationModal();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /*
-     * ESC
-     */
-
     document.addEventListener(
         "keydown",
-        event => {
+        function (event) {
 
             if (
                 event.key !==
@@ -1808,7 +1920,7 @@ function initializeModals() {
 
 
 /* =========================================================
-   APPLY FROM SERVICE
+   APPLY BUTTON
 ========================================================= */
 
 function initializeApplyButton() {
@@ -1828,34 +1940,30 @@ function initializeApplyButton() {
 
     applyFromService.addEventListener(
         "click",
-        () => {
+        function () {
+
+            const service =
+                selectedService;
+
 
             closeServiceModal();
 
-            openApplicationModal(
-                selectedService
+
+            setTimeout(
+                function () {
+
+                    openApplicationModal(
+                        service
+                    );
+
+                },
+                100
             );
 
         }
     );
 
 }
-
-
-/*
- * Запускаем отдельно,
- * потому что кнопка уже существует
- * в HTML.
- */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        initializeApplyButton();
-
-    }
-);
 
 
 /* =========================================================
@@ -1883,18 +1991,12 @@ function initializeScrollAnimations() {
     }
 
 
-    /*
-     * Если браузер не поддерживает
-     * IntersectionObserver,
-     * просто показываем элементы.
-     */
-
     if (
         !("IntersectionObserver" in window)
     ) {
 
         animatedElements.forEach(
-            element => {
+            function (element) {
 
                 element.classList.add(
                     "show"
@@ -1911,10 +2013,10 @@ function initializeScrollAnimations() {
 
     const observer =
         new IntersectionObserver(
-            entries => {
+            function (entries) {
 
                 entries.forEach(
-                    entry => {
+                    function (entry) {
 
                         if (
                             entry.isIntersecting
@@ -1942,7 +2044,7 @@ function initializeScrollAnimations() {
 
 
     animatedElements.forEach(
-        element => {
+        function (element) {
 
             element.classList.add(
                 "animate-element"
@@ -1960,12 +2062,12 @@ function initializeScrollAnimations() {
 
 
 /* =========================================================
-   SMOOTH ANCHOR SCROLL
+   SMOOTH SCROLL
 ========================================================= */
 
 document.addEventListener(
     "click",
-    event => {
+    function (event) {
 
         const link =
             event.target.closest(
@@ -1996,10 +2098,21 @@ document.addEventListener(
         }
 
 
-        const target =
-            document.querySelector(
-                targetId
-            );
+        let target;
+
+
+        try {
+
+            target =
+                document.querySelector(
+                    targetId
+                );
+
+        } catch (error) {
+
+            return;
+
+        }
 
 
         if (!target) {
@@ -2019,25 +2132,6 @@ document.addEventListener(
 
     }
 );
-
-
-/* =========================================================
-   SERVICE BUTTONS
-========================================================= */
-
-/*
- * Для inline onclick:
- *
- * openService(this)
- * openApplicationModal(...)
- * closeServiceModal()
- * closeApplicationModal()
- *
- * функции объявлены глобально.
- *
- * Поэтому дополнительно ничего
- * подключать в HTML не требуется.
- */
 
 
 /* =========================================================
@@ -2089,36 +2183,72 @@ function copyApplicationNumber() {
             .trim();
 
 
-    if (
-        !text ||
-        !navigator.clipboard
-    ) {
+    if (!text) {
 
         return;
 
     }
 
 
-    navigator.clipboard
-        .writeText(text)
-        .then(
-            () => {
+    if (
+        navigator.clipboard
+    ) {
 
-                console.log(
-                    "Номер заявки скопійовано."
-                );
+        navigator.clipboard
+            .writeText(text)
+            .then(
+                function () {
 
-            }
+                    console.log(
+                        "Номер заявки скопійовано."
+                    );
+
+                }
+            )
+            .catch(
+                function (error) {
+
+                    console.warn(
+                        "Не вдалося скопіювати номер:",
+                        error
+                    );
+
+                }
+            );
+
+    }
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(
+    value
+) {
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
         )
-        .catch(
-            error => {
-
-                console.warn(
-                    "Не вдалося скопіювати номер:",
-                    error
-                );
-
-            }
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
         );
 
 }
@@ -2127,11 +2257,6 @@ function copyApplicationNumber() {
 /* =========================================================
    PUBLIC API
 ========================================================= */
-
-/*
- * Оставляем функции доступными
- * для onclick="" из HTML.
- */
 
 window.openService =
     openService;
@@ -2162,7 +2287,7 @@ console.log(
     "font-weight:bold;font-size:18px;"
 );
 
-
 console.log(
-    "Frontend JavaScript 4.0 запущено."
+    "%cFrontend JavaScript 4.0 запущено.",
+    "font-weight:bold;"
 );
