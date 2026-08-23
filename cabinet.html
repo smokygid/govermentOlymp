@@ -10,9 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        Особистий кабінет | OLYMP Government
-    </title>
+    <title>Особистий кабінет | OLYMP Government</title>
 
     <meta
         name="description"
@@ -38,6 +36,9 @@
 
     <div class="header-inner">
 
+
+        <!-- BRAND -->
+
         <a
             href="index.html"
             class="brand"
@@ -62,13 +63,17 @@
         </a>
 
 
+        <!-- NAVIGATION -->
+
         <nav class="cabinet-nav">
 
             <a href="index.html">
                 Головна
             </a>
 
-            <a href="index.html#services">
+            <a
+                href="index.html#services"
+            >
                 Державні послуги
             </a>
 
@@ -80,6 +85,7 @@
             </a>
 
         </nav>
+
 
     </div>
 
@@ -107,28 +113,30 @@
 
 
             <div class="login-icon">
-                🏛️
+                🔐
             </div>
 
 
             <div class="section-label">
-                OLYMP GOVERNMENT
+                ОСОБИСТИЙ КАБІНЕТ
             </div>
 
 
             <h1>
-                Особистий кабінет
+                Вхід до кабінету
             </h1>
 
 
             <p class="login-description">
 
-                Увійдіть до особистого кабінету,
-                використовуючи номер вашої заявки
-                та код доступу.
+                Введіть номер вашої заявки та
+                персональний код доступу,
+                який був наданий після її реєстрації.
 
             </p>
 
+
+            <!-- FORM -->
 
             <form
                 id="loginForm"
@@ -138,13 +146,13 @@
 
                 <div class="form-group">
 
-                    <label for="loginNumber">
+                    <label for="applicationNumber">
                         Номер заявки
                     </label>
 
                     <input
                         type="text"
-                        id="loginNumber"
+                        id="applicationNumber"
                         name="number"
                         placeholder="Наприклад: OLYMP-000001"
                         autocomplete="off"
@@ -156,22 +164,24 @@
 
                 <div class="form-group">
 
-                    <label for="loginCode">
+                    <label for="accessCode">
                         Код доступу
                     </label>
 
                     <input
                         type="text"
-                        id="loginCode"
+                        id="accessCode"
                         name="accessCode"
                         placeholder="Введіть код доступу"
                         autocomplete="off"
-                        maxlength="8"
+                        autocapitalize="characters"
                         required
                     >
 
                 </div>
 
+
+                <!-- ERROR -->
 
                 <div
                     id="loginError"
@@ -185,7 +195,7 @@
                     class="primary-button"
                 >
 
-                    <span>
+                    <span id="loginButtonText">
                         Увійти до кабінету
                     </span>
 
@@ -195,18 +205,24 @@
             </form>
 
 
+            <!-- HELP -->
+
             <div class="login-help">
 
                 <strong>
-                    Де знайти код доступу?
+                    Не втрачайте код доступу.
                 </strong>
 
-                <p>
-                    Код доступу був наданий вам
-                    після успішної реєстрації заявки.
-                    Збережіть його — він необхідний
-                    для входу до кабінету.
-                </p>
+                <br>
+
+                Він необхідний для перегляду
+                інформації щодо вашої заявки.
+
+                <br><br>
+
+                Якщо ви втратили номер заявки
+                або код доступу, зверніться
+                до відповідного державного органу.
 
             </div>
 
@@ -227,438 +243,482 @@
     >
 
 
-        <div class="cabinet-container">
+        <!-- TITLE -->
+
+        <div class="cabinet-title-row">
 
 
-            <!-- =========================================
-                 CABINET HEADER
-            ========================================== -->
+            <div>
 
-            <div class="cabinet-title-row">
-
-                <div>
-
-                    <div class="section-label">
-                        OLYMP GOVERNMENT
-                    </div>
-
-                    <h1>
-                        Особистий кабінет
-                    </h1>
-
-                    <p>
-                        Інформація про ваші державні звернення
-                    </p>
-
+                <div class="section-label">
+                    ОСОБИСТИЙ КАБІНЕТ
                 </div>
 
+                <h1>
+                    Вітаємо у вашому кабінеті
+                </h1>
 
-                <button
-                    type="button"
-                    id="logoutButton"
-                    class="logout-button"
-                >
-
-                    Вийти
-
-                </button>
+                <p>
+                    Тут зберігається інформація
+                    про вашу державну заявку.
+                </p>
 
             </div>
 
 
-
-            <!-- =========================================
-                 PROFILE
-            ========================================== -->
-
-            <div class="profile-card">
-
-
-                <div class="card-header">
-
-                    <div>
-
-                        <span class="card-label">
-                            ГРОМАДЯНИН
-                        </span>
-
-                        <h2>
-                            Особисті дані
-                        </h2>
-
-                    </div>
-
-
-                    <div class="profile-avatar">
-                        👤
-                    </div>
-
-                </div>
-
-
-                <div class="profile-grid">
-
-
-                    <div class="info-item">
-
-                        <span>
-                            ПІБ
-                        </span>
-
-                        <strong
-                            id="profileFullName"
-                        >
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="info-item">
-
-                        <span>
-                            Дата народження
-                        </span>
-
-                        <strong
-                            id="profileBirthDate"
-                        >
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="info-item">
-
-                        <span>
-                            Телефон
-                        </span>
-
-                        <strong
-                            id="profilePhone"
-                        >
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="info-item">
-
-                        <span>
-                            Email
-                        </span>
-
-                        <strong
-                            id="profileEmail"
-                        >
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="info-item">
-
-                        <span>
-                            Discord
-                        </span>
-
-                        <strong
-                            id="profileDiscord"
-                        >
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="info-item">
-
-                        <span>
-                            Контакт
-                        </span>
-
-                        <strong
-                            id="profileContact"
-                        >
-                            —
-                        </strong>
-
-                    </div>
-
-
-                </div>
-
-            </div>
-
-
-
-            <!-- =========================================
-                 APPLICATION
-            ========================================== -->
-
-            <div class="applications-section">
-
-
-                <div class="section-heading">
-
-                    <div>
-
-                        <span class="card-label">
-                            ЗВЕРНЕННЯ
-                        </span>
-
-                        <h2>
-                            Моя заявка
-                        </h2>
-
-                    </div>
-
-                </div>
-
-
-
-                <div
-                    id="applicationCard"
-                    class="application-card"
-                >
-
-
-                    <div class="application-top">
-
-
-                        <div>
-
-                            <span class="application-label">
-                                НОМЕР ЗАЯВКИ
-                            </span>
-
-                            <div class="application-number-row">
-
-                                <strong
-                                    id="applicationNumber"
-                                >
-                                    —
-                                </strong>
-
-                                <button
-                                    type="button"
-                                    id="copyNumberButton"
-                                    class="copy-button"
-                                >
-                                    Копіювати
-                                </button>
-
-                            </div>
-
-                        </div>
-
-
-                        <div
-                            id="applicationStatus"
-                            class="status-badge"
-                        >
-                            🟡 На розгляді
-                        </div>
-
-
-                    </div>
-
-
-
-                    <div class="application-grid">
-
-
-                        <div class="info-item">
-
-                            <span>
-                                Дата подання
-                            </span>
-
-                            <strong
-                                id="applicationDate"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="info-item">
-
-                            <span>
-                                Державна послуга
-                            </span>
-
-                            <strong
-                                id="applicationService"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="info-item">
-
-                            <span>
-                                Відповідальний
-                            </span>
-
-                            <strong
-                                id="applicationResponsible"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="info-item">
-
-                            <span>
-                                Код доступу
-                            </span>
-
-                            <strong
-                                id="applicationAccessCode"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                    </div>
-
-
-
-                    <div class="application-block">
-
-                        <span>
-                            Опис звернення
-                        </span>
-
-                        <div
-                            id="applicationMessage"
-                            class="text-box"
-                        >
-                            —
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="application-block">
-
-                        <span>
-                            Відповідь державного органу
-                        </span>
-
-                        <div
-                            id="applicationComment"
-                            class="text-box government-answer"
-                        >
-
-                            Відповідь ще не надана.
-
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-
-            </div>
-
-
-
-            <!-- =========================================
-                 ALL APPLICATIONS PLACEHOLDER
-            ========================================== -->
-
-            <div
-                id="allApplicationsSection"
-                class="applications-section"
+            <button
+                type="button"
+                id="logoutButton"
+                class="logout-button"
             >
 
-                <div class="section-heading">
+                Вийти
 
-                    <div>
+            </button>
 
-                        <span class="card-label">
-                            ІСТОРІЯ
-                        </span>
 
-                        <h2>
-                            Мої звернення
-                        </h2>
+        </div>
 
+
+
+        <!-- =================================================
+             PROFILE
+        ================================================== -->
+
+        <section class="profile-card">
+
+
+            <div class="card-header">
+
+                <div>
+
+                    <div class="card-label">
+                        ГРОМАДЯНИН
                     </div>
+
+                    <h2>
+                        Особиста інформація
+                    </h2>
 
                 </div>
 
 
                 <div
-                    id="applicationsHistory"
-                    class="history-empty"
+                    id="profileAvatar"
+                    class="profile-avatar"
                 >
-
-                    <div class="history-icon">
-                        📁
-                    </div>
-
-                    <h3>
-                        Історія звернень
-                    </h3>
-
-                    <p>
-                        Тут відображатимуться всі ваші
-                        звернення до державних органів.
-                    </p>
-
+                    👤
                 </div>
 
             </div>
 
 
 
-            <!-- =========================================
-                 SECURITY
-            ========================================== -->
+            <div class="profile-grid">
 
-            <div class="security-notice">
 
-                <div class="security-icon">
-                    🔐
-                </div>
+                <div class="info-item">
 
-                <div>
+                    <span>
+                        ПІБ
+                    </span>
 
-                    <strong>
-                        Захищений кабінет
+                    <strong
+                        id="profileFullName"
+                    >
+                        —
                     </strong>
 
-                    <p>
-                        Не передавайте номер заявки
-                        та код доступу стороннім особам.
-                    </p>
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>
+                        Дата народження
+                    </span>
+
+                    <strong
+                        id="profileBirthDate"
+                    >
+                        —
+                    </strong>
 
                 </div>
+
+
+                <div class="info-item">
+
+                    <span>
+                        Телефон
+                    </span>
+
+                    <strong
+                        id="profilePhone"
+                    >
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>
+                        Email
+                    </span>
+
+                    <strong
+                        id="profileEmail"
+                    >
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>
+                        Discord
+                    </span>
+
+                    <strong
+                        id="profileDiscord"
+                    >
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <span>
+                        Бажаний спосіб зв'язку
+                    </span>
+
+                    <strong
+                        id="profileContact"
+                    >
+                        —
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             APPLICATION
+        ================================================== -->
+
+        <section class="applications-section">
+
+
+            <div class="section-heading">
+
+                <div class="card-label">
+                    ДЕРЖАВНЕ ЗВЕРНЕННЯ
+                </div>
+
+                <h2>
+                    Моя заявка
+                </h2>
+
+            </div>
+
+
+
+            <div class="application-card">
+
+
+                <!-- APPLICATION TOP -->
+
+                <div class="application-top">
+
+
+                    <div>
+
+                        <span class="application-label">
+                            НОМЕР ЗАЯВКИ
+                        </span>
+
+
+                        <div class="application-number-row">
+
+                            <strong
+                                id="applicationNumberView"
+                            >
+                                —
+                            </strong>
+
+
+                            <button
+                                type="button"
+                                id="copyNumberButton"
+                                class="copy-button"
+                            >
+                                Копіювати
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- STATUS -->
+
+                    <div
+                        id="applicationStatus"
+                        class="status-badge status-pending"
+                    >
+                        🟡 На розгляді
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- BASIC DATA -->
+
+                <div class="application-grid">
+
+
+                    <div class="info-item">
+
+                        <span>
+                            Дата подання
+                        </span>
+
+                        <strong
+                            id="applicationDate"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>
+                            Державна послуга
+                        </span>
+
+                        <strong
+                            id="applicationService"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>
+                            Відповідальний
+                        </span>
+
+                        <strong
+                            id="applicationResponsible"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>
+                            Код доступу
+                        </span>
+
+                        <strong
+                            id="applicationAccessCode"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- MESSAGE -->
+
+                <div class="application-block">
+
+                    <span>
+                        ОПИС ЗВЕРНЕННЯ
+                    </span>
+
+                    <div
+                        id="applicationMessage"
+                        class="text-box"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+
+                <!-- GOVERNMENT ANSWER -->
+
+                <div class="application-block">
+
+                    <span>
+                        ВІДПОВІДЬ ДЕРЖАВНОГО ОРГАНУ
+                    </span>
+
+                    <div
+                        id="applicationComment"
+                        class="text-box government-answer"
+                    >
+                        Відповідь ще не надана.
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             HISTORY
+        ================================================== -->
+
+        <section class="applications-section">
+
+
+            <div class="section-heading">
+
+                <div class="card-label">
+                    ІСТОРІЯ
+                </div>
+
+                <h2>
+                    Інші звернення
+                </h2>
+
+            </div>
+
+
+            <div class="history-empty">
+
+
+                <div class="history-icon">
+                    📁
+                </div>
+
+
+                <h3>
+                    Історія заявок
+                </h3>
+
+
+                <p>
+
+                    У поточній версії кожна заявка
+                    відкривається за власним номером
+                    та кодом доступу.
+
+                    <br>
+
+                    Після розширення бази громадян
+                    тут можна буде переглядати
+                    всі ваші заявки в одному кабінеті.
+
+                </p>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             SECURITY
+        ================================================== -->
+
+        <div class="security-notice">
+
+
+            <div class="security-icon">
+                🔒
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Захищений доступ
+                </strong>
+
+                <p>
+
+                    Не передавайте номер заявки
+                    та код доступу стороннім особам.
+
+                </p>
 
             </div>
 
 
         </div>
 
+
     </section>
 
 
 </main>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="cabinet-footer">
+
+
+    <div>
+
+        <strong>
+            OLYMP GOVERNMENT
+        </strong>
+
+        <span>
+            Державний портал
+        </span>
+
+    </div>
+
+
+    <div>
+
+        © 2026 OLYMP Government
+
+    </div>
+
+
+</footer>
 
 
 
@@ -673,15 +733,19 @@
 
     <div class="loading-box">
 
+
         <div class="loader"></div>
 
+
         <strong>
-            Завантаження...
+            Обробка запиту
         </strong>
 
+
         <span>
-            Отримуємо інформацію
+            Будь ласка, зачекайте...
         </span>
+
 
     </div>
 
@@ -701,33 +765,11 @@
 
 
 <!-- =====================================================
-     FOOTER
+     JAVASCRIPT
 ===================================================== -->
 
-<footer class="cabinet-footer">
-
-    <div>
-
-        <strong>
-            OLYMP Government
-        </strong>
-
-        <span>
-            Державний портал
-        </span>
-
-    </div>
-
-
-    <div>
-        © 2026 OLYMP Government
-    </div>
-
-</footer>
-
-
-
 <script src="cabinet.js"></script>
+
 
 </body>
 
