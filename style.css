@@ -107,18 +107,15 @@ button {
     z-index: 1000;
 
     background: rgba(7, 21, 37, 0.96);
-
     backdrop-filter: blur(12px);
 
-    border-bottom:
-        1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
     transition: 0.3s;
 }
 
 .header.scrolled {
-    box-shadow:
-        0 8px 30px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
 }
 
 .nav {
@@ -230,8 +227,7 @@ button {
     right: -200px;
     top: -150px;
 
-    border:
-        1px solid rgba(201, 164, 92, 0.2);
+    border: 1px solid rgba(201, 164, 92, 0.2);
 }
 
 .hero::after {
@@ -247,8 +243,7 @@ button {
     right: -100px;
     top: -50px;
 
-    border:
-        1px solid rgba(201, 164, 92, 0.15);
+    border: 1px solid rgba(201, 164, 92, 0.15);
 }
 
 .hero-overlay {
@@ -286,11 +281,9 @@ button {
 .hero h1 {
     max-width: 800px;
 
-    font-size:
-        clamp(48px, 7vw, 86px);
+    font-size: clamp(48px, 7vw, 86px);
 
     line-height: 0.95;
-
     letter-spacing: -3px;
 
     margin-bottom: 28px;
@@ -351,11 +344,9 @@ button {
 }
 
 .btn-outline {
-    border:
-        1px solid rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.35);
 
     color: white;
-
     background: transparent;
 }
 
@@ -377,8 +368,7 @@ button {
 .statistics {
     background: white;
 
-    border-bottom:
-        1px solid var(--border);
+    border-bottom: 1px solid var(--border);
 }
 
 .statistics-grid {
@@ -393,8 +383,7 @@ button {
 
     text-align: center;
 
-    border-right:
-        1px solid var(--border);
+    border-right: 1px solid var(--border);
 }
 
 .stat:last-child {
@@ -439,8 +428,7 @@ button {
 }
 
 .section-heading h2 {
-    font-size:
-        clamp(32px, 5vw, 48px);
+    font-size: clamp(32px, 5vw, 48px);
 
     line-height: 1.1;
 
@@ -478,8 +466,7 @@ button {
 .government-card {
     background: var(--navy-light);
 
-    border:
-        1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .person-placeholder {
@@ -502,11 +489,13 @@ button {
     color: var(--gold);
 
     font-size: 10px;
+
     letter-spacing: 2px;
 }
 
 .person-info h3 {
     font-size: 22px;
+
     margin: 8px 0;
 }
 
@@ -542,8 +531,7 @@ button {
 
     background: white;
 
-    border:
-        1px solid var(--border);
+    border: 1px solid var(--border);
 
     padding: 0 18px;
 
@@ -565,11 +553,13 @@ button {
     outline: none;
 
     font-size: 15px;
+
     color: var(--text);
 }
 
 .search-box button {
     border: none;
+
     background: transparent;
 
     color: #8994a2;
@@ -596,8 +586,7 @@ button {
 .category-btn {
     padding: 9px 15px;
 
-    border:
-        1px solid var(--border);
+    border: 1px solid var(--border);
 
     background: white;
 
@@ -642,8 +631,7 @@ button {
 
     background: white;
 
-    border:
-        1px solid var(--border);
+    border: 1px solid var(--border);
 
     transition:
         transform 0.3s,
@@ -688,6 +676,7 @@ button {
     color: var(--blue);
 
     font-size: 9px;
+
     font-weight: 700;
 
     letter-spacing: 1.5px;
@@ -697,6 +686,7 @@ button {
 
 .service-content h3 {
     font-size: 19px;
+
     margin-bottom: 8px;
 }
 
@@ -718,6 +708,7 @@ button {
     color: var(--blue);
 
     font-size: 13px;
+
     font-weight: 700;
 
     padding: 0;
@@ -784,6 +775,7 @@ button {
     display: flex;
 
     align-items: center;
+
     justify-content: space-between;
 
     gap: 40px;
@@ -793,6 +785,7 @@ button {
     color: var(--gold);
 
     font-size: 10px;
+
     letter-spacing: 2px;
 
     font-weight: 700;
@@ -827,8 +820,7 @@ button {
 .law-card {
     background: white;
 
-    border:
-        1px solid var(--border);
+    border: 1px solid var(--border);
 
     padding: 30px;
 
@@ -851,6 +843,7 @@ button {
 
 .law-card span {
     color: var(--blue);
+
     font-size: 13px;
 }
 
@@ -869,8 +862,7 @@ button {
 }
 
 .news-card {
-    border:
-        1px solid var(--border);
+    border: 1px solid var(--border);
 
     padding: 28px;
 
@@ -887,6 +879,7 @@ button {
     color: var(--blue);
 
     font-size: 12px;
+
     font-weight: 700;
 
     margin-bottom: 15px;
@@ -908,6 +901,7 @@ button {
     color: var(--blue);
 
     font-size: 13px;
+
     font-weight: 700;
 }
 
@@ -930,8 +924,7 @@ button {
 
     background: var(--navy-light);
 
-    border:
-        1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 
     transition:
         transform 0.25s,
@@ -1031,6 +1024,7 @@ button {
     display: flex;
 
     align-items: center;
+
     justify-content: space-between;
 
     gap: 30px;
@@ -1195,8 +1189,7 @@ button {
 .modal-content {
     position: relative;
 
-    width:
-        min(560px, 100%);
+    width: min(560px, 100%);
 
     max-height: 90vh;
 
@@ -1321,12 +1314,11 @@ button {
 
 
 /* =====================================================
-   FORM
+   APPLICATION FORM
 ===================================================== */
 
 .application-modal {
-    width:
-        min(620px, 100%);
+    width: min(620px, 100%);
 }
 
 .form-group {
@@ -1422,6 +1414,7 @@ button {
     justify-content: center;
 
     font-size: 48px;
+
     font-weight: 400;
 }
 
@@ -1455,15 +1448,11 @@ button {
     font-weight: 700;
 }
 
-
-/* =====================================================
-   APPLICATION STATUS
-===================================================== */
-
 .application-status {
     display: inline-flex;
 
     align-items: center;
+
     justify-content: center;
 
     gap: 10px;
@@ -1487,18 +1476,26 @@ button {
     font-weight: 600;
 }
 
+
+/* =====================================================
+   MAIN STATUS BADGES
+===================================================== */
+
 .status-badge {
     display: inline-flex;
 
     align-items: center;
+    justify-content: center;
 
-    padding: 6px 12px;
+    padding: 7px 12px;
 
     border-radius: 999px;
 
-    font-size: 14px;
+    font-size: 13px;
 
     font-weight: 700;
+
+    white-space: nowrap;
 }
 
 .status-badge.pending,
@@ -1506,6 +1503,34 @@ button {
     background: #fff7cc;
 
     color: #9a7500;
+}
+
+.status-badge.accepted,
+.status-accepted {
+    background: #e6f0ff;
+
+    color: #175cd3;
+}
+
+.status-badge.completed,
+.status-completed {
+    background: #dcfce7;
+
+    color: #15803d;
+}
+
+.status-badge.rejected,
+.status-rejected {
+    background: #fee2e2;
+
+    color: #b42318;
+}
+
+.status-badge.closed,
+.status-closed {
+    background: #e5e7eb;
+
+    color: #374151;
 }
 
 
@@ -1532,22 +1557,17 @@ button {
 }
 
 
-/* =========================================================
+/* =====================================================
+   =====================================================
    OLYMP GOVERNMENT
    PERSONAL CABINET
-========================================================= */
-
-/*
-   ВАЖНО:
-   Этот блок находится ВНЕ мобильного @media.
-   Поэтому личный кабинет работает на ПК,
-   планшете и телефоне.
-*/
+   =====================================================
+===================================================== */
 
 
-/* =========================================================
+/* =====================================================
    CABINET HEADER
-========================================================= */
+===================================================== */
 
 .cabinet-header {
     position: sticky;
@@ -1557,7 +1577,7 @@ button {
     z-index: 1000;
 
     background:
-        rgba(7, 21, 37, 0.96);
+        rgba(7, 21, 37, 0.97);
 
     backdrop-filter: blur(18px);
 
@@ -1566,11 +1586,11 @@ button {
 }
 
 .header-inner {
-    max-width: 1250px;
+    width: min(1250px, 94%);
 
     margin: 0 auto;
 
-    padding: 18px 24px;
+    padding: 18px 0;
 
     display: flex;
 
@@ -1580,6 +1600,11 @@ button {
 
     gap: 30px;
 }
+
+
+/* =====================================================
+   CABINET BRAND
+===================================================== */
 
 .brand {
     display: flex;
@@ -1598,7 +1623,7 @@ button {
     height: 42px;
 
     border:
-        2px solid #ffffff;
+        2px solid var(--gold);
 
     border-radius: 50%;
 
@@ -1610,6 +1635,8 @@ button {
     font-weight: 800;
 
     font-size: 20px;
+
+    color: var(--gold);
 }
 
 .brand-text {
@@ -1622,6 +1649,8 @@ button {
     font-size: 17px;
 
     letter-spacing: 2px;
+
+    color: white;
 }
 
 .brand-text span {
@@ -1630,7 +1659,14 @@ button {
     letter-spacing: 2px;
 
     opacity: 0.65;
+
+    color: #dce3eb;
 }
+
+
+/* =====================================================
+   CABINET NAVIGATION
+===================================================== */
 
 .cabinet-nav {
     display: flex;
@@ -1661,9 +1697,9 @@ button {
 }
 
 
-/* =========================================================
+/* =====================================================
    CABINET MAIN
-========================================================= */
+===================================================== */
 
 .cabinet-main {
     min-height:
@@ -1680,11 +1716,13 @@ button {
 }
 
 
-/* =========================================================
+/* =====================================================
    LOGIN
-========================================================= */
+===================================================== */
 
 .login-section {
+    width: 100%;
+
     max-width: 520px;
 
     margin: 30px auto;
@@ -1712,7 +1750,7 @@ button {
 
     border-radius: 18px;
 
-    background: #071525;
+    background: var(--navy);
 
     color: white;
 
@@ -1743,6 +1781,8 @@ button {
     color: #071525;
 
     font-size: 32px;
+
+    line-height: 1.2;
 }
 
 .login-description {
@@ -1753,6 +1793,11 @@ button {
     margin: 15px 0 30px;
 }
 
+
+/* =====================================================
+   LOGIN FORM
+===================================================== */
+
 .login-form {
     display: flex;
 
@@ -1761,35 +1806,12 @@ button {
     gap: 18px;
 }
 
-
-/* =========================================================
-   CABINET FORM
-========================================================= */
-
 .login-form .form-group {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 8px;
-
-    margin-bottom: 0;
-}
-
-.login-form .form-group label {
-    font-size: 14px;
-
-    font-weight: 700;
-
-    color: #273444;
-
     margin-bottom: 0;
 }
 
 .login-form .form-group input {
     width: 100%;
-
-    box-sizing: border-box;
 
     padding: 15px 16px;
 
@@ -1806,7 +1828,7 @@ button {
 }
 
 .login-form .form-group input:focus {
-    border-color: #071525;
+    border-color: var(--navy);
 
     box-shadow:
         0 0 0 3px rgba(7, 21, 37, 0.08);
@@ -1817,7 +1839,7 @@ button {
 
     border-radius: 10px;
 
-    background: #071525;
+    background: var(--navy);
 
     color: white;
 
@@ -1889,12 +1911,12 @@ button {
 }
 
 
-/* =========================================================
-   CABINET
-========================================================= */
+/* =====================================================
+   CABINET SECTION
+===================================================== */
 
 .cabinet-section {
-    max-width: 1250px;
+    width: min(1250px, 100%);
 
     margin: 0 auto;
 }
@@ -1916,6 +1938,11 @@ button {
 
     color: #667085;
 }
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
 
 .logout-button {
     border:
@@ -1943,9 +1970,9 @@ button {
 }
 
 
-/* =========================================================
-   CARDS
-========================================================= */
+/* =====================================================
+   PROFILE CARD
+===================================================== */
 
 .profile-card,
 .application-card {
@@ -1958,6 +1985,8 @@ button {
 
     box-shadow:
         0 12px 35px rgba(7, 21, 37, 0.06);
+
+    overflow: hidden;
 }
 
 .profile-card {
@@ -2001,7 +2030,7 @@ button {
 
     border-radius: 14px;
 
-    background: #071525;
+    background: var(--navy);
 
     color: white;
 
@@ -2012,6 +2041,11 @@ button {
 
     font-size: 23px;
 }
+
+
+/* =====================================================
+   PROFILE GRID
+===================================================== */
 
 .profile-grid {
     display: grid;
@@ -2055,31 +2089,34 @@ button {
 }
 
 
-/* =========================================================
+/* =====================================================
    APPLICATIONS
-========================================================= */
+===================================================== */
 
 .applications-section {
     margin-top: 35px;
 }
 
-.applications-section .section-heading {
+.applications-section > .section-heading {
     margin-bottom: 16px;
 }
 
-.applications-section .section-heading h2 {
-    font-size: 23px;
-
-    margin: 4px 0 0;
+.applications-section > .section-heading h2 {
+    font-size: 27px;
 
     color: #071525;
+
+    margin: 0;
 }
 
 .application-card {
-    overflow: hidden;
-
     margin-bottom: 20px;
 }
+
+
+/* =====================================================
+   APPLICATION TOP
+===================================================== */
 
 .application-top {
     display: flex;
@@ -2147,47 +2184,10 @@ button {
     background: #f5f7fa;
 }
 
-.application-status-badge {
-    padding: 9px 14px;
 
-    border-radius: 999px;
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    white-space: nowrap;
-}
-
-.status-pending {
-    background: #fff4c2;
-
-    color: #8a6500;
-}
-
-.status-accepted {
-    background: #e6f0ff;
-
-    color: #175cd3;
-}
-
-.status-completed {
-    background: #dcfce7;
-
-    color: #15803d;
-}
-
-.status-rejected {
-    background: #fee2e2;
-
-    color: #b42318;
-}
-
-.status-closed {
-    background: #e5e7eb;
-
-    color: #374151;
-}
+/* =====================================================
+   APPLICATION GRID
+===================================================== */
 
 .application-grid {
     display: grid;
@@ -2203,6 +2203,11 @@ button {
 .application-grid .info-item {
     min-height: 90px;
 }
+
+
+/* =====================================================
+   APPLICATION BLOCK
+===================================================== */
 
 .application-block {
     padding: 24px 30px;
@@ -2247,9 +2252,9 @@ button {
 }
 
 
-/* =========================================================
-   EMPTY APPLICATIONS
-========================================================= */
+/* =====================================================
+   HISTORY
+===================================================== */
 
 .history-empty {
     background: white;
@@ -2290,9 +2295,9 @@ button {
 }
 
 
-/* =========================================================
+/* =====================================================
    SECURITY
-========================================================= */
+===================================================== */
 
 .security-notice {
     margin-top: 35px;
@@ -2332,9 +2337,9 @@ button {
 }
 
 
-/* =========================================================
+/* =====================================================
    LOADING
-========================================================= */
+===================================================== */
 
 .loading-overlay {
     position: fixed;
@@ -2390,7 +2395,7 @@ button {
     border:
         4px solid #e6e9ed;
 
-    border-top-color: #071525;
+    border-top-color: var(--navy);
 
     border-radius: 50%;
 
@@ -2428,9 +2433,9 @@ button {
 }
 
 
-/* =========================================================
+/* =====================================================
    TOAST
-========================================================= */
+===================================================== */
 
 .toast {
     position: fixed;
@@ -2440,7 +2445,7 @@ button {
 
     z-index: 6000;
 
-    background: #071525;
+    background: var(--navy);
 
     color: white;
 
@@ -2479,9 +2484,9 @@ button {
 }
 
 
-/* =========================================================
+/* =====================================================
    CABINET FOOTER
-========================================================= */
+===================================================== */
 
 .cabinet-footer {
     background: #071525;
@@ -2573,57 +2578,35 @@ button {
         grid-template-columns:
             repeat(2, 1fr);
     }
-
-    .application-banner-content {
-        flex-direction: column;
-
-        align-items: flex-start;
-    }
 }
 
 
 /* =====================================================
-   CABINET RESPONSIVE
+   CONTACTS RESPONSIVE
 ===================================================== */
 
-@media (max-width: 850px) {
+@media (max-width: 700px) {
 
-    .header-inner {
-        padding: 15px;
+    .contacts-grid {
+        grid-template-columns: 1fr;
     }
 
-    .cabinet-nav {
-        display: none;
-    }
+    .contacts-bottom {
+        flex-direction: column;
 
-    .cabinet-main {
-        padding: 40px 15px;
-    }
-
-    .profile-grid {
-        grid-template-columns:
-            repeat(2, 1fr);
-    }
-
-    .application-grid {
-        grid-template-columns:
-            repeat(2, 1fr);
-    }
-
-    .cabinet-title-row {
         align-items: flex-start;
 
-        flex-direction: column;
+        padding: 25px;
     }
 
-    .logout-button {
+    .contacts-bottom .btn {
         width: 100%;
     }
 }
 
 
 /* =====================================================
-   700 PX
+   MAIN MOBILE
 ===================================================== */
 
 @media (max-width: 700px) {
@@ -2650,24 +2633,14 @@ button {
         grid-template-columns: 1fr;
     }
 
-    .laws-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .contacts-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .contacts-bottom {
+    .application-banner-content {
         flex-direction: column;
 
         align-items: flex-start;
-
-        padding: 25px;
     }
 
-    .contacts-bottom .btn {
-        width: 100%;
+    .laws-grid {
+        grid-template-columns: 1fr;
     }
 
     .footer-content {
@@ -2677,10 +2650,10 @@ button {
 
 
 /* =====================================================
-   600 PX
+   SMALL MOBILE
 ===================================================== */
 
-@media (max-width: 600px) {
+@media (max-width: 500px) {
 
     .section {
         padding: 70px 0;
@@ -2705,40 +2678,65 @@ button {
     .category-btn {
         font-size: 11px;
 
-        padding: 8px 10px;
+        padding:
+            8px 10px;
+    }
+}
+
+
+/* =====================================================
+   CABINET RESPONSIVE
+===================================================== */
+
+@media (max-width: 850px) {
+
+    .header-inner {
+        width: 100%;
+
+        padding:
+            15px 20px;
     }
 
-    .success-icon {
-        width: 72px;
-        height: 72px;
-
-        font-size: 40px;
-
-        margin-bottom: 22px;
+    .cabinet-nav {
+        display: none;
     }
 
-    .success-message h3 {
-        font-size: 25px;
+    .cabinet-main {
+        padding:
+            40px 15px;
     }
 
-    .success-message p {
-        font-size: 16px;
+    .profile-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
     }
 
-    .application-status {
+    .application-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .cabinet-title-row {
+        align-items: flex-start;
+
         flex-direction: column;
-
-        gap: 6px;
-
-        width: fit-content;
-
-        padding: 12px 18px;
     }
 
-    /* CABINET */
+    .logout-button {
+        width: 100%;
+    }
+}
+
+
+/* =====================================================
+   CABINET MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
 
     .login-container {
-        padding: 28px 20px;
+        padding:
+            28px 20px;
     }
 
     .login-container h1,
@@ -2752,11 +2750,13 @@ button {
     }
 
     .card-header {
-        padding: 22px 20px;
+        padding:
+            22px 20px;
     }
 
     .application-top {
-        padding: 22px 20px;
+        padding:
+            22px 20px;
 
         flex-direction: column;
 
@@ -2764,7 +2764,8 @@ button {
     }
 
     .application-block {
-        padding: 20px;
+        padding:
+            20px;
     }
 
     .application-number-row {
@@ -2783,44 +2784,12 @@ button {
 
     .toast {
         left: 15px;
+
         right: 15px;
+
         bottom: 15px;
 
         text-align: center;
-    }
-}
-
-
-/* =====================================================
-   500 PX
-===================================================== */
-
-@media (max-width: 500px) {
-
-    .hero h1 {
-        font-size: 45px;
-    }
-
-    .hero p {
-        font-size: 16px;
-    }
-
-    .modal-content {
-        padding: 30px 22px;
-    }
-
-    .category-buttons {
-        gap: 6px;
-    }
-
-    .category-btn {
-        font-size: 11px;
-
-        padding: 8px 10px;
-    }
-
-    .header-inner {
-        gap: 15px;
     }
 
     .brand-text strong {
@@ -2831,11 +2800,15 @@ button {
         font-size: 8px;
     }
 
-    .cabinet-main {
-        padding: 30px 12px;
+    .brand-emblem {
+        width: 38px;
+        height: 38px;
+
+        font-size: 17px;
     }
 
-    .application-number-row strong {
-        font-size: 19px;
+    .cabinet-main {
+        padding:
+            30px 12px;
     }
 }
