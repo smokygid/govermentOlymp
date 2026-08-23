@@ -24,7 +24,7 @@
 ========================================================= */
 
 const CABINET_API_URL =
-    "ВСТАВЬ_СЮДА_URL_ТВОЕГО_GOOGLE_APPS_SCRIPT";
+    "https://script.google.com/macros/s/AKfycbzET7X9XsoUnCZlhGv8YEiv1NAoCmu13U4AP3WMlmo5sFXiwlBKhfLkXBfQKcFJh-RGog/exec";
 
 
 /* =========================================================
