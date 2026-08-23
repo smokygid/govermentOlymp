@@ -45,7 +45,6 @@ button {
 ===================================================== */
 
 :root {
-
     --navy: #071525;
     --navy-light: #0d2037;
     --navy-soft: #102b47;
@@ -66,7 +65,6 @@ button {
 
     --shadow:
         0 15px 40px rgba(7, 21, 37, 0.08);
-
 }
 
 
@@ -92,148 +90,108 @@ button {
     background: var(--light);
 }
 
+.hidden {
+    display: none !important;
+}
+
 
 /* =====================================================
    HEADER
 ===================================================== */
 
 .header {
-
     position: fixed;
-
     top: 0;
     left: 0;
-
     width: 100%;
-
     z-index: 1000;
 
-    background:
-        rgba(7, 21, 37, 0.96);
+    background: rgba(7, 21, 37, 0.96);
 
     backdrop-filter: blur(12px);
 
     border-bottom:
-        1px solid rgba(255,255,255,0.08);
+        1px solid rgba(255, 255, 255, 0.08);
 
     transition: 0.3s;
-
 }
 
 .header.scrolled {
     box-shadow:
-        0 8px 30px rgba(0,0,0,0.25);
+        0 8px 30px rgba(0, 0, 0, 0.25);
 }
 
 .nav {
-
     height: 78px;
 
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
 }
 
 .logo {
-
     display: flex;
-
     align-items: center;
-
     gap: 12px;
-
     color: white;
-
 }
 
 .logo-symbol {
-
     width: 42px;
     height: 42px;
 
-    border:
-        2px solid var(--gold);
+    border: 2px solid var(--gold);
 
     display: flex;
-
     align-items: center;
     justify-content: center;
 
     font-size: 22px;
-
     font-weight: 700;
 
     color: var(--gold);
-
 }
 
 .logo-text {
-
     display: flex;
-
     flex-direction: column;
-
     line-height: 1.1;
-
 }
 
 .logo-text strong {
-
     font-size: 18px;
-
     letter-spacing: 2px;
-
 }
 
 .logo-text span {
-
     font-size: 9px;
-
     color: #9da9b8;
-
     letter-spacing: 1.5px;
-
 }
 
 .menu {
-
     display: flex;
-
     gap: 28px;
-
 }
 
 .menu a {
-
     color: #dfe6ef;
-
     font-size: 14px;
-
     transition: 0.25s;
-
 }
 
 .menu a:hover {
-
     color: var(--gold);
-
 }
 
 .menu-button {
-
     display: none;
 
     border: none;
-
     background: transparent;
 
     color: white;
-
     font-size: 26px;
-
 }
 
 
@@ -242,13 +200,11 @@ button {
 ===================================================== */
 
 .hero {
-
     min-height: 720px;
 
     position: relative;
 
     display: flex;
-
     align-items: center;
 
     background:
@@ -259,11 +215,9 @@ button {
         );
 
     overflow: hidden;
-
 }
 
 .hero::before {
-
     content: "";
 
     position: absolute;
@@ -277,12 +231,10 @@ button {
     top: -150px;
 
     border:
-        1px solid rgba(201,164,92,0.2);
-
+        1px solid rgba(201, 164, 92, 0.2);
 }
 
 .hero::after {
-
     content: "";
 
     position: absolute;
@@ -296,53 +248,42 @@ button {
     top: -50px;
 
     border:
-        1px solid rgba(201,164,92,0.15);
-
+        1px solid rgba(201, 164, 92, 0.15);
 }
 
 .hero-overlay {
-
     position: absolute;
-
     inset: 0;
 
     background:
         linear-gradient(
             90deg,
-            rgba(7,21,37,0.95),
-            rgba(7,21,37,0.45)
+            rgba(7, 21, 37, 0.95),
+            rgba(7, 21, 37, 0.45)
         );
-
 }
 
 .hero-content {
-
     position: relative;
-
     z-index: 2;
 
     color: white;
 
     padding-top: 80px;
-
 }
 
 .hero-label {
-
     display: inline-block;
 
     color: var(--gold);
 
     font-size: 12px;
-
     letter-spacing: 3px;
 
     margin-bottom: 20px;
-
 }
 
 .hero h1 {
-
     max-width: 800px;
 
     font-size:
@@ -353,19 +294,14 @@ button {
     letter-spacing: -3px;
 
     margin-bottom: 28px;
-
 }
 
 .hero h1 span {
-
     display: block;
-
     color: var(--gold);
-
 }
 
 .hero p {
-
     max-width: 600px;
 
     color: #c4ceda;
@@ -373,17 +309,12 @@ button {
     font-size: 19px;
 
     margin-bottom: 38px;
-
 }
 
 .hero-buttons {
-
     display: flex;
-
     gap: 14px;
-
     flex-wrap: wrap;
-
 }
 
 
@@ -392,7 +323,6 @@ button {
 ===================================================== */
 
 .btn {
-
     display: inline-flex;
 
     align-items: center;
@@ -403,56 +333,40 @@ button {
     border-radius: 4px;
 
     font-size: 14px;
-
     font-weight: 700;
 
     transition: 0.25s;
 
     border: none;
-
 }
 
 .btn-primary {
-
     background: var(--blue);
-
     color: white;
-
 }
 
 .btn-primary:hover {
-
     background: var(--blue-dark);
-
     transform: translateY(-2px);
-
 }
 
 .btn-outline {
-
     border:
-        1px solid rgba(255,255,255,0.35);
+        1px solid rgba(255, 255, 255, 0.35);
 
     color: white;
 
     background: transparent;
-
 }
 
 .btn-outline:hover {
-
     background: white;
-
     color: var(--navy);
-
 }
 
 .btn-light {
-
     background: var(--light);
-
     color: var(--text);
-
 }
 
 
@@ -461,32 +375,26 @@ button {
 ===================================================== */
 
 .statistics {
-
     background: white;
 
     border-bottom:
         1px solid var(--border);
-
 }
 
 .statistics-grid {
-
     display: grid;
 
     grid-template-columns:
         repeat(4, 1fr);
-
 }
 
 .stat {
-
     padding: 30px 20px;
 
     text-align: center;
 
     border-right:
         1px solid var(--border);
-
 }
 
 .stat:last-child {
@@ -494,7 +402,6 @@ button {
 }
 
 .stat strong {
-
     display: block;
 
     color: var(--navy);
@@ -502,15 +409,11 @@ button {
     font-size: 30px;
 
     margin-bottom: 4px;
-
 }
 
 .stat span {
-
     color: var(--muted);
-
     font-size: 12px;
-
 }
 
 
@@ -519,56 +422,43 @@ button {
 ===================================================== */
 
 .section-heading {
-
     margin-bottom: 50px;
-
 }
 
 .section-heading > span {
-
     display: block;
 
     color: var(--blue);
 
     font-size: 11px;
-
     font-weight: 700;
 
     letter-spacing: 2px;
 
     margin-bottom: 10px;
-
 }
 
 .section-heading h2 {
-
     font-size:
         clamp(32px, 5vw, 48px);
 
     line-height: 1.1;
 
     margin-bottom: 14px;
-
 }
 
 .section-heading p {
-
     color: var(--muted);
 
     max-width: 650px;
-
 }
 
 .section-heading.light > span {
-
     color: var(--gold);
-
 }
 
 .section-heading.light p {
-
     color: #9caabb;
-
 }
 
 
@@ -577,80 +467,60 @@ button {
 ===================================================== */
 
 .government-grid {
-
     display: grid;
 
     grid-template-columns:
         repeat(3, 1fr);
 
     gap: 20px;
-
 }
 
 .government-card {
-
     background: var(--navy-light);
 
     border:
-        1px solid rgba(255,255,255,0.08);
-
+        1px solid rgba(255, 255, 255, 0.08);
 }
 
 .person-placeholder {
-
     height: 230px;
 
     display: flex;
-
     align-items: center;
     justify-content: center;
 
     background: var(--navy-soft);
 
     font-size: 60px;
-
 }
 
 .person-info {
-
     padding: 25px;
-
 }
 
 .person-info small {
-
     color: var(--gold);
 
     font-size: 10px;
-
     letter-spacing: 2px;
-
 }
 
 .person-info h3 {
-
     font-size: 22px;
-
     margin: 8px 0;
-
 }
 
 .person-info p {
-
     color: #9caabb;
 
     font-size: 14px;
 
     margin-bottom: 18px;
-
 }
 
 .text-link {
-
     color: var(--gold);
-
     font-size: 13px;
-
 }
 
 
@@ -659,17 +529,13 @@ button {
 ===================================================== */
 
 .services-search {
-
     margin-bottom: 35px;
-
 }
 
 .search-box {
-
     position: relative;
 
     display: flex;
-
     align-items: center;
 
     gap: 12px;
@@ -684,36 +550,26 @@ button {
     height: 58px;
 
     box-shadow:
-        0 5px 20px rgba(7,21,37,0.04);
-
+        0 5px 20px rgba(7, 21, 37, 0.04);
 }
 
 .search-box > span {
-
     font-size: 20px;
-
 }
 
 .search-box input {
-
     width: 100%;
-
     height: 100%;
 
     border: none;
-
     outline: none;
 
     font-size: 15px;
-
     color: var(--text);
-
 }
 
 .search-box button {
-
     border: none;
-
     background: transparent;
 
     color: #8994a2;
@@ -721,17 +577,13 @@ button {
     font-size: 24px;
 
     display: none;
-
 }
 
 .search-box button.visible {
-
     display: block;
-
 }
 
 .category-buttons {
-
     display: flex;
 
     gap: 8px;
@@ -739,11 +591,9 @@ button {
     flex-wrap: wrap;
 
     margin-top: 15px;
-
 }
 
 .category-btn {
-
     padding: 9px 15px;
 
     border:
@@ -758,25 +608,19 @@ button {
     border-radius: 3px;
 
     transition: 0.2s;
-
 }
 
 .category-btn:hover {
-
     border-color: var(--blue);
-
     color: var(--blue);
-
 }
 
 .category-btn.active {
-
     background: var(--blue);
 
     color: white;
 
     border-color: var(--blue);
-
 }
 
 
@@ -785,18 +629,15 @@ button {
 ===================================================== */
 
 .services-grid-full {
-
     display: grid;
 
     grid-template-columns:
         repeat(3, 1fr);
 
     gap: 18px;
-
 }
 
 .service-card {
-
     position: relative;
 
     background: white;
@@ -805,26 +646,21 @@ button {
         1px solid var(--border);
 
     transition:
-        transform .3s,
-        box-shadow .3s,
-        border-color .3s;
-
+        transform 0.3s,
+        box-shadow 0.3s,
+        border-color 0.3s;
 }
 
 .service-card:hover {
-
     transform: translateY(-5px);
 
     border-color: var(--blue);
 
     box-shadow: var(--shadow);
-
 }
 
 .service-icon {
-
     width: 100%;
-
     height: 130px;
 
     background:
@@ -840,41 +676,31 @@ button {
     justify-content: center;
 
     font-size: 42px;
-
 }
 
 .service-content {
-
     padding: 25px;
-
 }
 
 .service-category {
-
     display: inline-block;
 
     color: var(--blue);
 
     font-size: 9px;
-
     font-weight: 700;
 
     letter-spacing: 1.5px;
 
     margin-bottom: 7px;
-
 }
 
 .service-content h3 {
-
     font-size: 19px;
-
     margin-bottom: 8px;
-
 }
 
 .service-content p {
-
     color: var(--muted);
 
     font-size: 13px;
@@ -882,11 +708,9 @@ button {
     min-height: 42px;
 
     margin-bottom: 18px;
-
 }
 
 .service-button {
-
     border: none;
 
     background: transparent;
@@ -894,23 +718,17 @@ button {
     color: var(--blue);
 
     font-size: 13px;
-
     font-weight: 700;
 
     padding: 0;
-
 }
 
 .service-button:hover {
-
     color: var(--blue-dark);
-
 }
 
 .service-item.hidden {
-
     display: none;
-
 }
 
 
@@ -919,39 +737,29 @@ button {
 ===================================================== */
 
 .no-results {
-
     display: none;
 
     text-align: center;
 
     padding: 60px 20px;
-
 }
 
 .no-results.visible {
-
     display: block;
-
 }
 
 .no-results > div {
-
     font-size: 45px;
 
     margin-bottom: 15px;
-
 }
 
 .no-results h3 {
-
     margin-bottom: 7px;
-
 }
 
 .no-results p {
-
     color: var(--muted);
-
 }
 
 
@@ -960,7 +768,6 @@ button {
 ===================================================== */
 
 .application-banner {
-
     padding: 70px 0;
 
     background:
@@ -971,47 +778,36 @@ button {
         );
 
     color: white;
-
 }
 
 .application-banner-content {
-
     display: flex;
 
     align-items: center;
-
     justify-content: space-between;
 
     gap: 40px;
-
 }
 
 .application-banner span {
-
     color: var(--gold);
 
     font-size: 10px;
-
     letter-spacing: 2px;
 
     font-weight: 700;
-
 }
 
 .application-banner h2 {
-
     font-size: 32px;
 
     margin: 8px 0;
-
 }
 
 .application-banner p {
-
     color: #9eacbc;
 
     max-width: 650px;
-
 }
 
 
@@ -1020,18 +816,15 @@ button {
 ===================================================== */
 
 .laws-grid {
-
     display: grid;
 
     grid-template-columns:
         repeat(4, 1fr);
 
     gap: 15px;
-
 }
 
 .law-card {
-
     background: white;
 
     border:
@@ -1040,35 +833,25 @@ button {
     padding: 30px;
 
     transition: 0.25s;
-
 }
 
 .law-card:hover {
-
     transform: translateY(-4px);
 
     border-color: var(--blue);
-
 }
 
 .law-card strong {
-
     font-size: 30px;
-
 }
 
 .law-card h3 {
-
     margin: 20px 0;
-
 }
 
 .law-card span {
-
     color: var(--blue);
-
     font-size: 13px;
-
 }
 
 
@@ -1077,71 +860,55 @@ button {
 ===================================================== */
 
 .news-grid {
-
     display: grid;
 
     grid-template-columns:
         repeat(3, 1fr);
 
     gap: 20px;
-
 }
 
 .news-card {
-
     border:
         1px solid var(--border);
 
     padding: 28px;
 
-    transition: .25s;
-
+    transition: 0.25s;
 }
 
 .news-card:hover {
-
     box-shadow: var(--shadow);
 
     transform: translateY(-3px);
-
 }
 
 .news-date {
-
     color: var(--blue);
 
     font-size: 12px;
-
     font-weight: 700;
 
     margin-bottom: 15px;
-
 }
 
 .news-card h3 {
-
     margin-bottom: 12px;
-
 }
 
 .news-card p {
-
     color: var(--muted);
 
     font-size: 14px;
 
     margin-bottom: 20px;
-
 }
 
 .news-card a {
-
     color: var(--blue);
 
     font-size: 13px;
-
     font-weight: 700;
-
 }
 
 
@@ -1150,46 +917,39 @@ button {
 ===================================================== */
 
 .contacts-grid {
-
     display: grid;
 
     grid-template-columns:
         repeat(3, 1fr);
 
     gap: 18px;
-
 }
 
 .contact-card {
-
     padding: 30px;
 
     background: var(--navy-light);
 
     border:
-        1px solid rgba(255,255,255,0.08);
+        1px solid rgba(255, 255, 255, 0.08);
 
     transition:
-        transform .25s,
-        border-color .25s,
-        box-shadow .25s;
-
+        transform 0.25s,
+        border-color 0.25s,
+        box-shadow 0.25s;
 }
 
 .contact-card:hover {
-
     transform: translateY(-4px);
 
     border-color:
-        rgba(201,164,92,0.45);
+        rgba(201, 164, 92, 0.45);
 
     box-shadow:
-        0 15px 35px rgba(0,0,0,0.15);
-
+        0 15px 35px rgba(0, 0, 0, 0.15);
 }
 
 .contact-icon {
-
     width: 58px;
     height: 58px;
 
@@ -1199,29 +959,25 @@ button {
     justify-content: center;
 
     background:
-        rgba(201,164,92,0.08);
+        rgba(201, 164, 92, 0.08);
 
     border:
-        1px solid rgba(201,164,92,0.18);
+        1px solid rgba(201, 164, 92, 0.18);
 
     font-size: 28px;
 
     margin-bottom: 20px;
-
 }
 
 .contact-card h3 {
-
     font-size: 20px;
 
     margin-bottom: 10px;
 
     color: white;
-
 }
 
 .contact-card p {
-
     color: #9caabb;
 
     font-size: 14px;
@@ -1229,11 +985,9 @@ button {
     line-height: 1.6;
 
     margin-bottom: 18px;
-
 }
 
 .contact-info {
-
     display: flex;
 
     flex-direction: column;
@@ -1241,19 +995,15 @@ button {
     gap: 7px;
 
     margin-bottom: 22px;
-
 }
 
 .contact-info span {
-
     color: #aeb9c7;
 
     font-size: 12px;
-
 }
 
 .contact-card .service-button {
-
     display: inline-block;
 
     border: none;
@@ -1267,17 +1017,13 @@ button {
     font-weight: 700;
 
     padding: 0;
-
 }
 
 .contact-card .service-button:hover {
-
     color: var(--gold-light);
-
 }
 
 .contacts-bottom {
-
     margin-top: 35px;
 
     padding: 30px 35px;
@@ -1285,21 +1031,18 @@ button {
     display: flex;
 
     align-items: center;
-
     justify-content: space-between;
 
     gap: 30px;
 
     background:
-        rgba(255,255,255,0.035);
+        rgba(255, 255, 255, 0.035);
 
     border:
-        1px solid rgba(255,255,255,0.08);
-
+        1px solid rgba(255, 255, 255, 0.08);
 }
 
 .contacts-bottom span {
-
     display: block;
 
     color: var(--gold);
@@ -1311,21 +1054,17 @@ button {
     letter-spacing: 2px;
 
     margin-bottom: 7px;
-
 }
 
 .contacts-bottom h3 {
-
     color: white;
 
     font-size: 21px;
 
     margin-bottom: 7px;
-
 }
 
 .contacts-bottom p {
-
     color: #8997a8;
 
     font-size: 13px;
@@ -1333,55 +1072,10 @@ button {
     margin: 0;
 
     max-width: 650px;
-
 }
 
 .contacts-bottom .btn {
-
     flex-shrink: 0;
-
-}
-
-
-/* =====================================================
-   CONTACTS RESPONSIVE
-===================================================== */
-
-@media (max-width: 950px) {
-
-    .contacts-grid {
-
-        grid-template-columns:
-            repeat(2, 1fr);
-
-    }
-
-}
-
-@media (max-width: 700px) {
-
-    .contacts-grid {
-
-        grid-template-columns: 1fr;
-
-    }
-
-    .contacts-bottom {
-
-        flex-direction: column;
-
-        align-items: flex-start;
-
-        padding: 25px;
-
-    }
-
-    .contacts-bottom .btn {
-
-        width: 100%;
-
-    }
-
 }
 
 
@@ -1390,17 +1084,14 @@ button {
 ===================================================== */
 
 .footer {
-
     background: #040d17;
 
     color: white;
 
     padding-top: 60px;
-
 }
 
 .footer-content {
-
     display: flex;
 
     justify-content: space-between;
@@ -1408,11 +1099,9 @@ button {
     gap: 40px;
 
     padding-bottom: 50px;
-
 }
 
 .footer-logo {
-
     color: var(--gold);
 
     font-size: 24px;
@@ -1420,19 +1109,15 @@ button {
     font-weight: 800;
 
     letter-spacing: 3px;
-
 }
 
 .footer-content p {
-
     color: #7f8b99;
 
     margin-top: 8px;
-
 }
 
 .footer-links {
-
     display: flex;
 
     gap: 25px;
@@ -1440,36 +1125,29 @@ button {
     align-items: center;
 
     flex-wrap: wrap;
-
 }
 
 .footer-links a {
-
     color: #aab4c1;
 
     font-size: 13px;
-
 }
 
 .footer-links a:hover {
-
     color: var(--gold);
-
 }
 
 .copyright {
-
     padding: 20px;
 
     text-align: center;
 
     border-top:
-        1px solid rgba(255,255,255,0.06);
+        1px solid rgba(255, 255, 255, 0.06);
 
     color: #65717e;
 
     font-size: 12px;
-
 }
 
 
@@ -1478,7 +1156,6 @@ button {
 ===================================================== */
 
 .modal {
-
     position: fixed;
 
     inset: 0;
@@ -1488,29 +1165,24 @@ button {
     display: none;
 
     align-items: center;
-
     justify-content: center;
 
     padding: 20px;
 
     background:
-        rgba(0,0,0,0.72);
+        rgba(0, 0, 0, 0.72);
 
     backdrop-filter: blur(4px);
-
 }
 
 .modal.active {
-
     display: flex;
 
     animation:
-        modalFade .2s ease;
-
+        modalFade 0.2s ease;
 }
 
 @keyframes modalFade {
-
     from {
         opacity: 0;
     }
@@ -1518,11 +1190,9 @@ button {
     to {
         opacity: 1;
     }
-
 }
 
 .modal-content {
-
     position: relative;
 
     width:
@@ -1537,40 +1207,31 @@ button {
     padding: 40px;
 
     animation:
-        modalSlide .25s ease;
-
+        modalSlide 0.25s ease;
 }
 
 @keyframes modalSlide {
-
     from {
-
         opacity: 0;
 
         transform:
             translateY(20px)
-            scale(.98);
-
+            scale(0.98);
     }
 
     to {
-
         opacity: 1;
 
         transform:
             translateY(0)
             scale(1);
-
     }
-
 }
 
 .modal-close {
-
     position: absolute;
 
     top: 14px;
-
     right: 18px;
 
     border: none;
@@ -1580,17 +1241,13 @@ button {
     font-size: 28px;
 
     color: #687483;
-
 }
 
 .modal-close:hover {
-
     color: var(--text);
-
 }
 
 .modal-icon {
-
     width: 65px;
     height: 65px;
 
@@ -1604,11 +1261,9 @@ button {
     font-size: 30px;
 
     margin-bottom: 20px;
-
 }
 
 .modal-category {
-
     display: block;
 
     color: var(--blue);
@@ -1620,61 +1275,48 @@ button {
     font-weight: 700;
 
     margin-bottom: 8px;
-
 }
 
 .modal-content h2 {
-
     font-size: 30px;
 
     line-height: 1.2;
 
     margin-bottom: 12px;
-
 }
 
 .modal-description {
-
     color: var(--muted);
 
     margin-bottom: 25px;
-
 }
 
 .modal-block {
-
     padding: 18px;
 
     background: var(--light);
 
     margin-bottom: 25px;
-
 }
 
 .modal-block strong {
-
     display: block;
 
     margin-bottom: 5px;
-
 }
 
 .modal-block p {
-
     color: var(--muted);
 
     font-size: 14px;
-
 }
 
 .modal-actions {
-
     display: flex;
 
     gap: 10px;
 
     flex-wrap: wrap;
-
 }
 
 
@@ -1683,20 +1325,15 @@ button {
 ===================================================== */
 
 .application-modal {
-
     width:
         min(620px, 100%);
-
 }
 
 .form-group {
-
     margin-bottom: 17px;
-
 }
 
 .form-group label {
-
     display: block;
 
     font-size: 12px;
@@ -1704,13 +1341,11 @@ button {
     font-weight: 700;
 
     margin-bottom: 6px;
-
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-
     width: 100%;
 
     border:
@@ -1728,35 +1363,28 @@ button {
 
     border-radius: 3px;
 
-    transition: .2s;
-
+    transition: 0.2s;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-
     border-color: var(--blue);
 
     box-shadow:
-        0 0 0 3px rgba(22,119,210,.08);
-
+        0 0 0 3px rgba(22, 119, 210, 0.08);
 }
 
 .form-group textarea {
-
     resize: vertical;
 
     min-height: 100px;
-
 }
 
 .form-submit {
-
     width: 100%;
 
     margin-top: 5px;
-
 }
 
 
@@ -1765,265 +1393,10 @@ button {
 ===================================================== */
 
 .success-message {
-
     display: none;
 
     text-align: center;
 
-    padding: 20px 0;
-
-}
-
-.success-message.active {
-
-    display: block;
-
-}
-
-.success-message > div {
-
-    width: 70px;
-    height: 70px;
-
-    border-radius: 50%;
-
-    background:
-        #e8f7ed;
-
-    color: #219653;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: 35px;
-
-    margin: 0 auto 20px;
-
-}
-
-.success-message h3 {
-
-    font-size: 25px;
-
-    margin-bottom: 8px;
-
-}
-
-.success-message p {
-
-    color: var(--muted);
-
-    margin-bottom: 10px;
-
-}
-
-.success-message strong {
-
-    display: block;
-
-    color: var(--blue);
-
-    margin-bottom: 25px;
-
-}
-
-
-/* =====================================================
-   MOBILE
-===================================================== */
-
-@media (max-width: 950px) {
-
-    .menu {
-
-        position: absolute;
-
-        top: 78px;
-
-        left: 0;
-
-        width: 100%;
-
-        display: none;
-
-        flex-direction: column;
-
-        gap: 0;
-
-        background: var(--navy);
-
-        padding: 10px 5%;
-
-    }
-
-    .menu.active {
-
-        display: flex;
-
-    }
-
-    .menu a {
-
-        padding: 14px 0;
-
-        border-bottom:
-            1px solid rgba(255,255,255,.08);
-
-    }
-
-    .menu-button {
-
-        display: block;
-
-    }
-
-    .services-grid-full {
-
-        grid-template-columns:
-            repeat(2, 1fr);
-
-    }
-
-    .government-grid,
-    .news-grid,
-    .contacts-grid {
-
-        grid-template-columns: 1fr;
-
-    }
-
-    .laws-grid {
-
-        grid-template-columns:
-            repeat(2, 1fr);
-
-    }
-
-}
-
-
-@media (max-width: 700px) {
-
-    .hero {
-
-        min-height: 650px;
-
-    }
-
-    .hero h1 {
-
-        font-size: 52px;
-
-    }
-
-    .statistics-grid {
-
-        grid-template-columns:
-            repeat(2, 1fr);
-
-    }
-
-    .stat {
-
-        border-bottom:
-            1px solid var(--border);
-
-    }
-
-    .services-grid-full {
-
-        grid-template-columns: 1fr;
-
-    }
-
-    .application-banner-content {
-
-        flex-direction: column;
-
-        align-items: flex-start;
-
-    }
-
-    .laws-grid {
-
-        grid-template-columns: 1fr;
-
-    }
-
-    .footer-content {
-
-        flex-direction: column;
-
-    }
-
-}
-
-
-@media (max-width: 500px) {
-
-    .section {
-        padding: 70px 0;
-    }
-
-    .hero h1 {
-        font-size: 45px;
-    }
-
-    .hero p {
-        font-size: 16px;
-    }
-
-    .modal-content {
-        padding: 30px 22px;
-    }
-
-    .category-buttons {
-        gap: 6px;
-    }
-
-    .category-btn {
-        font-size: 11px;
-        padding: 8px 10px;
-    }
-
-}
-
-
-/* =====================================================
-   ANIMATIONS
-===================================================== */
-
-.animate-element {
-
-    opacity: 0;
-
-    transform:
-        translateY(20px);
-
-    transition:
-        opacity .5s ease,
-        transform .5s ease;
-
-}
-
-.animate-element.show {
-
-    opacity: 1;
-
-    transform:
-        translateY(0);
-
-}
-
-/* =====================================================
-   APPLICATION SUCCESS
-===================================================== */
-
-.success-message {
-    display: none;
-    text-align: center;
     padding: 10px 0 0;
 }
 
@@ -2044,6 +1417,7 @@ button {
     color: #1d9b59;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -2055,6 +1429,7 @@ button {
     margin: 0 0 14px;
 
     font-size: 30px;
+
     line-height: 1.2;
 
     color: #1b2638;
@@ -2076,8 +1451,10 @@ button {
     color: #1976d2;
 
     font-size: 21px;
+
     font-weight: 700;
 }
+
 
 /* =====================================================
    APPLICATION STATUS
@@ -2124,53 +1501,48 @@ button {
     font-weight: 700;
 }
 
-.status-badge.pending {
+.status-badge.pending,
+.status-pending {
     background: #fff7cc;
 
     color: #9a7500;
 }
 
+
 /* =====================================================
-   MOBILE
+   ANIMATIONS
 ===================================================== */
 
-@media (max-width: 600px) {
+.animate-element {
+    opacity: 0;
 
-    .success-icon {
-        width: 72px;
-        height: 72px;
+    transform:
+        translateY(20px);
 
-        font-size: 40px;
+    transition:
+        opacity 0.5s ease,
+        transform 0.5s ease;
+}
 
-        margin-bottom: 22px;
-    }
+.animate-element.show {
+    opacity: 1;
 
-    .success-message h3 {
-        font-size: 25px;
-    }
+    transform:
+        translateY(0);
+}
 
-    .success-message p {
-        font-size: 16px;
-    }
 
-    .application-status {
-        flex-direction: column;
-
-        gap: 6px;
-
-        width: fit-content;
-
-        padding: 12px 18px;
-    }
-
-   /* =========================================================
+/* =========================================================
    OLYMP GOVERNMENT
    PERSONAL CABINET
 ========================================================= */
 
-.hidden {
-    display: none !important;
-}
+/*
+   ВАЖНО:
+   Этот блок находится ВНЕ мобильного @media.
+   Поэтому личный кабинет работает на ПК,
+   планшете и телефоне.
+*/
 
 
 /* =========================================================
@@ -2179,16 +1551,19 @@ button {
 
 .cabinet-header {
     position: sticky;
+
     top: 0;
+
     z-index: 1000;
 
-    background: rgba(7, 21, 37, 0.96);
+    background:
+        rgba(7, 21, 37, 0.96);
 
     backdrop-filter: blur(18px);
 
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.08);
 }
-
 
 .header-inner {
     max-width: 1250px;
@@ -2206,7 +1581,6 @@ button {
     gap: 30px;
 }
 
-
 .brand {
     display: flex;
 
@@ -2219,19 +1593,18 @@ button {
     text-decoration: none;
 }
 
-
 .brand-emblem {
     width: 42px;
     height: 42px;
 
-    border: 2px solid #ffffff;
+    border:
+        2px solid #ffffff;
 
     border-radius: 50%;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     font-weight: 800;
@@ -2239,13 +1612,11 @@ button {
     font-size: 20px;
 }
 
-
 .brand-text {
     display: flex;
 
     flex-direction: column;
 }
-
 
 .brand-text strong {
     font-size: 17px;
@@ -2253,15 +1624,13 @@ button {
     letter-spacing: 2px;
 }
 
-
 .brand-text span {
     font-size: 9px;
 
     letter-spacing: 2px;
 
-    opacity: .65;
+    opacity: 0.65;
 }
-
 
 .cabinet-nav {
     display: flex;
@@ -2271,9 +1640,8 @@ button {
     gap: 8px;
 }
 
-
 .cabinet-nav a {
-    color: rgba(255,255,255,.75);
+    color: rgba(255, 255, 255, 0.75);
 
     text-decoration: none;
 
@@ -2281,24 +1649,25 @@ button {
 
     border-radius: 8px;
 
-    transition: .2s;
+    transition: 0.2s;
 }
-
 
 .cabinet-nav a:hover,
 .cabinet-nav a.active {
     color: white;
 
-    background: rgba(255,255,255,.08);
+    background:
+        rgba(255, 255, 255, 0.08);
 }
 
 
 /* =========================================================
-   MAIN
+   CABINET MAIN
 ========================================================= */
 
 .cabinet-main {
-    min-height: calc(100vh - 150px);
+    min-height:
+        calc(100vh - 150px);
 
     background:
         linear-gradient(
@@ -2321,7 +1690,6 @@ button {
     margin: 30px auto;
 }
 
-
 .login-container {
     background: white;
 
@@ -2330,11 +1698,11 @@ button {
     padding: 42px;
 
     box-shadow:
-        0 20px 60px rgba(7,21,37,.10);
+        0 20px 60px rgba(7, 21, 37, 0.10);
 
-    border: 1px solid #e4e8ed;
+    border:
+        1px solid #e4e8ed;
 }
-
 
 .login-icon {
     width: 70px;
@@ -2351,12 +1719,10 @@ button {
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     font-size: 30px;
 }
-
 
 .section-label {
     font-size: 11px;
@@ -2370,7 +1736,6 @@ button {
     margin-bottom: 8px;
 }
 
-
 .login-container h1,
 .cabinet-title-row h1 {
     margin: 0;
@@ -2380,7 +1745,6 @@ button {
     font-size: 32px;
 }
 
-
 .login-description {
     color: #667085;
 
@@ -2388,11 +1752,6 @@ button {
 
     margin: 15px 0 30px;
 }
-
-
-/* =========================================================
-   FORM
-========================================================= */
 
 .login-form {
     display: flex;
@@ -2403,32 +1762,39 @@ button {
 }
 
 
-.form-group {
+/* =========================================================
+   CABINET FORM
+========================================================= */
+
+.login-form .form-group {
     display: flex;
 
     flex-direction: column;
 
     gap: 8px;
+
+    margin-bottom: 0;
 }
 
-
-.form-group label {
+.login-form .form-group label {
     font-size: 14px;
 
     font-weight: 700;
 
     color: #273444;
+
+    margin-bottom: 0;
 }
 
-
-.form-group input {
+.login-form .form-group input {
     width: 100%;
 
     box-sizing: border-box;
 
     padding: 15px 16px;
 
-    border: 1px solid #d8dee6;
+    border:
+        1px solid #d8dee6;
 
     border-radius: 10px;
 
@@ -2436,17 +1802,15 @@ button {
 
     font-size: 15px;
 
-    transition: .2s;
+    transition: 0.2s;
 }
 
-
-.form-group input:focus {
+.login-form .form-group input:focus {
     border-color: #071525;
 
     box-shadow:
-        0 0 0 3px rgba(7,21,37,.08);
+        0 0 0 3px rgba(7, 21, 37, 0.08);
 }
-
 
 .primary-button {
     border: 0;
@@ -2465,9 +1829,8 @@ button {
 
     cursor: pointer;
 
-    transition: .2s;
+    transition: 0.2s;
 }
-
 
 .primary-button:hover {
     transform: translateY(-1px);
@@ -2475,15 +1838,13 @@ button {
     background: #10263d;
 }
 
-
 .primary-button:disabled {
-    opacity: .65;
+    opacity: 0.65;
 
     cursor: not-allowed;
 
     transform: none;
 }
-
 
 .form-error {
     display: none;
@@ -2496,25 +1857,25 @@ button {
 
     color: #b42318;
 
-    border: 1px solid #ffd1d1;
+    border:
+        1px solid #ffd1d1;
 
     font-size: 14px;
 
     line-height: 1.5;
 }
 
-
 .form-error.visible {
     display: block;
 }
-
 
 .login-help {
     margin-top: 28px;
 
     padding-top: 22px;
 
-    border-top: 1px solid #edf0f3;
+    border-top:
+        1px solid #edf0f3;
 
     color: #667085;
 
@@ -2522,7 +1883,6 @@ button {
 
     line-height: 1.6;
 }
-
 
 .login-help strong {
     color: #273444;
@@ -2539,7 +1899,6 @@ button {
     margin: 0 auto;
 }
 
-
 .cabinet-title-row {
     display: flex;
 
@@ -2552,16 +1911,15 @@ button {
     margin-bottom: 30px;
 }
 
-
 .cabinet-title-row p {
     margin: 10px 0 0;
 
     color: #667085;
 }
 
-
 .logout-button {
-    border: 1px solid #d8dee6;
+    border:
+        1px solid #d8dee6;
 
     background: white;
 
@@ -2575,9 +1933,8 @@ button {
 
     font-weight: 700;
 
-    transition: .2s;
+    transition: 0.2s;
 }
-
 
 .logout-button:hover {
     background: #f8fafc;
@@ -2594,19 +1951,18 @@ button {
 .application-card {
     background: white;
 
-    border: 1px solid #e1e6ec;
+    border:
+        1px solid #e1e6ec;
 
     border-radius: 18px;
 
     box-shadow:
-        0 12px 35px rgba(7,21,37,.06);
+        0 12px 35px rgba(7, 21, 37, 0.06);
 }
-
 
 .profile-card {
     margin-bottom: 35px;
 }
-
 
 .card-header {
     display: flex;
@@ -2617,19 +1973,17 @@ button {
 
     padding: 28px 30px;
 
-    border-bottom: 1px solid #edf0f3;
+    border-bottom:
+        1px solid #edf0f3;
 }
 
-
-.card-header h2,
-.section-heading h2 {
+.card-header h2 {
     margin: 4px 0 0;
 
     color: #071525;
 
     font-size: 23px;
 }
-
 
 .card-label {
     font-size: 10px;
@@ -2640,7 +1994,6 @@ button {
 
     color: #87909d;
 }
-
 
 .profile-avatar {
     width: 52px;
@@ -2655,15 +2008,12 @@ button {
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     font-size: 23px;
 }
 
-
-.profile-grid,
-.application-grid {
+.profile-grid {
     display: grid;
 
     grid-template-columns:
@@ -2673,7 +2023,6 @@ button {
 
     background: #edf0f3;
 }
-
 
 .info-item {
     background: white;
@@ -2689,7 +2038,6 @@ button {
     min-width: 0;
 }
 
-
 .info-item span {
     color: #87909d;
 
@@ -2697,7 +2045,6 @@ button {
 
     font-weight: 600;
 }
-
 
 .info-item strong {
     color: #1d2939;
@@ -2709,23 +2056,30 @@ button {
 
 
 /* =========================================================
-   APPLICATION
+   APPLICATIONS
 ========================================================= */
 
 .applications-section {
     margin-top: 35px;
 }
 
-
-.section-heading {
+.applications-section .section-heading {
     margin-bottom: 16px;
 }
 
+.applications-section .section-heading h2 {
+    font-size: 23px;
+
+    margin: 4px 0 0;
+
+    color: #071525;
+}
 
 .application-card {
     overflow: hidden;
-}
 
+    margin-bottom: 20px;
+}
 
 .application-top {
     display: flex;
@@ -2738,9 +2092,9 @@ button {
 
     padding: 28px 30px;
 
-    border-bottom: 1px solid #edf0f3;
+    border-bottom:
+        1px solid #edf0f3;
 }
-
 
 .application-label {
     display: block;
@@ -2756,7 +2110,6 @@ button {
     margin-bottom: 8px;
 }
 
-
 .application-number-row {
     display: flex;
 
@@ -2765,18 +2118,17 @@ button {
     gap: 12px;
 }
 
-
 .application-number-row strong {
     font-size: 24px;
 
     color: #071525;
 
-    letter-spacing: .5px;
+    letter-spacing: 0.5px;
 }
 
-
 .copy-button {
-    border: 1px solid #d8dee6;
+    border:
+        1px solid #d8dee6;
 
     background: #fff;
 
@@ -2788,16 +2140,14 @@ button {
 
     cursor: pointer;
 
-    transition: .2s;
+    transition: 0.2s;
 }
-
 
 .copy-button:hover {
     background: #f5f7fa;
 }
 
-
-.status-badge {
+.application-status-badge {
     padding: 9px 14px;
 
     border-radius: 999px;
@@ -2809,13 +2159,11 @@ button {
     white-space: nowrap;
 }
 
-
 .status-pending {
     background: #fff4c2;
 
     color: #8a6500;
 }
-
 
 .status-accepted {
     background: #e6f0ff;
@@ -2823,13 +2171,11 @@ button {
     color: #175cd3;
 }
 
-
 .status-completed {
     background: #dcfce7;
 
     color: #15803d;
 }
-
 
 .status-rejected {
     background: #fee2e2;
@@ -2837,26 +2183,33 @@ button {
     color: #b42318;
 }
 
-
 .status-closed {
     background: #e5e7eb;
 
     color: #374151;
 }
 
-
 .application-grid {
+    display: grid;
+
     grid-template-columns:
         repeat(4, 1fr);
+
+    gap: 1px;
+
+    background: #edf0f3;
 }
 
+.application-grid .info-item {
+    min-height: 90px;
+}
 
 .application-block {
     padding: 24px 30px;
 
-    border-top: 1px solid #edf0f3;
+    border-top:
+        1px solid #edf0f3;
 }
-
 
 .application-block > span {
     display: block;
@@ -2870,7 +2223,6 @@ button {
     margin-bottom: 10px;
 }
 
-
 .text-box {
     color: #273444;
 
@@ -2882,13 +2234,13 @@ button {
 
     background: #f8fafc;
 
-    border: 1px solid #edf0f3;
+    border:
+        1px solid #edf0f3;
 
     border-radius: 10px;
 
     padding: 15px;
 }
-
 
 .government-answer {
     min-height: 45px;
@@ -2896,13 +2248,14 @@ button {
 
 
 /* =========================================================
-   HISTORY
+   EMPTY APPLICATIONS
 ========================================================= */
 
 .history-empty {
     background: white;
 
-    border: 1px solid #e1e6ec;
+    border:
+        1px solid #e1e6ec;
 
     border-radius: 18px;
 
@@ -2911,9 +2264,8 @@ button {
     text-align: center;
 
     box-shadow:
-        0 12px 35px rgba(7,21,37,.05);
+        0 12px 35px rgba(7, 21, 37, 0.05);
 }
-
 
 .history-icon {
     font-size: 35px;
@@ -2921,13 +2273,11 @@ button {
     margin-bottom: 10px;
 }
 
-
 .history-empty h3 {
     margin: 0 0 8px;
 
     color: #071525;
 }
-
 
 .history-empty p {
     max-width: 520px;
@@ -2957,25 +2307,23 @@ button {
 
     background: #eef6ff;
 
-    border: 1px solid #d7e9ff;
+    border:
+        1px solid #d7e9ff;
 
     border-radius: 12px;
 
     color: #174a7c;
 }
 
-
 .security-icon {
     font-size: 25px;
 }
-
 
 .security-notice strong {
     display: block;
 
     margin-bottom: 3px;
 }
-
 
 .security-notice p {
     margin: 0;
@@ -2995,17 +2343,16 @@ button {
 
     z-index: 5000;
 
-    background: rgba(7,21,37,.55);
+    background:
+        rgba(7, 21, 37, 0.55);
 
     backdrop-filter: blur(5px);
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 }
-
 
 .loading-box {
     min-width: 240px;
@@ -3019,7 +2366,7 @@ button {
     text-align: center;
 
     box-shadow:
-        0 20px 60px rgba(0,0,0,.2);
+        0 20px 60px rgba(0, 0, 0, 0.2);
 
     display: flex;
 
@@ -3030,39 +2377,34 @@ button {
     gap: 8px;
 }
 
-
 .loading-box span {
     color: #667085;
 
     font-size: 13px;
 }
 
-
 .loader {
     width: 38px;
     height: 38px;
 
-    border: 4px solid #e6e9ed;
+    border:
+        4px solid #e6e9ed;
 
     border-top-color: #071525;
 
     border-radius: 50%;
 
     animation:
-        olympSpin .8s linear infinite;
+        olympSpin 0.8s linear infinite;
 
     margin-bottom: 5px;
 }
 
-
 @keyframes olympSpin {
-
     to {
         transform: rotate(360deg);
     }
-
 }
-
 
 .button-loader {
     display: inline-block;
@@ -3070,14 +2412,15 @@ button {
     width: 14px;
     height: 14px;
 
-    border: 2px solid rgba(255,255,255,.4);
+    border:
+        2px solid rgba(255, 255, 255, 0.4);
 
     border-top-color: white;
 
     border-radius: 50%;
 
     animation:
-        olympSpin .7s linear infinite;
+        olympSpin 0.7s linear infinite;
 
     vertical-align: -2px;
 
@@ -3093,7 +2436,6 @@ button {
     position: fixed;
 
     right: 25px;
-
     bottom: 25px;
 
     z-index: 6000;
@@ -3107,7 +2449,7 @@ button {
     border-radius: 10px;
 
     box-shadow:
-        0 10px 30px rgba(0,0,0,.18);
+        0 10px 30px rgba(0, 0, 0, 0.18);
 
     transform:
         translateY(20px);
@@ -3116,11 +2458,10 @@ button {
 
     pointer-events: none;
 
-    transition: .25s;
+    transition: 0.25s;
 
     font-size: 14px;
 }
-
 
 .toast.visible {
     opacity: 1;
@@ -3129,11 +2470,9 @@ button {
         translateY(0);
 }
 
-
 .toast.success {
     background: #126b3f;
 }
-
 
 .toast.error {
     background: #b42318;
@@ -3141,7 +2480,7 @@ button {
 
 
 /* =========================================================
-   FOOTER
+   CABINET FOOTER
 ========================================================= */
 
 .cabinet-footer {
@@ -3160,7 +2499,6 @@ button {
     font-size: 13px;
 }
 
-
 .cabinet-footer div:first-child {
     display: flex;
 
@@ -3169,43 +2507,108 @@ button {
     gap: 3px;
 }
 
-
 .cabinet-footer span {
-    opacity: .55;
+    opacity: 0.55;
 
     font-size: 11px;
 }
 
 
-/* =========================================================
-   MOBILE
-========================================================= */
+/* =====================================================
+   MAIN SITE RESPONSIVE
+===================================================== */
 
-@media (
-    max-width: 850px
-) {
+@media (max-width: 950px) {
+
+    .menu {
+        position: absolute;
+
+        top: 78px;
+        left: 0;
+
+        width: 100%;
+
+        display: none;
+
+        flex-direction: column;
+
+        gap: 0;
+
+        background: var(--navy);
+
+        padding: 10px 5%;
+    }
+
+    .menu.active {
+        display: flex;
+    }
+
+    .menu a {
+        padding: 14px 0;
+
+        border-bottom:
+            1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .menu-button {
+        display: block;
+    }
+
+    .services-grid-full {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .government-grid,
+    .news-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .laws-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .contacts-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .application-banner-content {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+}
+
+
+/* =====================================================
+   CABINET RESPONSIVE
+===================================================== */
+
+@media (max-width: 850px) {
 
     .header-inner {
         padding: 15px;
     }
 
-
     .cabinet-nav {
         display: none;
     }
-
 
     .cabinet-main {
         padding: 40px 15px;
     }
 
-
-    .profile-grid,
-    .application-grid {
+    .profile-grid {
         grid-template-columns:
             repeat(2, 1fr);
     }
 
+    .application-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
 
     .cabinet-title-row {
         align-items: flex-start;
@@ -3213,40 +2616,144 @@ button {
         flex-direction: column;
     }
 
-
     .logout-button {
         width: 100%;
     }
-
 }
 
 
-@media (
-    max-width: 600px
-) {
+/* =====================================================
+   700 PX
+===================================================== */
+
+@media (max-width: 700px) {
+
+    .hero {
+        min-height: 650px;
+    }
+
+    .hero h1 {
+        font-size: 52px;
+    }
+
+    .statistics-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .stat {
+        border-bottom:
+            1px solid var(--border);
+    }
+
+    .services-grid-full {
+        grid-template-columns: 1fr;
+    }
+
+    .laws-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .contacts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .contacts-bottom {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        padding: 25px;
+    }
+
+    .contacts-bottom .btn {
+        width: 100%;
+    }
+
+    .footer-content {
+        flex-direction: column;
+    }
+}
+
+
+/* =====================================================
+   600 PX
+===================================================== */
+
+@media (max-width: 600px) {
+
+    .section {
+        padding: 70px 0;
+    }
+
+    .hero h1 {
+        font-size: 45px;
+    }
+
+    .hero p {
+        font-size: 16px;
+    }
+
+    .modal-content {
+        padding: 30px 22px;
+    }
+
+    .category-buttons {
+        gap: 6px;
+    }
+
+    .category-btn {
+        font-size: 11px;
+
+        padding: 8px 10px;
+    }
+
+    .success-icon {
+        width: 72px;
+        height: 72px;
+
+        font-size: 40px;
+
+        margin-bottom: 22px;
+    }
+
+    .success-message h3 {
+        font-size: 25px;
+    }
+
+    .success-message p {
+        font-size: 16px;
+    }
+
+    .application-status {
+        flex-direction: column;
+
+        gap: 6px;
+
+        width: fit-content;
+
+        padding: 12px 18px;
+    }
+
+    /* CABINET */
 
     .login-container {
         padding: 28px 20px;
     }
-
 
     .login-container h1,
     .cabinet-title-row h1 {
         font-size: 26px;
     }
 
-
     .profile-grid,
     .application-grid {
-        grid-template-columns:
-            1fr;
+        grid-template-columns: 1fr;
     }
-
 
     .card-header {
         padding: 22px 20px;
     }
-
 
     .application-top {
         padding: 22px 20px;
@@ -3256,11 +2763,9 @@ button {
         align-items: flex-start;
     }
 
-
     .application-block {
         padding: 20px;
     }
-
 
     .application-number-row {
         align-items: flex-start;
@@ -3268,27 +2773,69 @@ button {
         flex-direction: column;
     }
 
-
     .application-number-row strong {
         font-size: 21px;
     }
-
 
     .cabinet-footer {
         flex-direction: column;
     }
 
-
     .toast {
         left: 15px;
-
         right: 15px;
-
         bottom: 15px;
 
         text-align: center;
     }
-
 }
 
+
+/* =====================================================
+   500 PX
+===================================================== */
+
+@media (max-width: 500px) {
+
+    .hero h1 {
+        font-size: 45px;
+    }
+
+    .hero p {
+        font-size: 16px;
+    }
+
+    .modal-content {
+        padding: 30px 22px;
+    }
+
+    .category-buttons {
+        gap: 6px;
+    }
+
+    .category-btn {
+        font-size: 11px;
+
+        padding: 8px 10px;
+    }
+
+    .header-inner {
+        gap: 15px;
+    }
+
+    .brand-text strong {
+        font-size: 14px;
+    }
+
+    .brand-text span {
+        font-size: 8px;
+    }
+
+    .cabinet-main {
+        padding: 30px 12px;
+    }
+
+    .application-number-row strong {
+        font-size: 19px;
+    }
 }
