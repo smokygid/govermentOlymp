@@ -1,12 +1,28 @@
-/* =====================================================
+/* =========================================================
    OLYMP GOVERNMENT
-   JavaScript 2.0
-===================================================== */
+   Frontend JavaScript 3.0
+========================================================= */
 
 
-/* =====================================================
+/*
+ * ВАЖНО:
+ *
+ * СЮДА ВСТАВЬ URL WEB APP,
+ * КОТОРЫЙ ТЫ ПОЛУЧИШЬ ПОСЛЕ
+ * РАЗВЁРТЫВАНИЯ GOOGLE APPS SCRIPT.
+ *
+ * Например:
+ *
+ * https://script.google.com/macros/s/XXXXXXXX/exec
+ */
+
+const GOOGLE_SCRIPT_URL =
+    "ВСТАВЬ_СЮДА_URL_GOOGLE_APPS_SCRIPT";
+
+
+/* =========================================================
    MOBILE MENU
-===================================================== */
+========================================================= */
 
 const menuButton =
     document.getElementById("menuButton");
@@ -15,70 +31,104 @@ const mainMenu =
     document.getElementById("mainMenu");
 
 
-menuButton.addEventListener("click", () => {
+if (menuButton) {
 
-    mainMenu.classList.toggle("active");
+    menuButton.addEventListener(
+        "click",
+        () => {
 
-});
+            mainMenu.classList.toggle(
+                "active"
+            );
+
+        }
+    );
+
+}
 
 
 document
     .querySelectorAll(".menu a")
     .forEach(link => {
 
-        link.addEventListener("click", () => {
+        link.addEventListener(
+            "click",
+            () => {
 
-            mainMenu.classList.remove("active");
+                mainMenu.classList.remove(
+                    "active"
+                );
 
-        });
+            }
+        );
 
     });
 
 
-/* =====================================================
-   HEADER SCROLL
-===================================================== */
+/* =========================================================
+   HEADER
+========================================================= */
 
 const header =
     document.getElementById("header");
 
 
-window.addEventListener("scroll", () => {
+window.addEventListener(
+    "scroll",
+    () => {
 
-    if (window.scrollY > 50) {
+        if (
+            window.scrollY > 50
+        ) {
 
-        header.classList.add("scrolled");
+            header.classList.add(
+                "scrolled"
+            );
 
-    } else {
+        } else {
 
-        header.classList.remove("scrolled");
+            header.classList.remove(
+                "scrolled"
+            );
+
+        }
 
     }
+);
 
-});
 
-
-/* =====================================================
-   SERVICES SEARCH
-===================================================== */
+/* =========================================================
+   SERVICE SEARCH
+========================================================= */
 
 const searchInput =
-    document.getElementById("serviceSearch");
+    document.getElementById(
+        "serviceSearch"
+    );
 
 const clearSearch =
-    document.getElementById("clearSearch");
+    document.getElementById(
+        "clearSearch"
+    );
 
 const serviceItems =
-    document.querySelectorAll(".service-item");
+    document.querySelectorAll(
+        ".service-item"
+    );
 
 const categoryButtons =
-    document.querySelectorAll(".category-btn");
+    document.querySelectorAll(
+        ".category-btn"
+    );
 
 const noResults =
-    document.getElementById("noResults");
+    document.getElementById(
+        "noResults"
+    );
 
 
-let currentCategory = "all";
+let currentCategory =
+    "all";
 
 
 function filterServices() {
@@ -92,145 +142,202 @@ function filterServices() {
     let visibleCount = 0;
 
 
-    serviceItems.forEach(service => {
+    serviceItems.forEach(
+        service => {
 
-        const title =
-            service.dataset.title
-                .toLowerCase();
-
-        const description =
-            service.dataset.description
-                .toLowerCase();
-
-        const category =
-            service.dataset.category;
+            const title =
+                service.dataset.title
+                    .toLowerCase();
 
 
-        const matchesSearch =
-            title.includes(searchText) ||
-            description.includes(searchText);
+            const description =
+                service.dataset.description
+                    .toLowerCase();
 
 
-        const matchesCategory =
-            currentCategory === "all" ||
-            category === currentCategory;
+            const category =
+                service.dataset.category;
 
 
-        if (
-            matchesSearch &&
-            matchesCategory
-        ) {
+            const matchesSearch =
+                title.includes(
+                    searchText
+                ) ||
+                description.includes(
+                    searchText
+                );
 
-            service.classList.remove("hidden");
 
-            visibleCount++;
+            const matchesCategory =
+                currentCategory === "all" ||
+                category === currentCategory;
 
-        } else {
 
-            service.classList.add("hidden");
+            if (
+                matchesSearch &&
+                matchesCategory
+            ) {
+
+                service.classList.remove(
+                    "hidden"
+                );
+
+                visibleCount++;
+
+            } else {
+
+                service.classList.add(
+                    "hidden"
+                );
+
+            }
 
         }
+    );
 
-    });
 
+    if (
+        visibleCount === 0
+    ) {
 
-    if (visibleCount === 0) {
-
-        noResults.classList.add("visible");
+        noResults.classList.add(
+            "visible"
+        );
 
     } else {
 
-        noResults.classList.remove("visible");
+        noResults.classList.remove(
+            "visible"
+        );
 
     }
 
 
-    if (searchText.length > 0) {
+    if (
+        searchText.length > 0
+    ) {
 
-        clearSearch.classList.add("visible");
+        clearSearch.classList.add(
+            "visible"
+        );
 
     } else {
 
-        clearSearch.classList.remove("visible");
+        clearSearch.classList.remove(
+            "visible"
+        );
 
     }
 
 }
 
 
-searchInput.addEventListener(
-    "input",
-    filterServices
-);
+if (searchInput) {
+
+    searchInput.addEventListener(
+        "input",
+        filterServices
+    );
+
+}
 
 
-clearSearch.addEventListener(
-    "click",
-    () => {
+if (clearSearch) {
 
-        searchInput.value = "";
+    clearSearch.addEventListener(
+        "click",
+        () => {
 
-        filterServices();
+            searchInput.value = "";
 
-        searchInput.focus();
+            filterServices();
+
+            searchInput.focus();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CATEGORY FILTER
+========================================================= */
+
+categoryButtons.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                categoryButtons.forEach(
+                    btn => {
+
+                        btn.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                button.classList.add(
+                    "active"
+                );
+
+
+                currentCategory =
+                    button.dataset.category;
+
+
+                filterServices();
+
+            }
+        );
 
     }
 );
 
 
-/* =====================================================
-   CATEGORY FILTER
-===================================================== */
-
-categoryButtons.forEach(button => {
-
-    button.addEventListener("click", () => {
-
-        categoryButtons.forEach(btn => {
-
-            btn.classList.remove("active");
-
-        });
-
-
-        button.classList.add("active");
-
-
-        currentCategory =
-            button.dataset.category;
-
-
-        filterServices();
-
-    });
-
-});
-
-
-/* =====================================================
+/* =========================================================
    SERVICE MODAL
-===================================================== */
+========================================================= */
 
 const serviceModal =
-    document.getElementById("serviceModal");
+    document.getElementById(
+        "serviceModal"
+    );
 
 const modalTitle =
-    document.getElementById("modalTitle");
+    document.getElementById(
+        "modalTitle"
+    );
 
 const modalDescription =
-    document.getElementById("modalDescription");
+    document.getElementById(
+        "modalDescription"
+    );
 
 const modalRequirements =
-    document.getElementById("modalRequirements");
+    document.getElementById(
+        "modalRequirements"
+    );
 
 const modalCategory =
-    document.getElementById("modalCategory");
+    document.getElementById(
+        "modalCategory"
+    );
 
 const modalIcon =
-    document.getElementById("modalIcon");
+    document.getElementById(
+        "modalIcon"
+    );
 
 const applyFromService =
-    document.getElementById("applyFromService");
+    document.getElementById(
+        "applyFromService"
+    );
 
 
 let selectedService = "";
@@ -239,7 +346,9 @@ let selectedService = "";
 function openService(button) {
 
     const card =
-        button.closest(".service-item");
+        button.closest(
+            ".service-item"
+        );
 
 
     selectedService =
@@ -258,14 +367,10 @@ function openService(button) {
         card.dataset.requirements;
 
 
-    const category =
+    modalCategory.textContent =
         card.querySelector(
             ".service-category"
         ).textContent;
-
-
-    modalCategory.textContent =
-        category;
 
 
     modalIcon.textContent =
@@ -274,12 +379,16 @@ function openService(button) {
         ).textContent.trim();
 
 
-    serviceModal.classList.add("active");
+    serviceModal.classList.add(
+        "active"
+    );
+
 
     serviceModal.setAttribute(
         "aria-hidden",
         "false"
     );
+
 
     document.body.classList.add(
         "modal-open"
@@ -290,12 +399,16 @@ function openService(button) {
 
 function closeServiceModal() {
 
-    serviceModal.classList.remove("active");
+    serviceModal.classList.remove(
+        "active"
+    );
+
 
     serviceModal.setAttribute(
         "aria-hidden",
         "true"
     );
+
 
     document.body.classList.remove(
         "modal-open"
@@ -304,27 +417,9 @@ function closeServiceModal() {
 }
 
 
-/* =====================================================
-   APPLY FROM SERVICE
-===================================================== */
-
-applyFromService.addEventListener(
-    "click",
-    () => {
-
-        closeServiceModal();
-
-        openApplicationModal(
-            selectedService
-        );
-
-    }
-);
-
-
-/* =====================================================
+/* =========================================================
    APPLICATION MODAL
-===================================================== */
+========================================================= */
 
 const applicationModal =
     document.getElementById(
@@ -360,10 +455,12 @@ function openApplicationModal(
         "active"
     );
 
+
     applicationModal.setAttribute(
         "aria-hidden",
         "false"
     );
+
 
     document.body.classList.add(
         "modal-open"
@@ -403,10 +500,12 @@ function closeApplicationModal() {
         "active"
     );
 
+
     applicationModal.setAttribute(
         "aria-hidden",
         "true"
     );
+
 
     document.body.classList.remove(
         "modal-open"
@@ -415,16 +514,38 @@ function closeApplicationModal() {
 }
 
 
-/* =====================================================
-   APPLICATION FORM
-===================================================== */
+/* =========================================================
+   SUBMIT APPLICATION
+========================================================= */
 
 applicationForm.addEventListener(
     "submit",
-    event => {
+    async event => {
 
         event.preventDefault();
 
+
+        /*
+         * Защита от двойной отправки
+         */
+
+        const submitButton =
+            applicationForm.querySelector(
+                ".form-submit"
+            );
+
+
+        submitButton.disabled =
+            true;
+
+
+        submitButton.textContent =
+            "Відправлення...";
+
+
+        /*
+         * Получаем значения
+         */
 
         const fullName =
             document.getElementById(
@@ -454,6 +575,10 @@ applicationForm.addEventListener(
             ).value.trim();
 
 
+        /*
+         * Проверяем
+         */
+
         if (
             !fullName ||
             !idNumber ||
@@ -465,91 +590,221 @@ applicationForm.addEventListener(
                 "Будь ласка, заповніть усі обов'язкові поля."
             );
 
+
+            resetSubmitButton(
+                submitButton
+            );
+
+
             return;
 
         }
 
 
-        /* Генерация номера заявки */
+        /*
+         * Проверяем URL
+         */
 
-        const randomNumber =
-            Math.floor(
-                100000 +
-                Math.random() * 900000
+        if (
+            !GOOGLE_SCRIPT_URL ||
+            GOOGLE_SCRIPT_URL.includes(
+                "ВСТАВЬ"
+            )
+        ) {
+
+            alert(
+                "Система заявок ще не налаштована. Адміністратору необхідно додати URL Google Apps Script."
             );
 
 
-        const requestNumber =
-            "OLYMP-" +
-            randomNumber;
+            resetSubmitButton(
+                submitButton
+            );
 
 
-        applicationNumber.textContent =
-            "№ " + requestNumber;
+            return;
+
+        }
 
 
-        /* Временное хранение заявки */
+        /*
+         * Создаём данные
+         */
 
-        const application = {
-
-            number: requestNumber,
-
-            fullName: fullName,
-
-            idNumber: idNumber,
-
-            service: service,
-
-            contact: contact,
-
-            message: message,
-
-            date:
-                new Date()
-                    .toLocaleString(
-                        "uk-UA"
-                    )
-
-        };
+        const formData =
+            new URLSearchParams();
 
 
-        console.log(
-            "НОВА ЗАЯВКА:",
-            application
+        formData.append(
+            "fullName",
+            fullName
+        );
+
+
+        formData.append(
+            "idNumber",
+            idNumber
+        );
+
+
+        formData.append(
+            "service",
+            service
+        );
+
+
+        formData.append(
+            "contact",
+            contact
+        );
+
+
+        formData.append(
+            "message",
+            message
         );
 
 
         /*
-         =================================================
-         ВАЖНО
+         * Отправляем в Google Apps Script
+         *
+         * Используем URLSearchParams,
+         * чтобы не создавать CORS preflight.
+         */
 
-         Здесь позже можно подключить:
+        try {
 
-         Google Sheets
-         Discord Webhook
-         Firebase
-         MySQL
-         API
+            await fetch(
+                GOOGLE_SCRIPT_URL,
+                {
 
-         =================================================
-        */
+                    method:
+                        "POST",
+
+                    body:
+                        formData,
+
+                    mode:
+                        "no-cors"
+
+                }
+            );
 
 
-        applicationForm.style.display =
-            "none";
+            /*
+             * При no-cors браузер не даёт
+             * прочитать ответ Google.
+             *
+             * Но Apps Script получает
+             * заявку и записывает её
+             * в Google Sheets.
+             *
+             * Поэтому показываем успешную
+             * отправку после fetch.
+             */
 
 
-        successMessage.classList.add(
-            "active"
-        );
+            const fakeNumber =
+                generateLocalNumber();
+
+
+            applicationNumber.textContent =
+                "Заявку № " +
+                fakeNumber;
+
+
+            applicationForm.style.display =
+                "none";
+
+
+            successMessage.classList.add(
+                "active"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Помилка:",
+                error
+            );
+
+
+            alert(
+                "Не вдалося відправити заявку. Спробуйте ще раз."
+            );
+
+
+            resetSubmitButton(
+                submitButton
+            );
+
+        }
 
     }
 );
 
 
-/* =====================================================
-   MODAL CLICK OUTSIDE
-===================================================== */
+/* =========================================================
+   ЛОКАЛЬНЫЙ НОМЕР
+========================================================= */
+
+function generateLocalNumber() {
+
+    const number =
+        Math.floor(
+            100000 +
+            Math.random() * 900000
+        );
+
+
+    return "OLYMP-" + number;
+
+}
+
+
+/* =========================================================
+   RESET BUTTON
+========================================================= */
+
+function resetSubmitButton(
+    button
+) {
+
+    button.disabled =
+        false;
+
+    button.textContent =
+        "Надіслати заявку";
+
+}
+
+
+/* =========================================================
+   APPLY FROM SERVICE
+========================================================= */
+
+if (applyFromService) {
+
+    applyFromService.addEventListener(
+        "click",
+        () => {
+
+            closeServiceModal();
+
+            openApplicationModal(
+                selectedService
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE MODALS
+========================================================= */
 
 serviceModal.addEventListener(
     "click",
@@ -585,30 +840,60 @@ applicationModal.addEventListener(
 );
 
 
-/* =====================================================
+/* =========================================================
    ESC
-===================================================== */
+========================================================= */
 
 document.addEventListener(
     "keydown",
     event => {
 
-        if (event.key !== "Escape") {
-            return;
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeServiceModal();
+
+            closeApplicationModal();
+
         }
-
-
-        closeServiceModal();
-
-        closeApplicationModal();
 
     }
 );
 
 
-/* =====================================================
-   RESET APPLICATION FORM
-===================================================== */
+/* =========================================================
+   RESET APPLICATION MODAL
+========================================================= */
+
+function resetApplicationModal() {
+
+    applicationForm.reset();
+
+    applicationForm.style.display =
+        "";
+
+    successMessage.classList.remove(
+        "active"
+    );
+
+
+    const button =
+        applicationForm.querySelector(
+            ".form-submit"
+        );
+
+
+    if (button) {
+
+        resetSubmitButton(
+            button
+        );
+
+    }
+
+}
+
 
 applicationModal.addEventListener(
     "transitionend",
@@ -628,23 +913,9 @@ applicationModal.addEventListener(
 );
 
 
-function resetApplicationModal() {
-
-    applicationForm.reset();
-
-    applicationForm.style.display =
-        "";
-
-    successMessage.classList.remove(
-        "active"
-    );
-
-}
-
-
-/* =====================================================
+/* =========================================================
    SCROLL ANIMATION
-===================================================== */
+========================================================= */
 
 const animatedElements =
     document.querySelectorAll(
@@ -660,19 +931,21 @@ const observer =
     new IntersectionObserver(
         entries => {
 
-            entries.forEach(entry => {
+            entries.forEach(
+                entry => {
 
-                if (
-                    entry.isIntersecting
-                ) {
+                    if (
+                        entry.isIntersecting
+                    ) {
 
-                    entry.target.classList.add(
-                        "show"
-                    );
+                        entry.target.classList.add(
+                            "show"
+                        );
+
+                    }
 
                 }
-
-            });
+            );
 
         },
         {
@@ -681,12 +954,17 @@ const observer =
     );
 
 
-animatedElements.forEach(element => {
+animatedElements.forEach(
+    element => {
 
-    element.classList.add(
-        "animate-element"
-    );
+        element.classList.add(
+            "animate-element"
+        );
 
-    observer.observe(element);
 
-});
+        observer.observe(
+            element
+        );
+
+    }
+);
