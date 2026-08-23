@@ -1249,39 +1249,65 @@
             </span>
 
             <h2>
-                Зв'язок з урядом
+                Зв'язок з Урядом
             </h2>
+
+            <p>
+                Контактна інформація державних органів
+                та основних служб штату Olymp.
+            </p>
 
         </div>
 
 
         <div class="contacts-grid">
 
+
+            <!-- МЕРІЯ -->
+
             <div class="contact-card">
 
-                <div>
+                <div class="contact-icon">
                     🏛️
                 </div>
 
                 <h3>
-                    Мерія
+                    Мерія штату
                 </h3>
 
                 <p>
-                    Прийом громадян та
-                    муніципальні послуги.
+                    Прийом громадян, муніципальні
+                    послуги та адміністративні питання.
                 </p>
 
-                <a href="#">
-                    Перейти →
-                </a>
+                <div class="contact-info">
+
+                    <span>
+                        📍 Los Santos City Hall
+                    </span>
+
+                    <span>
+                        🕐 09:00 — 21:00
+                    </span>
+
+                </div>
+
+                <button
+                    class="service-button"
+                    onclick="openApplicationModal('Мерія штату')">
+
+                    Звернутися →
+
+                </button>
 
             </div>
 
 
+            <!-- ОФІС ГУБЕРНАТОРА -->
+
             <div class="contact-card">
 
-                <div>
+                <div class="contact-icon">
                     👑
                 </div>
 
@@ -1290,20 +1316,78 @@
                 </h3>
 
                 <p>
-                    Офіційні звернення
-                    та державні питання.
+                    Офіційні звернення громадян,
+                    державні питання та пропозиції.
                 </p>
 
-                <a href="#">
-                    Перейти →
-                </a>
+                <div class="contact-info">
+
+                    <span>
+                        🏛️ Уряд штату Olymp
+                    </span>
+
+                    <span>
+                        🕐 За попереднім записом
+                    </span>
+
+                </div>
+
+                <button
+                    class="service-button"
+                    onclick="openApplicationModal('Звернення до губернатора')">
+
+                    Подати звернення →
+
+                </button>
 
             </div>
 
 
+            <!-- ЮРИДИЧНИЙ ВІДДІЛ -->
+
             <div class="contact-card">
 
-                <div>
+                <div class="contact-icon">
+                    ⚖️
+                </div>
+
+                <h3>
+                    Юридичний відділ
+                </h3>
+
+                <p>
+                    Юридичні консультації, державний
+                    адвокат та правова допомога.
+                </p>
+
+                <div class="contact-info">
+
+                    <span>
+                        ⚖️ Державна адвокатура
+                    </span>
+
+                    <span>
+                        🕐 09:00 — 21:00
+                    </span>
+
+                </div>
+
+                <button
+                    class="service-button"
+                    onclick="openApplicationModal('Державний адвокат')">
+
+                    Отримати допомогу →
+
+                </button>
+
+            </div>
+
+
+            <!-- ГАРЯЧА ЛІНІЯ -->
+
+            <div class="contact-card">
+
+                <div class="contact-icon">
                     📞
                 </div>
 
@@ -1312,15 +1396,145 @@
                 </h3>
 
                 <p>
-                    Цілодобова допомога
-                    громадянам.
+                    Для термінових звернень та отримання
+                    інформації про державні служби.
                 </p>
 
-                <a href="#">
-                    Зв'язатися →
+                <div class="contact-info">
+
+                    <span>
+                        📞 911
+                    </span>
+
+                    <span>
+                        🕐 Цілодобово
+                    </span>
+
+                </div>
+
+                <a
+                    href="tel:911"
+                    class="service-button">
+
+                    Зателефонувати →
+
                 </a>
 
             </div>
+
+
+            <!-- ДЕРЖАВНІ СЛУЖБИ -->
+
+            <div class="contact-card">
+
+                <div class="contact-icon">
+                    🚔
+                </div>
+
+                <h3>
+                    Державні служби
+                </h3>
+
+                <p>
+                    Поліція, федеральні служби, національна
+                    гвардія та медичні служби.
+                </p>
+
+                <div class="contact-info">
+
+                    <span>
+                        🚔 LSPD
+                    </span>
+
+                    <span>
+                        🕐 Цілодобово
+                    </span>
+
+                </div>
+
+                <a
+                    href="#government"
+                    class="service-button">
+
+                    Переглянути служби →
+
+                </a>
+
+            </div>
+
+
+            <!-- ЗАГАЛЬНЕ ЗВЕРНЕННЯ -->
+
+            <div class="contact-card">
+
+                <div class="contact-icon">
+                    📩
+                </div>
+
+                <h3>
+                    Загальне звернення
+                </h3>
+
+                <p>
+                    Не знаєте, до якого державного органу
+                    потрібно звернутися?
+                </p>
+
+                <div class="contact-info">
+
+                    <span>
+                        📋 Онлайн-заявка
+                    </span>
+
+                    <span>
+                        🔎 Розгляд звернення
+                    </span>
+
+                </div>
+
+                <button
+                    class="service-button"
+                    onclick="openApplicationModal('Звернення громадянина')">
+
+                    Подати заявку →
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- CONTACT BOTTOM -->
+
+        <div class="contacts-bottom">
+
+            <div>
+
+                <span>
+                    НЕ ЗНАЄТЕ, КУДИ ЗВЕРНУТИСЯ?
+                </span>
+
+                <h3>
+                    Ми допоможемо знайти потрібний державний орган
+                </h3>
+
+                <p>
+                    Опишіть ваше питання, і відповідальний
+                    співробітник розгляне звернення.
+                </p>
+
+            </div>
+
+
+            <button
+                class="btn btn-primary"
+                onclick="openApplicationModal('Звернення громадянина')">
+
+                Подати звернення
+
+            </button>
 
         </div>
 
