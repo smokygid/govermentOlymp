@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
 
     <meta charset="UTF-8">
@@ -9,17 +10,20 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Особистий кабінет | Olymp State Government</title>
+    <title>
+        Особистий кабінет | Olymp State Government
+    </title>
 
     <meta
         name="description"
-        content="Особистий кабінет громадянина штату Olymp. Перегляд поданих заявок та їх статусів."
+        content="Особистий кабінет громадянина штату Olymp. Реєстрація, вхід, перегляд профілю та поданих заявок."
     >
 
     <link
         rel="stylesheet"
         href="style.css"
     >
+
 
     <style>
 
@@ -34,17 +38,19 @@
 
 
         /* =====================================================
-           CABINET HERO
+           HERO
         ===================================================== */
 
         .cabinet-hero {
             padding: 150px 0 70px;
+
             background:
                 linear-gradient(
                     135deg,
                     #101820,
                     #172631
                 );
+
             color: #fff;
         }
 
@@ -57,73 +63,119 @@
 
         .cabinet-label {
             display: inline-block;
+
             margin-bottom: 15px;
+
             font-size: 13px;
             font-weight: 700;
+
             letter-spacing: 2px;
+
             color: #9fb4c7;
         }
 
 
         .cabinet-hero h1 {
             margin: 0 0 15px;
-            font-size: clamp(34px, 5vw, 56px);
+
+            font-size:
+                clamp(
+                    34px,
+                    5vw,
+                    56px
+                );
+
             line-height: 1.1;
         }
 
 
         .cabinet-hero p {
             max-width: 700px;
+
             margin: 0;
+
             color: #c7d1d9;
+
             font-size: 17px;
+
             line-height: 1.7;
         }
 
 
         /* =====================================================
-           CABINET CONTAINER
+           CONTAINER
         ===================================================== */
 
         .cabinet-container {
             max-width: 1100px;
+
             margin: 0 auto;
-            padding: 50px 20px 80px;
+
+            padding:
+                50px
+                20px
+                80px;
         }
 
 
         /* =====================================================
-           LOGIN CARD
+           LOGIN / REGISTER CARD
         ===================================================== */
 
         .cabinet-login {
             max-width: 620px;
-            margin: -90px auto 0;
+
+            margin:
+                -90px
+                auto
+                30px;
+
             position: relative;
+
             z-index: 2;
 
             padding: 35px;
 
             background: #fff;
+
             border-radius: 18px;
 
             box-shadow:
-                0 20px 60px rgba(0, 0, 0, .12);
+                0 20px 60px
+                rgba(0, 0, 0, .12);
+        }
+
+
+        .cabinet-register {
+            margin-top: 30px;
         }
 
 
         .cabinet-login h2 {
-            margin: 0 0 10px;
+            margin:
+                0
+                0
+                10px;
+
             font-size: 26px;
         }
 
 
         .cabinet-login > p {
-            margin: 0 0 25px;
+            margin:
+                0
+                0
+                25px;
+
             color: #68737d;
+
             line-height: 1.6;
         }
 
+
+        /* =====================================================
+           FORM
+        ===================================================== */
 
         .cabinet-form-group {
             margin-bottom: 18px;
@@ -132,19 +184,29 @@
 
         .cabinet-form-group label {
             display: block;
+
             margin-bottom: 8px;
-            font-weight: 700;
+
             font-size: 14px;
+
+            font-weight: 700;
         }
 
 
         .cabinet-input {
             width: 100%;
+
             box-sizing: border-box;
 
-            padding: 14px 16px;
+            padding:
+                14px
+                16px;
 
-            border: 1px solid #d7dde2;
+            border:
+                1px
+                solid
+                #d7dde2;
+
             border-radius: 10px;
 
             font-size: 15px;
@@ -161,7 +223,11 @@
             border-color: #607d94;
 
             box-shadow:
-                0 0 0 3px rgba(
+                0
+                0
+                0
+                3px
+                rgba(
                     96,
                     125,
                     148,
@@ -172,19 +238,28 @@
 
         .cabinet-login-button {
             width: 100%;
+
             margin-top: 5px;
         }
 
+
+        /* =====================================================
+           ERROR
+        ===================================================== */
 
         .cabinet-error {
             display: none;
 
             margin-top: 15px;
-            padding: 13px 15px;
+
+            padding:
+                13px
+                15px;
 
             border-radius: 10px;
 
             background: #fff0f0;
+
             color: #b42318;
 
             font-size: 14px;
@@ -197,7 +272,65 @@
 
 
         /* =====================================================
-           PROFILE
+           SUCCESS
+        ===================================================== */
+
+        .cabinet-success {
+            display: none;
+
+            margin-top: 15px;
+
+            padding:
+                13px
+                15px;
+
+            border-radius: 10px;
+
+            background: #e8f7ed;
+
+            color: #18753d;
+
+            font-size: 14px;
+        }
+
+
+        .cabinet-success.visible {
+            display: block;
+        }
+
+
+        /* =====================================================
+           REGISTRATION INFORMATION
+        ===================================================== */
+
+        .registration-info {
+            margin-top: 20px;
+
+            padding: 18px;
+
+            border-radius: 12px;
+
+            background: #f4f6f8;
+
+            color: #59656e;
+
+            font-size: 14px;
+
+            line-height: 1.6;
+        }
+
+
+        .registration-info strong {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #172631;
+        }
+
+
+        /* =====================================================
+           DASHBOARD
         ===================================================== */
 
         .cabinet-dashboard {
@@ -210,13 +343,21 @@
         }
 
 
+        /* =====================================================
+           PROFILE
+        ===================================================== */
+
         .profile-card {
             display: flex;
+
             align-items: center;
+
             justify-content: space-between;
+
             gap: 25px;
 
             margin-bottom: 30px;
+
             padding: 28px;
 
             background: #fff;
@@ -224,23 +365,36 @@
             border-radius: 18px;
 
             box-shadow:
-                0 10px 35px rgba(0, 0, 0, .07);
+                0
+                10px
+                35px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .07
+                );
         }
 
 
         .profile-left {
             display: flex;
+
             align-items: center;
+
             gap: 20px;
         }
 
 
         .profile-avatar {
             width: 70px;
+
             height: 70px;
 
             display: flex;
+
             align-items: center;
+
             justify-content: center;
 
             flex-shrink: 0;
@@ -248,9 +402,11 @@
             border-radius: 50%;
 
             background: #172631;
+
             color: #fff;
 
             font-size: 28px;
+
             font-weight: 700;
         }
 
@@ -263,19 +419,26 @@
             color: #7b8790;
 
             font-size: 12px;
+
             font-weight: 700;
+
             letter-spacing: 1px;
         }
 
 
         .profile-info h2 {
-            margin: 0 0 5px;
+            margin:
+                0
+                0
+                5px;
+
             font-size: 24px;
         }
 
 
         .profile-info p {
             margin: 0;
+
             color: #69757e;
         }
 
@@ -293,7 +456,10 @@
             display: grid;
 
             grid-template-columns:
-                repeat(4, 1fr);
+                repeat(
+                    4,
+                    1fr
+                );
 
             gap: 18px;
 
@@ -309,7 +475,15 @@
             border-radius: 15px;
 
             box-shadow:
-                0 8px 25px rgba(0, 0, 0, .05);
+                0
+                8px
+                25px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .05
+                );
         }
 
 
@@ -319,6 +493,7 @@
             margin-bottom: 7px;
 
             font-size: 30px;
+
             font-weight: 800;
 
             color: #172631;
@@ -327,17 +502,20 @@
 
         .cabinet-stat-label {
             color: #707b84;
+
             font-size: 14px;
         }
 
 
         /* =====================================================
-           APPLICATIONS HEADER
+           APPLICATION HEADER
         ===================================================== */
 
         .applications-header {
             display: flex;
+
             align-items: end;
+
             justify-content: space-between;
 
             gap: 20px;
@@ -347,13 +525,18 @@
 
 
         .applications-header h2 {
-            margin: 0 0 5px;
+            margin:
+                0
+                0
+                5px;
+
             font-size: 28px;
         }
 
 
         .applications-header p {
             margin: 0;
+
             color: #737e87;
         }
 
@@ -364,11 +547,12 @@
 
 
         /* =====================================================
-           APPLICATION CARD
+           APPLICATIONS
         ===================================================== */
 
         .applications-list {
             display: grid;
+
             gap: 18px;
         }
 
@@ -381,13 +565,23 @@
             border-radius: 16px;
 
             box-shadow:
-                0 8px 30px rgba(0, 0, 0, .06);
+                0
+                8px
+                30px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .06
+                );
         }
 
 
         .application-card-top {
             display: flex;
+
             align-items: flex-start;
+
             justify-content: space-between;
 
             gap: 20px;
@@ -404,7 +598,9 @@
             color: #71808b;
 
             font-size: 13px;
+
             font-weight: 700;
+
             letter-spacing: .5px;
         }
 
@@ -422,14 +618,19 @@
 
         .application-status-badge {
             display: inline-flex;
+
             align-items: center;
+
             gap: 7px;
 
-            padding: 8px 13px;
+            padding:
+                8px
+                13px;
 
             border-radius: 30px;
 
             font-size: 13px;
+
             font-weight: 700;
 
             white-space: nowrap;
@@ -438,36 +639,42 @@
 
         .status-pending {
             background: #fff4d6;
+
             color: #9a6700;
         }
 
 
         .status-review {
             background: #e8f1ff;
+
             color: #2457a6;
         }
 
 
         .status-documents {
             background: #fff0df;
+
             color: #a44b00;
         }
 
 
         .status-approved {
             background: #e8f7ed;
+
             color: #18753d;
         }
 
 
         .status-rejected {
             background: #ffe9e9;
+
             color: #b42318;
         }
 
 
         .status-completed {
             background: #e9f7f6;
+
             color: #087f75;
         }
 
@@ -480,7 +687,10 @@
             display: grid;
 
             grid-template-columns:
-                repeat(3, 1fr);
+                repeat(
+                    3,
+                    1fr
+                );
 
             gap: 15px;
 
@@ -514,7 +724,7 @@
 
 
         /* =====================================================
-           APPLICATION DESCRIPTION
+           DESCRIPTION
         ===================================================== */
 
         .application-description {
@@ -530,6 +740,7 @@
 
         .application-description strong {
             display: block;
+
             margin-bottom: 8px;
         }
 
@@ -546,22 +757,30 @@
 
 
         /* =====================================================
-           EMPLOYEE COMMENT
+           COMMENT
         ===================================================== */
 
         .application-comment {
             padding: 18px;
 
-            border-left: 3px solid #8798a6;
+            border-left:
+                3px
+                solid
+                #8798a6;
 
             background: #f4f6f8;
 
-            border-radius: 0 10px 10px 0;
+            border-radius:
+                0
+                10px
+                10px
+                0;
         }
 
 
         .application-comment strong {
             display: block;
+
             margin-bottom: 8px;
         }
 
@@ -584,7 +803,9 @@
         .applications-empty {
             display: none;
 
-            padding: 60px 25px;
+            padding:
+                60px
+                25px;
 
             text-align: center;
 
@@ -600,18 +821,23 @@
 
 
         .empty-icon {
-            font-size: 45px;
             margin-bottom: 15px;
+
+            font-size: 45px;
         }
 
 
         .applications-empty h3 {
-            margin: 0 0 10px;
+            margin:
+                0
+                0
+                10px;
         }
 
 
         .applications-empty p {
             margin: 0;
+
             color: #77818a;
         }
 
@@ -640,24 +866,37 @@
 
         .loading-spinner {
             width: 40px;
+
             height: 40px;
 
-            margin: 0 auto 15px;
+            margin:
+                0
+                auto
+                15px;
 
-            border: 4px solid #e3e7ea;
-            border-top-color: #172631;
+            border:
+                4px
+                solid
+                #e3e7ea;
+
+            border-top-color:
+                #172631;
 
             border-radius: 50%;
 
             animation:
-                olympSpin .8s linear infinite;
+                olympSpin
+                .8s
+                linear
+                infinite;
         }
 
 
         @keyframes olympSpin {
 
             to {
-                transform: rotate(360deg);
+                transform:
+                    rotate(360deg);
             }
 
         }
@@ -669,9 +908,13 @@
 
         .cabinet-footer {
             margin-top: 30px;
+
             padding-top: 30px;
 
-            border-top: 1px solid #e1e5e8;
+            border-top:
+                1px
+                solid
+                #e1e5e8;
 
             text-align: center;
 
@@ -683,6 +926,7 @@
 
         .cabinet-footer a {
             color: inherit;
+
             text-decoration: none;
         }
 
@@ -696,20 +940,32 @@
         ) {
 
             .cabinet-stats {
+
                 grid-template-columns:
-                    repeat(2, 1fr);
+                    repeat(
+                        2,
+                        1fr
+                    );
+
             }
 
 
             .application-info {
+
                 grid-template-columns:
                     1fr 1fr;
+
             }
 
 
             .profile-card {
-                align-items: flex-start;
-                flex-direction: column;
+
+                align-items:
+                    flex-start;
+
+                flex-direction:
+                    column;
+
             }
 
         }
@@ -720,78 +976,126 @@
         ) {
 
             .cabinet-hero {
+
                 padding:
-                    120px 0 80px;
+                    120px
+                    0
+                    80px;
+
             }
 
 
             .cabinet-login {
-                margin-top: -55px;
-                padding: 25px 20px;
+
+                margin-top:
+                    -55px;
+
+                padding:
+                    25px
+                    20px;
+
+            }
+
+
+            .cabinet-register {
+
+                margin-top:
+                    25px;
+
             }
 
 
             .cabinet-container {
+
                 padding:
-                    35px 15px 60px;
+                    35px
+                    15px
+                    60px;
+
             }
 
 
             .cabinet-stats {
+
                 grid-template-columns:
                     1fr 1fr;
 
                 gap: 10px;
+
             }
 
 
             .cabinet-stat {
+
                 padding: 18px;
+
             }
 
 
             .cabinet-stat-number {
+
                 font-size: 25px;
+
             }
 
 
             .profile-left {
-                align-items: flex-start;
+
+                align-items:
+                    flex-start;
+
             }
 
 
             .profile-avatar {
+
                 width: 55px;
+
                 height: 55px;
 
                 font-size: 22px;
+
             }
 
 
             .profile-info h2 {
+
                 font-size: 20px;
+
             }
 
 
             .applications-header {
-                align-items: flex-start;
-                flex-direction: column;
+
+                align-items:
+                    flex-start;
+
+                flex-direction:
+                    column;
+
             }
 
 
             .application-card {
+
                 padding: 20px;
+
             }
 
 
             .application-card-top {
-                flex-direction: column;
+
+                flex-direction:
+                    column;
+
             }
 
 
             .application-info {
+
                 grid-template-columns:
                     1fr;
+
             }
 
         }
@@ -904,10 +1208,10 @@
 
 
             <p>
-                Переглядайте подані заявки,
-                перевіряйте їх статус,
-                отримуйте інформацію про розгляд
-                та рішення державних органів.
+                Реєструйте громадянський профіль,
+                подавайте заявки до державних органів,
+                перевіряйте їх статус та отримуйте
+                офіційні рішення.
             </p>
 
         </div>
@@ -918,11 +1222,15 @@
 
 
 <!-- =====================================================
-     LOGIN
+     MAIN
 ===================================================== -->
 
 <main class="cabinet-container">
 
+
+    <!-- =================================================
+         LOGIN
+    ================================================= -->
 
     <section
         class="cabinet-login"
@@ -934,12 +1242,15 @@
 
 
         <p>
-            Введіть номер посвідчення,
-            який ви вказували під час подання заявки.
+            Увійдіть до особистого кабінету за номером
+            посвідчення та паролем.
         </p>
 
 
         <form id="cabinetLoginForm">
+
+
+            <!-- ID -->
 
             <div class="cabinet-form-group">
 
@@ -953,159 +1264,42 @@
                     class="cabinet-input"
                     id="cabinetIdNumber"
                     placeholder="Наприклад: OLYMP-0001"
-                    autocomplete="off"
+                    autocomplete="username"
                     required>
-<div class="cabinet-form-group">
 
-    <label for="cabinetPassword">
-        Пароль
-    </label>
-
-    <input
-        type="password"
-        class="cabinet-input"
-        id="cabinetPassword"
-        placeholder="Введіть пароль"
-        autocomplete="current-password"
-        required>
-
-</div>
             </div>
 
-<section
-    class="cabinet-login"
-    id="cabinetRegister">
 
-    <h2>
-        Реєстрація громадянина
-    </h2>
+            <!-- PASSWORD -->
 
-    <p>
-        Створіть особистий профіль громадянина штату Olymp.
-        Після реєстрації ви отримаєте номер посвідчення,
-        за допомогою якого зможете користуватися державними послугами.
-    </p>
+            <div class="cabinet-form-group">
 
-    <form id="citizenRegisterForm">
-
-        <div class="cabinet-form-group">
-
-            <label for="registerFullName">
-                ПІБ *
-            </label>
-
-            <input
-                type="text"
-                class="cabinet-input"
-                id="registerFullName"
-                placeholder="Ім'я Прізвище"
-                required>
-
-        </div>
+                <label for="cabinetPassword">
+                    Пароль
+                </label>
 
 
-        <div class="cabinet-form-group">
+                <input
+                    type="password"
+                    class="cabinet-input"
+                    id="cabinetPassword"
+                    placeholder="Введіть пароль"
+                    autocomplete="current-password"
+                    required>
 
-            <label for="registerBirthDate">
-                Дата народження *
-            </label>
-
-            <input
-                type="date"
-                class="cabinet-input"
-                id="registerBirthDate"
-                required>
-
-        </div>
+            </div>
 
 
-        <div class="cabinet-form-group">
+            <!-- LOGIN -->
 
-            <label for="registerPhone">
-                Телефон
-            </label>
+            <button
+                type="submit"
+                class="btn btn-primary cabinet-login-button"
+                id="cabinetLoginButton">
 
-            <input
-                type="text"
-                class="cabinet-input"
-                id="registerPhone"
-                placeholder="+380...">
+                Увійти до кабінету
 
-        </div>
-
-
-        <div class="cabinet-form-group">
-
-            <label for="registerDiscord">
-                Discord
-            </label>
-
-            <input
-                type="text"
-                class="cabinet-input"
-                id="registerDiscord"
-                placeholder="Ваш Discord">
-
-        </div>
-
-
-        <div class="cabinet-form-group">
-
-            <label for="registerEmail">
-                Email
-            </label>
-
-            <input
-                type="email"
-                class="cabinet-input"
-                id="registerEmail"
-                placeholder="example@email.com">
-
-        </div>
-
-
-        <div class="cabinet-form-group">
-
-            <label for="registerPassword">
-                Пароль *
-            </label>
-
-            <input
-                type="password"
-                class="cabinet-input"
-                id="registerPassword"
-                minlength="6"
-                placeholder="Мінімум 6 символів"
-                required>
-
-        </div>
-
-
-        <button
-            type="submit"
-            class="btn btn-primary cabinet-login-button">
-
-            Зареєструватися
-
-        </button>
-
-    </form>
-
-
-    <div
-        class="cabinet-error"
-        id="registerError">
-    </div>
-
-</section>
-<button
-    type="submit"
-    class="btn btn-primary cabinet-login-button"
-    id="cabinetLoginButton">
-
-    Увійти до кабінету
-
-</button>
+            </button>
 
 
         </form>
@@ -1115,8 +1309,210 @@
             class="cabinet-error"
             id="cabinetLoginError">
 
-            Не вдалося знайти заявки
-            за вказаним номером посвідчення.
+            Не вдалося виконати вхід.
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         REGISTRATION
+    ================================================= -->
+
+    <section
+        class="cabinet-login cabinet-register"
+        id="cabinetRegister">
+
+        <h2>
+            Реєстрація громадянина
+        </h2>
+
+
+        <p>
+            Створіть особистий профіль громадянина
+            штату Olymp. Після реєстрації система
+            автоматично створить номер посвідчення.
+        </p>
+
+
+        <form id="citizenRegisterForm">
+
+
+            <!-- FULL NAME -->
+
+            <div class="cabinet-form-group">
+
+                <label for="registerFullName">
+                    ПІБ *
+                </label>
+
+
+                <input
+                    type="text"
+                    class="cabinet-input"
+                    id="registerFullName"
+                    placeholder="Ім'я Прізвище"
+                    autocomplete="name"
+                    required>
+
+            </div>
+
+
+            <!-- BIRTH DATE -->
+
+            <div class="cabinet-form-group">
+
+                <label for="registerBirthDate">
+                    Дата народження *
+                </label>
+
+
+                <input
+                    type="date"
+                    class="cabinet-input"
+                    id="registerBirthDate"
+                    required>
+
+            </div>
+
+
+            <!-- PHONE -->
+
+            <div class="cabinet-form-group">
+
+                <label for="registerPhone">
+                    Телефон
+                </label>
+
+
+                <input
+                    type="tel"
+                    class="cabinet-input"
+                    id="registerPhone"
+                    placeholder="+380..."
+                    autocomplete="tel">
+
+            </div>
+
+
+            <!-- DISCORD -->
+
+            <div class="cabinet-form-group">
+
+                <label for="registerDiscord">
+                    Discord
+                </label>
+
+
+                <input
+                    type="text"
+                    class="cabinet-input"
+                    id="registerDiscord"
+                    placeholder="Ваш Discord">
+
+            </div>
+
+
+            <!-- EMAIL -->
+
+            <div class="cabinet-form-group">
+
+                <label for="registerEmail">
+                    Email
+                </label>
+
+
+                <input
+                    type="email"
+                    class="cabinet-input"
+                    id="registerEmail"
+                    placeholder="example@email.com"
+                    autocomplete="email">
+
+            </div>
+
+
+            <!-- PASSWORD -->
+
+            <div class="cabinet-form-group">
+
+                <label for="registerPassword">
+                    Пароль *
+                </label>
+
+
+                <input
+                    type="password"
+                    class="cabinet-input"
+                    id="registerPassword"
+                    minlength="6"
+                    placeholder="Мінімум 6 символів"
+                    autocomplete="new-password"
+                    required>
+
+            </div>
+
+
+            <!-- PASSWORD CONFIRM -->
+
+            <div class="cabinet-form-group">
+
+                <label for="registerPasswordConfirm">
+                    Повторіть пароль *
+                </label>
+
+
+                <input
+                    type="password"
+                    class="cabinet-input"
+                    id="registerPasswordConfirm"
+                    minlength="6"
+                    placeholder="Повторіть пароль"
+                    autocomplete="new-password"
+                    required>
+
+            </div>
+
+
+            <!-- REGISTER -->
+
+            <button
+                type="submit"
+                class="btn btn-primary cabinet-login-button"
+                id="registerButton">
+
+                Зареєструватися
+
+            </button>
+
+
+        </form>
+
+
+        <div
+            class="cabinet-error"
+            id="registerError">
+        </div>
+
+
+        <div
+            class="cabinet-success"
+            id="registerSuccess">
+        </div>
+
+
+        <div class="registration-info">
+
+            <strong>
+                Що відбувається після реєстрації?
+            </strong>
+
+            Система створює ваш громадянський профіль,
+            присвоює унікальний номер посвідчення
+            формату <strong>OLYMP-0001</strong> та
+            дозволяє користуватися державними послугами
+            навіть якщо ви ще не подавали жодної заявки.
 
         </div>
 
@@ -1164,6 +1560,7 @@
                     <p>
 
                         Посвідчення:
+
                         <strong id="profileId">
                             —
                         </strong>
@@ -1271,11 +1668,13 @@
 
         <div class="applications-header">
 
+
             <div>
 
                 <h2>
                     Мої заявки
                 </h2>
+
 
                 <p>
                     Історія звернень до державних органів.
@@ -1304,9 +1703,11 @@
 
             <div class="loading-spinner"></div>
 
+
             <strong>
                 Завантаження заявок...
             </strong>
+
 
             <p>
                 Зачекайте, система отримує
@@ -1321,7 +1722,6 @@
         <div
             class="applications-list"
             id="applicationsList">
-
         </div>
 
 
@@ -1342,12 +1742,14 @@
 
 
             <p>
-                За вашим номером посвідчення
-                поки що немає зареєстрованих заявок.
+                За вашим профілем поки що немає
+                зареєстрованих заявок.
             </p>
 
         </div>
 
+
+        <!-- FOOTER -->
 
         <div class="cabinet-footer">
 
@@ -1355,11 +1757,11 @@
                 Офіційний портал Уряду штату Olymp
             </p>
 
+
             <p>
 
                 <a href="index.html">
                     ← Повернутися на головну
-
                 </a>
 
             </p>
@@ -1389,7 +1791,8 @@
 
         <button
             class="modal-close"
-            id="closeCabinetApplicationModal">
+            id="closeCabinetApplicationModal"
+            type="button">
 
             ×
 
@@ -1420,12 +1823,12 @@
 
             <button
                 class="btn btn-light"
-                id="closeCabinetApplicationModalButton">
+                id="closeCabinetApplicationModalButton"
+                type="button">
 
                 Закрити
 
             </button>
-
 
         </div>
 
@@ -1442,4 +1845,5 @@
 
 
 </body>
+
 </html>
