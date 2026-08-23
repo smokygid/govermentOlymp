@@ -1856,35 +1856,51 @@
         </form>
 
 
-        <div
-            class="success-message"
-            id="successMessage">
+<div
+    class="success-message"
+    id="successMessage">
 
-            <div>
-                ✓
-            </div>
+    <div class="success-icon">
+        ✓
+    </div>
 
-            <h3>
-                Заявку прийнято
-            </h3>
+    <h3>
+        Заявку прийнято
+    </h3>
 
-            <p>
-                Ваше звернення успішно сформовано.
-            </p>
+    <p>
+        Ваше звернення успішно сформовано.
+    </p>
 
-            <strong id="applicationNumber">
-                № OLYMP-000001
-            </strong>
+    <strong
+        class="application-number"
+        id="applicationNumber">
+        № OLYMP-000001
+    </strong>
 
-            <button
-                class="btn btn-primary"
-                onclick="closeApplicationModal()">
+    <div
+        class="application-status"
+        id="applicationStatus">
 
-                Закрити
+        <span class="status-label">
+            Статус:
+        </span>
 
-            </button>
+        <span class="status-badge pending">
+            🟡 На розгляді
+        </span>
 
-        </div>
+    </div>
+
+    <button
+        class="btn btn-primary"
+        onclick="closeApplicationModal()">
+
+        Закрити
+
+    </button>
+
+</div>
 
     </div>
 
