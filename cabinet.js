@@ -59,8 +59,6 @@ function initializeCabinet() {
 
     initializeApplicationModal();
 
-    initializeNewApplicationButton();
-
     restoreSession();
 
 }
@@ -73,44 +71,30 @@ function initializeCabinet() {
 function initializeHeader() {
 
     const header =
-        document.getElementById(
-            "header"
-        );
-
+        document.getElementById("header");
 
     const menuButton =
-        document.getElementById(
-            "menuButton"
-        );
-
+        document.getElementById("menuButton");
 
     const mainMenu =
-        document.getElementById(
-            "mainMenu"
-        );
+        document.getElementById("mainMenu");
 
 
-    /*
-     * HEADER SCROLL
-     */
+    /* =====================================================
+       HEADER SCROLL
+    ===================================================== */
 
     if (header) {
 
         function updateHeader() {
 
-            if (
-                window.scrollY > 50
-            ) {
+            if (window.scrollY > 50) {
 
-                header.classList.add(
-                    "scrolled"
-                );
+                header.classList.add("scrolled");
 
             } else {
 
-                header.classList.remove(
-                    "scrolled"
-                );
+                header.classList.remove("scrolled");
 
             }
 
@@ -131,9 +115,9 @@ function initializeHeader() {
     }
 
 
-    /*
-     * MOBILE MENU
-     */
+    /* =====================================================
+       MOBILE MENU
+    ===================================================== */
 
     if (
         menuButton &&
@@ -157,9 +141,7 @@ function initializeHeader() {
 
                 menuButton.setAttribute(
                     "aria-expanded",
-                    String(
-                        opened
-                    )
+                    opened
                 );
 
             }
@@ -263,9 +245,9 @@ async function loginCitizen() {
     hideLoginError();
 
 
-    /*
-     * VALIDATION
-     */
+    /* =====================================================
+       VALIDATION
+    ===================================================== */
 
     if (!idNumber) {
 
@@ -281,31 +263,21 @@ async function loginCitizen() {
     }
 
 
-    /*
-     * LOADING
-     */
+    /* =====================================================
+       LOADING
+    ===================================================== */
 
     setCabinetButtonLoading(
         button,
         true,
-        "Пошук..."
+        "Відкриття кабінету..."
     );
 
 
     try {
 
-        /*
-         * Загружаем профиль.
-         *
-         * ВАЖНО:
-         * Code.gs должен поддерживать:
-         *
-         * action=profile
-         * idNumber=OLYMP-0001
-         */
-
         const result =
-            await fetchProfile(
+            await fetchUserProfile(
                 idNumber
             );
 
@@ -319,40 +291,57 @@ async function loginCitizen() {
                 result &&
                 result.message
                     ? result.message
-                    : "Не вдалося отримати дані."
+                    : "Не вдалося отримати профіль."
             );
 
         }
 
 
         /*
-         * Профиль может существовать
-         * даже без заявок.
+         * ВАЖНО:
+         *
+         * Даже если заявок 0 —
+         * профиль всё равно открывается.
          */
 
         currentApplications =
             normalizeApplications(
-                result.applications
-            );
-
-
-        currentCitizen =
-            createCitizenProfile(
-                idNumber,
-                result
+                result.applications || []
             );
 
 
         /*
-         * СОХРАНЯЕМ СЕССИЮ
+         * Берём ПІБ из профиля,
+         * если Google Apps Script его вернул.
          */
+
+        const profile =
+            result.profile || {};
+
+
+        currentCitizen = {
+
+            fullName:
+                profile.fullName ||
+                "Громадянин Olymp",
+
+            idNumber:
+                profile.idNumber ||
+                idNumber,
+
+            contact:
+                profile.contact ||
+                ""
+
+        };
+
 
         saveSession();
 
 
-        /*
-         * ПОКАЗЫВАЕМ КАБИНЕТ
-         */
+        /* =================================================
+           OPEN DASHBOARD
+        ================================================= */
 
         showDashboard();
 
@@ -361,6 +350,7 @@ async function loginCitizen() {
         renderStatistics();
 
         renderApplications();
+
 
     } catch (error) {
 
@@ -381,7 +371,7 @@ async function loginCitizen() {
         setCabinetButtonLoading(
             button,
             false,
-            "Переглянути мій кабінет"
+            "Переглянути мої заявки"
         );
 
     }
@@ -390,16 +380,14 @@ async function loginCitizen() {
 
 
 /* =========================================================
-   FETCH PROFILE
+   FETCH USER PROFILE
 ========================================================= */
 
-async function fetchProfile(
+async function fetchUserProfile(
     idNumber
 ) {
 
-    if (
-        !GOOGLE_SCRIPT_URL
-    ) {
+    if (!GOOGLE_SCRIPT_URL) {
 
         throw new Error(
             "Google Apps Script URL не налаштовано."
@@ -427,9 +415,7 @@ async function fetchProfile(
         );
 
 
-    if (
-        !response.ok
-    ) {
+    if (!response.ok) {
 
         throw new Error(
             "HTTP " +
@@ -475,14 +461,13 @@ async function fetchProfile(
 
 /* =========================================================
    FETCH APPLICATIONS
-   Оставлено для совместимости
 ========================================================= */
 
 async function fetchApplications(
     idNumber
 ) {
 
-    return await fetchProfile(
+    return fetchUserProfile(
         idNumber
     );
 
@@ -580,6 +565,7 @@ function normalizeApplication(
                     "Посвідчення"
                 ]
             ) ||
+            currentCitizen?.idNumber ||
             "",
 
 
@@ -700,10 +686,6 @@ function getField(
     possibleNames
 ) {
 
-    /*
-     * Точное совпадение
-     */
-
     for (
         const name of possibleNames
     ) {
@@ -735,10 +717,6 @@ function getField(
     }
 
 
-    /*
-     * Без учета регистра
-     */
-
     const objectKeys =
         Object.keys(
             object
@@ -757,9 +735,7 @@ function getField(
             );
 
 
-        if (
-            foundKey
-        ) {
+        if (foundKey) {
 
             const value =
                 object[foundKey];
@@ -782,112 +758,6 @@ function getField(
 
 
     return "";
-
-}
-
-
-/* =========================================================
-   CREATE CITIZEN PROFILE
-========================================================= */
-
-function createCitizenProfile(
-    idNumber,
-    result
-) {
-
-    const profile =
-        result &&
-        result.profile
-            ? result.profile
-            : {};
-
-
-    const applications =
-        result &&
-        Array.isArray(
-            result.applications
-        )
-            ? result.applications
-            : [];
-
-
-    const firstApplication =
-        applications.length
-            ? applications[0]
-            : null;
-
-
-    /*
-     * ПРИОРИТЕТ:
-     *
-     * 1. profile.fullName
-     * 2. первая заявка
-     * 3. Громадянин Olymp
-     */
-
-    const fullName =
-        cleanText(
-            profile.fullName
-        ) ||
-        (
-            firstApplication &&
-            cleanText(
-                firstApplication.fullName
-            )
-        ) ||
-        "Громадянин Olymp";
-
-
-    const contact =
-        cleanText(
-            profile.contact
-        ) ||
-        (
-            firstApplication &&
-            cleanText(
-                firstApplication.contact
-            )
-        ) ||
-        "Не вказано";
-
-
-    return {
-
-        fullName:
-            fullName,
-
-        idNumber:
-            idNumber,
-
-        contact:
-            contact
-
-    };
-
-}
-
-
-/* =========================================================
-   CLEAN TEXT
-========================================================= */
-
-function cleanText(
-    value
-) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return "";
-
-    }
-
-
-    return String(
-        value
-    ).trim();
 
 }
 
@@ -973,14 +843,12 @@ function showLogin() {
 
 
 /* =========================================================
-   RENDER PROFILE
+   RENDER CITIZEN PROFILE
 ========================================================= */
 
 function renderCitizenProfile() {
 
-    if (
-        !currentCitizen
-    ) {
+    if (!currentCitizen) {
 
         return;
 
@@ -1008,7 +876,8 @@ function renderCitizenProfile() {
     if (name) {
 
         name.textContent =
-            currentCitizen.fullName;
+            currentCitizen.fullName ||
+            "Громадянин Olymp";
 
     }
 
@@ -1016,7 +885,8 @@ function renderCitizenProfile() {
     if (id) {
 
         id.textContent =
-            currentCitizen.idNumber;
+            currentCitizen.idNumber ||
+            "—";
 
     }
 
@@ -1027,45 +897,6 @@ function renderCitizenProfile() {
             getInitials(
                 currentCitizen.fullName
             );
-
-    }
-
-
-    /*
-     * Дополнительные поля,
-     * если они есть в HTML
-     */
-
-    setTextIfExists(
-        "profileContact",
-        currentCitizen.contact
-    );
-
-}
-
-
-/* =========================================================
-   SET TEXT IF EXISTS
-========================================================= */
-
-function setTextIfExists(
-    id,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if (
-        element &&
-        value
-    ) {
-
-        element.textContent =
-            value;
 
     }
 
@@ -1080,9 +911,7 @@ function getInitials(
     name
 ) {
 
-    if (
-        !name
-    ) {
+    if (!name) {
 
         return "O";
 
@@ -1092,12 +921,8 @@ function getInitials(
     const words =
         name
             .trim()
-            .split(
-                /\s+/
-            )
-            .filter(
-                Boolean
-            );
+            .split(/\s+/)
+            .filter(Boolean);
 
 
     if (
@@ -1105,10 +930,7 @@ function getInitials(
     ) {
 
         return words[0]
-            .substring(
-                0,
-                1
-            )
+            .substring(0, 1)
             .toUpperCase();
 
     }
@@ -1136,11 +958,7 @@ function renderStatistics() {
 
     let approved = 0;
 
-    let completed = 0;
-
     let rejected = 0;
-
-    let closed = 0;
 
 
     currentApplications.forEach(
@@ -1152,29 +970,32 @@ function renderStatistics() {
                 );
 
 
-            switch (
-                status
+            if (
+                status === "pending" ||
+                status === "review" ||
+                status === "documents"
             ) {
 
-                case "pending":
-                    pending++;
-                    break;
+                pending++;
 
-                case "approved":
-                    approved++;
-                    break;
+            }
 
-                case "completed":
-                    completed++;
-                    break;
 
-                case "rejected":
-                    rejected++;
-                    break;
+            if (
+                status === "approved" ||
+                status === "completed"
+            ) {
 
-                case "closed":
-                    closed++;
-                    break;
+                approved++;
+
+            }
+
+
+            if (
+                status === "rejected"
+            ) {
+
+                rejected++;
 
             }
 
@@ -1201,20 +1022,8 @@ function renderStatistics() {
 
 
     setText(
-        "completedApplications",
-        completed
-    );
-
-
-    setText(
         "rejectedApplications",
         rejected
-    );
-
-
-    setText(
-        "closedApplications",
-        closed
     );
 
 }
@@ -1289,11 +1098,12 @@ function renderApplications() {
 
 
     /*
-     * НЕТ ЗАЯВОК
+     * ЧЕЛОВЕК ЕСТЬ,
+     * НО ЗАЯВОК НЕТ
      */
 
     if (
-        !currentApplications.length
+        currentApplications.length === 0
     ) {
 
         if (empty) {
@@ -1303,21 +1113,30 @@ function renderApplications() {
             );
 
 
-            /*
-             * Если внутри empty есть
-             * счетчик / текст — обновляем
-             */
-
-            const emptyTitle =
+            const title =
                 empty.querySelector(
-                    "[data-empty-title]"
+                    "h3"
                 );
 
 
-            if (emptyTitle) {
+            const text =
+                empty.querySelector(
+                    "p"
+                );
 
-                emptyTitle.textContent =
+
+            if (title) {
+
+                title.textContent =
                     "Заявок поки немає";
+
+            }
+
+
+            if (text) {
+
+                text.textContent =
+                    "Ви ще не подавали заявок до державних органів. Тут вони з’являться після подання.";
 
             }
 
@@ -1328,10 +1147,6 @@ function renderApplications() {
 
     }
 
-
-    /*
-     * ЗАЯВКИ ЕСТЬ
-     */
 
     if (empty) {
 
@@ -1369,7 +1184,7 @@ function renderApplications() {
 
 
 /* =========================================================
-   SORT APPLICATIONS
+   SORT
 ========================================================= */
 
 function compareApplications(
@@ -1395,7 +1210,7 @@ function compareApplications(
 
 
 /* =========================================================
-   CREATE APPLICATION CARD
+   APPLICATION CARD
 ========================================================= */
 
 function createApplicationCard(
@@ -1466,8 +1281,7 @@ function createApplicationCard(
                 <strong>
                     ${escapeHtml(
                         formatDate(
-                            application.createdAt ||
-                            application.date
+                            application.createdAt
                         )
                     )}
                 </strong>
@@ -1495,13 +1309,15 @@ function createApplicationCard(
             <div class="application-info-item">
 
                 <span>
-                    Відповідальний
+                    Останнє оновлення
                 </span>
 
                 <strong>
                     ${escapeHtml(
-                        application.responsible ||
-                        "Не призначено"
+                        formatDate(
+                            application.updatedAt ||
+                            application.createdAt
+                        )
                     )}
                 </strong>
 
@@ -1528,6 +1344,7 @@ function createApplicationCard(
         ${
             application.comment
                 ? `
+
                     <div class="application-comment">
 
                         <strong>
@@ -1541,6 +1358,7 @@ function createApplicationCard(
                         </p>
 
                     </div>
+
                 `
                 : ""
         }
@@ -1593,7 +1411,7 @@ function createApplicationCard(
 
 
 /* =========================================================
-   STATUS INFORMATION
+   STATUS
 ========================================================= */
 
 function getStatusInfo(
@@ -1606,89 +1424,68 @@ function getStatusInfo(
         );
 
 
-    switch (
-        normalized
-    ) {
+    switch (normalized) {
 
         case "approved":
 
             return {
-
-                label:
-                    "Прийнято",
-
-                className:
-                    "status-approved",
-
-                icon:
-                    "🔵"
-
-            };
-
-
-        case "completed":
-
-            return {
-
-                label:
-                    "Виконано",
-
-                className:
-                    "status-completed",
-
-                icon:
-                    "🟢"
-
+                label: "Прийнято",
+                className: "status-approved",
+                icon: "🔵"
             };
 
 
         case "rejected":
 
             return {
+                label: "Відхилено",
+                className: "status-rejected",
+                icon: "🔴"
+            };
 
-                label:
-                    "Відхилено",
 
-                className:
-                    "status-rejected",
+        case "documents":
 
-                icon:
-                    "🔴"
+            return {
+                label: "Потрібні документи",
+                className: "status-documents",
+                icon: "🟠"
+            };
 
+
+        case "review":
+
+            return {
+                label: "Перевірка",
+                className: "status-review",
+                icon: "🔵"
+            };
+
+
+        case "completed":
+
+            return {
+                label: "Виконано",
+                className: "status-completed",
+                icon: "🟢"
             };
 
 
         case "closed":
 
             return {
-
-                label:
-                    "Закрито",
-
-                className:
-                    "status-closed",
-
-                icon:
-                    "⚫"
-
+                label: "Закрито",
+                className: "status-completed",
+                icon: "⚫"
             };
 
-
-        case "pending":
 
         default:
 
             return {
-
-                label:
-                    "На розгляді",
-
-                className:
-                    "status-pending",
-
-                icon:
-                    "🟡"
-
+                label: "На розгляді",
+                className: "status-pending",
+                icon: "🟡"
             };
 
     }
@@ -1715,24 +1512,12 @@ function normalizeStatus(
     if (
         value.includes("схвал") ||
         value.includes("одобр") ||
+        value.includes("прийня") ||
         value.includes("approved") ||
-        value.includes("approve") ||
-        value.includes("прийня")
+        value.includes("approve")
     ) {
 
         return "approved";
-
-    }
-
-
-    if (
-        value.includes("викон") ||
-        value.includes("заверш") ||
-        value.includes("completed") ||
-        value.includes("complete")
-    ) {
-
-        return "completed";
 
     }
 
@@ -1750,9 +1535,42 @@ function normalizeStatus(
 
 
     if (
+        value.includes("документ") ||
+        value.includes("documents") ||
+        value.includes("document")
+    ) {
+
+        return "documents";
+
+    }
+
+
+    if (
+        value.includes("перевір") ||
+        value.includes("провер") ||
+        value.includes("review")
+    ) {
+
+        return "review";
+
+    }
+
+
+    if (
+        value.includes("викон") ||
+        value.includes("заверш") ||
+        value.includes("completed") ||
+        value.includes("complete")
+    ) {
+
+        return "completed";
+
+    }
+
+
+    if (
         value.includes("закрит") ||
-        value.includes("closed") ||
-        value.includes("close")
+        value.includes("closed")
     ) {
 
         return "closed";
@@ -1766,7 +1584,7 @@ function normalizeStatus(
 
 
 /* =========================================================
-   OPEN APPLICATION DETAILS
+   APPLICATION DETAILS
 ========================================================= */
 
 function openApplicationDetails(
@@ -1922,8 +1740,7 @@ function openApplicationDetails(
                 <strong>
                     ${escapeHtml(
                         formatDate(
-                            application.createdAt ||
-                            application.date
+                            application.createdAt
                         )
                     )}
                 </strong>
@@ -1934,13 +1751,15 @@ function openApplicationDetails(
             <div class="application-info-item">
 
                 <span>
-                    Відповідальний
+                    Останнє оновлення
                 </span>
 
                 <strong>
                     ${escapeHtml(
-                        application.responsible ||
-                        "Не призначено"
+                        formatDate(
+                            application.updatedAt ||
+                            application.createdAt
+                        )
                     )}
                 </strong>
 
@@ -1964,25 +1783,41 @@ function openApplicationDetails(
         </div>
 
 
-        <div class="application-comment">
+        ${
+            application.comment
+                ? `
 
-            <strong>
-                Коментар державного службовця
-            </strong>
+                    <div class="application-comment">
 
-            <p>
+                        <strong>
+                            Коментар державного службовця
+                        </strong>
 
-                ${
-                    application.comment
-                        ? escapeHtml(
-                            application.comment
-                        )
-                        : "Коментар поки що відсутній."
-                }
+                        <p>
+                            ${escapeHtml(
+                                application.comment
+                            )}
+                        </p>
 
-            </p>
+                    </div>
 
-        </div>
+                `
+                : `
+
+                    <div class="application-comment">
+
+                        <strong>
+                            Коментар державного службовця
+                        </strong>
+
+                        <p>
+                            Коментар поки що відсутній.
+                        </p>
+
+                    </div>
+
+                `
+        }
 
     `;
 
@@ -2006,7 +1841,7 @@ function openApplicationDetails(
 
 
 /* =========================================================
-   APPLICATION MODAL
+   MODAL
 ========================================================= */
 
 function initializeApplicationModal() {
@@ -2088,7 +1923,7 @@ function initializeApplicationModal() {
 
 
 /* =========================================================
-   CLOSE APPLICATION DETAILS
+   CLOSE MODAL
 ========================================================= */
 
 function closeApplicationDetails() {
@@ -2117,45 +1952,9 @@ function closeApplicationDetails() {
     );
 
 
-    selectedApplication =
-        null;
-
-
-    updateBodyModalState();
-
-}
-
-
-/* =========================================================
-   BODY MODAL STATE
-========================================================= */
-
-function updateBodyModalState() {
-
-    const modal =
-        document.getElementById(
-            "cabinetApplicationModal"
-        );
-
-
-    if (
-        modal &&
-        modal.classList.contains(
-            "active"
-        )
-    ) {
-
-        document.body.classList.add(
-            "modal-open"
-        );
-
-    } else {
-
-        document.body.classList.remove(
-            "modal-open"
-        );
-
-    }
+    document.body.classList.remove(
+        "modal-open"
+    );
 
 }
 
@@ -2252,7 +2051,7 @@ async function refreshApplications() {
     try {
 
         const result =
-            await fetchProfile(
+            await fetchUserProfile(
                 currentCitizen.idNumber
             );
 
@@ -2266,7 +2065,7 @@ async function refreshApplications() {
                 result &&
                 result.message
                     ? result.message
-                    : "Не вдалося оновити дані."
+                    : "Не вдалося оновити профіль."
             );
 
         }
@@ -2274,20 +2073,34 @@ async function refreshApplications() {
 
         currentApplications =
             normalizeApplications(
-                result.applications
+                result.applications || []
             );
 
 
         /*
-         * Обновляем профиль даже если
-         * заявок после обновления нет.
+         * Обновляем профиль,
+         * даже если заявок стало 0.
          */
 
-        currentCitizen =
-            createCitizenProfile(
-                currentCitizen.idNumber,
-                result
-            );
+        if (result.profile) {
+
+            currentCitizen.fullName =
+                result.profile.fullName ||
+                currentCitizen.fullName ||
+                "Громадянин Olymp";
+
+
+            currentCitizen.contact =
+                result.profile.contact ||
+                currentCitizen.contact ||
+                "";
+
+
+            currentCitizen.idNumber =
+                result.profile.idNumber ||
+                currentCitizen.idNumber;
+
+        }
 
 
         saveSession();
@@ -2298,6 +2111,7 @@ async function refreshApplications() {
         renderStatistics();
 
         renderApplications();
+
 
     } catch (error) {
 
@@ -2339,53 +2153,6 @@ async function refreshApplications() {
         );
 
     }
-
-}
-
-
-/* =========================================================
-   NEW APPLICATION BUTTON
-========================================================= */
-
-function initializeNewApplicationButton() {
-
-    const buttons =
-        document.querySelectorAll(
-            "[data-new-application]"
-        );
-
-
-    buttons.forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    openNewApplicationPage();
-
-                }
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   OPEN NEW APPLICATION PAGE
-========================================================= */
-
-function openNewApplicationPage() {
-
-    /*
-     * Если у тебя страница называется иначе,
-     * поменяй только эту строку.
-     */
-
-    window.location.href =
-        "services.html";
 
 }
 
@@ -2467,6 +2234,7 @@ function logoutCitizen() {
 
     hideLoginError();
 
+
     showLogin();
 
 
@@ -2479,14 +2247,12 @@ function logoutCitizen() {
 
 
 /* =========================================================
-   SESSION
+   SAVE SESSION
 ========================================================= */
 
 function saveSession() {
 
-    if (
-        !currentCitizen
-    ) {
+    if (!currentCitizen) {
 
         return;
 
@@ -2503,7 +2269,10 @@ function saveSession() {
                     currentCitizen.idNumber,
 
                 fullName:
-                    currentCitizen.fullName
+                    currentCitizen.fullName,
+
+                contact:
+                    currentCitizen.contact || ""
 
             })
         );
@@ -2526,8 +2295,7 @@ function saveSession() {
 
 async function restoreSession() {
 
-    let session =
-        null;
+    let session = null;
 
 
     try {
@@ -2590,7 +2358,7 @@ async function restoreSession() {
     try {
 
         const result =
-            await fetchProfile(
+            await fetchUserProfile(
                 session.idNumber
             );
 
@@ -2605,22 +2373,33 @@ async function restoreSession() {
         }
 
 
-        /*
-         * Даже если заявок НЕТ —
-         * всё равно открываем кабинет.
-         */
-
         currentApplications =
             normalizeApplications(
-                result.applications
+                result.applications || []
             );
 
 
-        currentCitizen =
-            createCitizenProfile(
+        const profile =
+            result.profile || {};
+
+
+        currentCitizen = {
+
+            fullName:
+                profile.fullName ||
+                session.fullName ||
+                "Громадянин Olymp",
+
+            idNumber:
+                profile.idNumber ||
                 session.idNumber,
-                result
-            );
+
+            contact:
+                profile.contact ||
+                session.contact ||
+                ""
+
+        };
 
 
         showDashboard();
@@ -2768,9 +2547,7 @@ function getFriendlyErrorMessage(
 
     if (!error) {
 
-        return (
-            "Сталася невідома помилка."
-        );
+        return "Сталася невідома помилка.";
 
     }
 
@@ -2790,7 +2567,7 @@ function getFriendlyErrorMessage(
 
         return (
             "Не вдалося підключитися до сервера. " +
-            "Перевірте URL Google Apps Script та його розгортання."
+            "Перевірте Google Apps Script."
         );
 
     }
@@ -2835,18 +2612,12 @@ function parseDate(
     value
 ) {
 
-    if (
-        !value
-    ) {
+    if (!value) {
 
         return 0;
 
     }
 
-
-    /*
-     * ISO / обычная дата
-     */
 
     const date =
         new Date(
@@ -2865,65 +2636,30 @@ function parseDate(
     }
 
 
-    /*
-     * DD.MM.YYYY HH:mm:ss
-     */
-
     const match =
-        String(
-            value
-        ).match(
-            /^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/
+        String(value).match(
+            /^(\d{1,2})\.(\d{1,2})\.(\d{4})/
         );
 
 
-    if (
-        match
-    ) {
+    if (match) {
 
         const day =
-            Number(
-                match[1]
-            );
+            Number(match[1]);
 
 
         const month =
-            Number(
-                match[2]
-            ) - 1;
+            Number(match[2]) - 1;
 
 
         const year =
-            Number(
-                match[3]
-            );
-
-
-        const hour =
-            Number(
-                match[4] || 0
-            );
-
-
-        const minute =
-            Number(
-                match[5] || 0
-            );
-
-
-        const second =
-            Number(
-                match[6] || 0
-            );
+            Number(match[3]);
 
 
         return new Date(
             year,
             month,
-            day,
-            hour,
-            minute,
-            second
+            day
         ).getTime();
 
     }
@@ -2942,9 +2678,7 @@ function formatDate(
     value
 ) {
 
-    if (
-        !value
-    ) {
+    if (!value) {
 
         return "—";
 
@@ -2959,40 +2693,25 @@ function formatDate(
 
     if (!timestamp) {
 
-        return String(
-            value
-        );
+        return String(value);
 
     }
 
 
     const date =
-        new Date(
-            timestamp
-        );
+        new Date(timestamp);
 
 
     return new Intl.DateTimeFormat(
         "uk-UA",
         {
-            day:
-                "2-digit",
-
-            month:
-                "2-digit",
-
-            year:
-                "numeric",
-
-            hour:
-                "2-digit",
-
-            minute:
-                "2-digit"
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
         }
-    ).format(
-        date
-    );
+    ).format(date);
 
 }
 
@@ -3015,25 +2734,28 @@ function escapeHtml(
     }
 
 
-    return String(
-        value
-    )
+    return String(value)
+
         .replace(
             /&/g,
             "&amp;"
         )
+
         .replace(
             /</g,
             "&lt;"
         )
+
         .replace(
             />/g,
             "&gt;"
         )
+
         .replace(
             /"/g,
             "&quot;"
         )
+
         .replace(
             /'/g,
             "&#039;"
