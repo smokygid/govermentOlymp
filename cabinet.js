@@ -1,21 +1,17 @@
 /* =========================================================
    OLYMP STATE GOVERNMENT
-   PERSONAL CABINET 3.1
+   PERSONAL CABINET 4.0
    ---------------------------------------------------------
-   Функции:
-
    • Регистрация гражданина
-   • Вход по номеру удостоверения + паролю
-   • Автоматическое восстановление сессии
+   • После регистрации переход к входу
+   • Автоматическая подстановка ID
+   • Вход по ID + паролю
+   • Восстановление сессии
    • Профиль гражданина
-   • Заявки гражданина
-   • Статистика заявок
-   • Просмотр подробностей заявки
+   • Заявки
+   • Статистика
+   • Просмотр заявки
    • Выход
-   • Обновление заявок
-   • Работа при 0 заявок
-   • Email при регистрации
-   • Совместимость с текущим cabinet.html
 ========================================================= */
 
 
@@ -31,8 +27,7 @@ const CABINET_API_URL =
    STORAGE
 ========================================================= */
 
-const STORAGE_KEY =
-    "olymp_citizen";
+const STORAGE_KEY = "olymp_citizen";
 
 
 /* =========================================================
@@ -40,34 +35,22 @@ const STORAGE_KEY =
 ========================================================= */
 
 const loginForm =
-    document.getElementById(
-        "cabinetLoginForm"
-    );
+    document.getElementById("cabinetLoginForm");
 
 const loginId =
-    document.getElementById(
-        "cabinetIdNumber"
-    );
+    document.getElementById("cabinetIdNumber");
 
 const loginPassword =
-    document.getElementById(
-        "cabinetPassword"
-    );
+    document.getElementById("cabinetPassword");
 
 const loginError =
-    document.getElementById(
-        "cabinetLoginError"
-    );
+    document.getElementById("cabinetLoginError");
 
 const loginButton =
-    document.getElementById(
-        "cabinetLoginButton"
-    );
+    document.getElementById("cabinetLoginButton");
 
 const cabinetLogin =
-    document.getElementById(
-        "cabinetLogin"
-    );
+    document.getElementById("cabinetLogin");
 
 
 /* =========================================================
@@ -75,64 +58,40 @@ const cabinetLogin =
 ========================================================= */
 
 const cabinetRegister =
-    document.getElementById(
-        "cabinetRegister"
-    );
+    document.getElementById("cabinetRegister");
 
 const registerForm =
-    document.getElementById(
-        "citizenRegisterForm"
-    );
+    document.getElementById("citizenRegisterForm");
 
 const registerFullName =
-    document.getElementById(
-        "registerFullName"
-    );
+    document.getElementById("registerFullName");
 
 const registerBirthDate =
-    document.getElementById(
-        "registerBirthDate"
-    );
+    document.getElementById("registerBirthDate");
 
 const registerPhone =
-    document.getElementById(
-        "registerPhone"
-    );
+    document.getElementById("registerPhone");
 
 const registerDiscord =
-    document.getElementById(
-        "registerDiscord"
-    );
+    document.getElementById("registerDiscord");
 
 const registerEmail =
-    document.getElementById(
-        "registerEmail"
-    );
+    document.getElementById("registerEmail");
 
 const registerPassword =
-    document.getElementById(
-        "registerPassword"
-    );
+    document.getElementById("registerPassword");
 
 const registerPasswordConfirm =
-    document.getElementById(
-        "registerPasswordConfirm"
-    );
+    document.getElementById("registerPasswordConfirm");
 
 const registerButton =
-    document.getElementById(
-        "registerButton"
-    );
+    document.getElementById("registerButton");
 
 const registerError =
-    document.getElementById(
-        "registerError"
-    );
+    document.getElementById("registerError");
 
 const registerSuccess =
-    document.getElementById(
-        "registerSuccess"
-    );
+    document.getElementById("registerSuccess");
 
 
 /* =========================================================
@@ -140,49 +99,31 @@ const registerSuccess =
 ========================================================= */
 
 const cabinetDashboard =
-    document.getElementById(
-        "cabinetDashboard"
-    );
+    document.getElementById("cabinetDashboard");
 
 const logoutButton =
-    document.getElementById(
-        "logoutButton"
-    );
+    document.getElementById("logoutButton");
 
 const profileName =
-    document.getElementById(
-        "profileName"
-    );
+    document.getElementById("profileName");
 
 const profileId =
-    document.getElementById(
-        "profileId"
-    );
+    document.getElementById("profileId");
 
 const profileAvatar =
-    document.getElementById(
-        "profileAvatar"
-    );
+    document.getElementById("profileAvatar");
 
 const applicationsList =
-    document.getElementById(
-        "applicationsList"
-    );
+    document.getElementById("applicationsList");
 
 const applicationsEmpty =
-    document.getElementById(
-        "applicationsEmpty"
-    );
+    document.getElementById("applicationsEmpty");
 
 const cabinetLoading =
-    document.getElementById(
-        "cabinetLoading"
-    );
+    document.getElementById("cabinetLoading");
 
 const refreshApplications =
-    document.getElementById(
-        "refreshApplications"
-    );
+    document.getElementById("refreshApplications");
 
 
 /* =========================================================
@@ -190,24 +131,16 @@ const refreshApplications =
 ========================================================= */
 
 const totalApplications =
-    document.getElementById(
-        "totalApplications"
-    );
+    document.getElementById("totalApplications");
 
 const pendingApplications =
-    document.getElementById(
-        "pendingApplications"
-    );
+    document.getElementById("pendingApplications");
 
 const approvedApplications =
-    document.getElementById(
-        "approvedApplications"
-    );
+    document.getElementById("approvedApplications");
 
 const rejectedApplications =
-    document.getElementById(
-        "rejectedApplications"
-    );
+    document.getElementById("rejectedApplications");
 
 
 /* =========================================================
@@ -215,9 +148,7 @@ const rejectedApplications =
 ========================================================= */
 
 const applicationModal =
-    document.getElementById(
-        "cabinetApplicationModal"
-    );
+    document.getElementById("cabinetApplicationModal");
 
 const closeModal =
     document.getElementById(
@@ -230,14 +161,10 @@ const closeModalButton =
     );
 
 const detailsTitle =
-    document.getElementById(
-        "detailsTitle"
-    );
+    document.getElementById("detailsTitle");
 
 const detailsContent =
-    document.getElementById(
-        "detailsContent"
-    );
+    document.getElementById("detailsContent");
 
 
 /* =========================================================
@@ -262,10 +189,7 @@ document.addEventListener(
 
 function initEvents() {
 
-
-    /* =====================================================
-       LOGIN
-    ===================================================== */
+    /* LOGIN */
 
     if (loginForm) {
 
@@ -277,9 +201,7 @@ function initEvents() {
     }
 
 
-    /* =====================================================
-       REGISTRATION
-    ===================================================== */
+    /* REGISTRATION */
 
     if (registerForm) {
 
@@ -291,9 +213,7 @@ function initEvents() {
     }
 
 
-    /* =====================================================
-       LOGOUT
-    ===================================================== */
+    /* LOGOUT */
 
     if (logoutButton) {
 
@@ -305,9 +225,7 @@ function initEvents() {
     }
 
 
-    /* =====================================================
-       REFRESH APPLICATIONS
-    ===================================================== */
+    /* REFRESH */
 
     if (refreshApplications) {
 
@@ -317,7 +235,6 @@ function initEvents() {
 
                 const citizen =
                     getSavedCitizen();
-
 
                 if (
                     citizen &&
@@ -336,9 +253,7 @@ function initEvents() {
     }
 
 
-    /* =====================================================
-       MODAL CLOSE
-    ===================================================== */
+    /* MODAL */
 
     if (closeModal) {
 
@@ -381,9 +296,7 @@ function initEvents() {
     }
 
 
-    /* =====================================================
-       ESC
-    ===================================================== */
+    /* ESC */
 
     document.addEventListener(
         "keydown",
@@ -407,14 +320,11 @@ function initEvents() {
    LOGIN
 ========================================================= */
 
-async function handleLogin(
-    event
-) {
+async function handleLogin(event) {
 
     event.preventDefault();
 
     hideError();
-
 
     const idNumber =
         String(
@@ -423,16 +333,11 @@ async function handleLogin(
         .trim()
         .toUpperCase();
 
-
     const password =
         String(
             loginPassword?.value || ""
         );
 
-
-    /* =====================================================
-       VALIDATION
-    ===================================================== */
 
     if (!idNumber) {
 
@@ -464,14 +369,11 @@ async function handleLogin(
         const response =
             await postRequest({
 
-                action:
-                    "login",
+                action: "login",
 
-                idNumber:
-                    idNumber,
+                idNumber: idNumber,
 
-                password:
-                    password
+                password: password
 
             });
 
@@ -491,13 +393,7 @@ async function handleLogin(
         }
 
 
-        /* =================================================
-           SAVE CITIZEN
-        ================================================= */
-
-        if (
-            response.citizen
-        ) {
+        if (response.citizen) {
 
             saveCitizen(
                 response.citizen
@@ -505,10 +401,6 @@ async function handleLogin(
 
         }
 
-
-        /* =================================================
-           SHOW DASHBOARD
-        ================================================= */
 
         showDashboard();
 
@@ -530,7 +422,6 @@ async function handleLogin(
 
         }
 
-
     } catch (error) {
 
         console.error(
@@ -538,11 +429,9 @@ async function handleLogin(
             error
         );
 
-
         showError(
             "Не вдалося підключитися до державного порталу."
         );
-
 
     } finally {
 
@@ -557,9 +446,7 @@ async function handleLogin(
    REGISTRATION
 ========================================================= */
 
-async function handleRegistration(
-    event
-) {
+async function handleRegistration(event) {
 
     event.preventDefault();
 
@@ -571,43 +458,32 @@ async function handleRegistration(
     const fullName =
         String(
             registerFullName?.value || ""
-        )
-        .trim();
-
+        ).trim();
 
     const birthDate =
         String(
             registerBirthDate?.value || ""
-        )
-        .trim();
-
+        ).trim();
 
     const phone =
         String(
             registerPhone?.value || ""
-        )
-        .trim();
-
+        ).trim();
 
     const discord =
         String(
             registerDiscord?.value || ""
-        )
-        .trim();
-
+        ).trim();
 
     const email =
         String(
             registerEmail?.value || ""
-        )
-        .trim();
-
+        ).trim();
 
     const password =
         String(
             registerPassword?.value || ""
         );
-
 
     const passwordConfirm =
         String(
@@ -630,9 +506,7 @@ async function handleRegistration(
     }
 
 
-    if (
-        fullName.length < 5
-    ) {
+    if (fullName.length < 5) {
 
         showRegisterError(
             "ПІБ вказано некоректно."
@@ -698,9 +572,7 @@ async function handleRegistration(
     }
 
 
-    if (
-        password.length < 6
-    ) {
+    if (password.length < 6) {
 
         showRegisterError(
             "Пароль повинен містити мінімум 6 символів."
@@ -733,26 +605,19 @@ async function handleRegistration(
         const response =
             await postRequest({
 
-                action:
-                    "register",
+                action: "register",
 
-                fullName:
-                    fullName,
+                fullName: fullName,
 
-                birthDate:
-                    birthDate,
+                birthDate: birthDate,
 
-                phone:
-                    phone,
+                phone: phone,
 
-                discord:
-                    discord,
+                discord: discord,
 
-                email:
-                    email,
+                email: email,
 
-                password:
-                    password
+                password: password
 
             });
 
@@ -773,22 +638,31 @@ async function handleRegistration(
 
 
         /* =================================================
-           SAVE CITIZEN
+           ID ГРАЖДАНИНА
         ================================================= */
 
-        if (
-            response.citizen
-        ) {
+        const newCitizen =
+            response.citizen;
 
-            saveCitizen(
-                response.citizen
-            );
 
-        }
+        const newId =
+            newCitizen?.idNumber || "";
 
 
         /* =================================================
-           SUCCESS
+           ВАЖНО:
+           НЕ сохраняем пользователя как авторизованного.
+           
+           После регистрации он должен войти вручную.
+        ================================================= */
+
+        localStorage.removeItem(
+            STORAGE_KEY
+        );
+
+
+        /* =================================================
+           RESET FORM
         ================================================= */
 
         if (registerForm) {
@@ -798,45 +672,47 @@ async function handleRegistration(
         }
 
 
-        if (
-            response.citizen &&
-            response.citizen.idNumber
-        ) {
+        /* =================================================
+           SUCCESS MESSAGE
+        ================================================= */
+
+        if (newId) {
 
             showRegisterSuccess(
 
-                "Профіль успішно створено! " +
+                "Реєстрація успішна! " +
                 "Ваш номер посвідчення: " +
-                response.citizen.idNumber
+                newId +
+                ". Зараз відкриється форма входу."
 
             );
 
         } else {
 
             showRegisterSuccess(
-                "Профіль успішно створено!"
+
+                "Профіль успішно створено! " +
+                "Перейдіть до форми входу."
+
             );
 
         }
 
 
         /* =================================================
-           OPEN CABINET
+           ПЕРЕКЛЮЧАЕМ НА ВХОД
         ================================================= */
 
-        if (
-            response.citizen &&
-            response.citizen.idNumber
-        ) {
+        setTimeout(
+            function () {
 
-            showDashboard();
+                showLoginAfterRegistration(
+                    newId
+                );
 
-
-            await loadCabinet(
-                response.citizen.idNumber
-            );
-
-        }
+            },
+            1500
+        );
 
 
     } catch (error) {
@@ -846,17 +722,134 @@ async function handleRegistration(
             error
         );
 
-
         showRegisterError(
             "Не вдалося підключитися до державного порталу."
         );
-
 
     } finally {
 
         setRegisterLoading(false);
 
     }
+
+}
+
+
+/* =========================================================
+   SHOW LOGIN AFTER REGISTRATION
+========================================================= */
+
+function showLoginAfterRegistration(
+    idNumber
+) {
+
+    /* Скрываем регистрацию */
+
+    if (cabinetRegister) {
+
+        cabinetRegister.style.display =
+            "none";
+
+    }
+
+
+    /* Показываем вход */
+
+    if (cabinetLogin) {
+
+        cabinetLogin.style.display =
+            "block";
+
+    }
+
+
+    /* Dashboard скрываем */
+
+    if (cabinetDashboard) {
+
+        cabinetDashboard.classList.remove(
+            "active"
+        );
+
+    }
+
+
+    /* Автоматически вставляем ID */
+
+    if (
+        loginId &&
+        idNumber
+    ) {
+
+        loginId.value =
+            idNumber;
+
+    }
+
+
+    /* Очищаем пароль */
+
+    if (loginPassword) {
+
+        loginPassword.value =
+            "";
+
+    }
+
+
+    hideError();
+
+
+    /* Сообщение под формой входа */
+
+    if (loginError) {
+
+        loginError.textContent =
+            "Реєстрацію завершено. Введіть пароль для входу до кабінету.";
+
+        loginError.classList.add(
+            "visible"
+        );
+
+    }
+
+
+    /* Фокус на пароль */
+
+    if (loginPassword) {
+
+        setTimeout(
+            function () {
+
+                loginPassword.focus();
+
+            },
+            100
+        );
+
+    }
+
+
+    /* Прокрутка */
+
+    setTimeout(
+        function () {
+
+            if (cabinetLogin) {
+
+                cabinetLogin.scrollIntoView({
+
+                    behavior: "smooth",
+
+                    block: "center"
+
+                });
+
+            }
+
+        },
+        100
+    );
 
 }
 
@@ -875,6 +868,8 @@ function restoreSession() {
         !citizen ||
         !citizen.idNumber
     ) {
+
+        showLogin();
 
         return;
 
@@ -914,11 +909,9 @@ async function loadCabinet(
         const response =
             await getRequest({
 
-                action:
-                    "profile",
+                action: "profile",
 
-                idNumber:
-                    idNumber
+                idNumber: idNumber
 
             });
 
@@ -932,28 +925,19 @@ async function loadCabinet(
                 STORAGE_KEY
             );
 
-
             showLogin();
-
 
             showError(
                 response?.message ||
                 "Профіль не знайдено."
             );
 
-
             return;
 
         }
 
 
-        /* =================================================
-           SAVE UPDATED PROFILE
-        ================================================= */
-
-        if (
-            response.citizen
-        ) {
+        if (response.citizen) {
 
             saveCitizen(
                 response.citizen
@@ -962,18 +946,10 @@ async function loadCabinet(
         }
 
 
-        /* =================================================
-           PROFILE
-        ================================================= */
-
         renderProfile(
             response.citizen
         );
 
-
-        /* =================================================
-           APPLICATIONS
-        ================================================= */
 
         renderApplications(
             response.applications || []
@@ -987,11 +963,6 @@ async function loadCabinet(
             error
         );
 
-
-        /*
-         * Если сервер временно недоступен,
-         * НЕ удаляем пользователя из localStorage.
-         */
 
         showCabinetError(
             "Не вдалося завантажити актуальні дані кабінету. Спробуйте оновити сторінку."
@@ -1081,10 +1052,6 @@ function renderApplications(
     }
 
 
-    /* =====================================================
-       NO APPLICATIONS
-    ===================================================== */
-
     if (
         applications.length === 0
     ) {
@@ -1168,44 +1135,28 @@ function createApplicationCard(
 ) {
 
     const card =
-        document.createElement(
-            "article"
-        );
-
+        document.createElement("article");
 
     card.className =
         "application-card";
 
 
-    /* =====================================================
-       TOP
-    ===================================================== */
-
     const top =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     top.className =
         "application-card-top";
 
 
     const left =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     const number =
-        document.createElement(
-            "span"
-        );
-
+        document.createElement("span");
 
     number.className =
         "application-number";
-
 
     number.textContent =
         application.number ||
@@ -1213,39 +1164,23 @@ function createApplicationCard(
 
 
     const title =
-        document.createElement(
-            "h3"
-        );
-
+        document.createElement("h3");
 
     title.className =
         "application-title";
-
 
     title.textContent =
         application.service ||
         "Державна послуга";
 
 
-    left.appendChild(
-        number
-    );
+    left.appendChild(number);
 
+    left.appendChild(title);
 
-    left.appendChild(
-        title
-    );
-
-
-    /* =====================================================
-       STATUS
-    ===================================================== */
 
     const status =
-        document.createElement(
-            "span"
-        );
-
+        document.createElement("span");
 
     status.className =
         "application-status-badge " +
@@ -1253,36 +1188,20 @@ function createApplicationCard(
             application.status
         );
 
-
     status.textContent =
         application.status ||
         "🟡 На розгляді";
 
 
-    top.appendChild(
-        left
-    );
+    top.appendChild(left);
 
+    top.appendChild(status);
 
-    top.appendChild(
-        status
-    );
+    card.appendChild(top);
 
-
-    card.appendChild(
-        top
-    );
-
-
-    /* =====================================================
-       INFO
-    ===================================================== */
 
     const info =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     info.className =
         "application-info";
@@ -1313,40 +1232,25 @@ function createApplicationCard(
     );
 
 
-    card.appendChild(
-        info
-    );
+    card.appendChild(info);
 
-
-    /* =====================================================
-       DESCRIPTION
-    ===================================================== */
 
     const description =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     description.className =
         "application-description";
 
 
     const descriptionTitle =
-        document.createElement(
-            "strong"
-        );
-
+        document.createElement("strong");
 
     descriptionTitle.textContent =
         "Опис звернення";
 
 
     const descriptionText =
-        document.createElement(
-            "p"
-        );
-
+        document.createElement("p");
 
     descriptionText.textContent =
         application.message ||
@@ -1357,50 +1261,33 @@ function createApplicationCard(
         descriptionTitle
     );
 
-
     description.appendChild(
         descriptionText
     );
-
 
     card.appendChild(
         description
     );
 
 
-    /* =====================================================
-       COMMENT
-    ===================================================== */
-
-    if (
-        application.comment
-    ) {
+    if (application.comment) {
 
         const comment =
-            document.createElement(
-                "div"
-            );
-
+            document.createElement("div");
 
         comment.className =
             "application-comment";
 
 
         const commentTitle =
-            document.createElement(
-                "strong"
-            );
-
+            document.createElement("strong");
 
         commentTitle.textContent =
             "Коментар державного органу";
 
 
         const commentText =
-            document.createElement(
-                "p"
-            );
-
+            document.createElement("p");
 
         commentText.textContent =
             application.comment;
@@ -1410,11 +1297,9 @@ function createApplicationCard(
             commentTitle
         );
 
-
         comment.appendChild(
             commentText
         );
-
 
         card.appendChild(
             comment
@@ -1423,33 +1308,21 @@ function createApplicationCard(
     }
 
 
-    /* =====================================================
-       DETAILS
-    ===================================================== */
-
     const actions =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     actions.style.marginTop =
         "18px";
 
 
     const button =
-        document.createElement(
-            "button"
-        );
-
+        document.createElement("button");
 
     button.type =
         "button";
 
-
     button.className =
         "btn btn-light";
-
 
     button.textContent =
         "Детальніше";
@@ -1467,14 +1340,9 @@ function createApplicationCard(
     );
 
 
-    actions.appendChild(
-        button
-    );
+    actions.appendChild(button);
 
-
-    card.appendChild(
-        actions
-    );
+    card.appendChild(actions);
 
 
     return card;
@@ -1492,44 +1360,30 @@ function createInfoItem(
 ) {
 
     const item =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     item.className =
         "application-info-item";
 
 
     const span =
-        document.createElement(
-            "span"
-        );
-
+        document.createElement("span");
 
     span.textContent =
         label;
 
 
     const strong =
-        document.createElement(
-            "strong"
-        );
-
+        document.createElement("strong");
 
     strong.textContent =
         value ||
         "—";
 
 
-    item.appendChild(
-        span
-    );
+    item.appendChild(span);
 
-
-    item.appendChild(
-        strong
-    );
+    item.appendChild(strong);
 
 
     return item;
@@ -1564,18 +1418,11 @@ function updateStatistics(
                 .trim();
 
 
-            /* PENDING */
-
             if (
-
                 status.includes("розгляді") ||
-
                 status.includes("очіку") ||
-
                 status.includes("нов") ||
-
                 status.includes("pending")
-
             ) {
 
                 pending++;
@@ -1583,18 +1430,11 @@ function updateStatistics(
             }
 
 
-            /* APPROVED */
-
             if (
-
                 status.includes("прийнято") ||
-
                 status.includes("схвалено") ||
-
                 status.includes("затверджено") ||
-
                 status.includes("approved")
-
             ) {
 
                 approved++;
@@ -1602,16 +1442,10 @@ function updateStatistics(
             }
 
 
-            /* REJECTED */
-
             if (
-
                 status.includes("відхилено") ||
-
                 status.includes("відмовлено") ||
-
                 status.includes("rejected")
-
             ) {
 
                 rejected++;
@@ -1673,15 +1507,10 @@ function getStatusClass(
 
 
     if (
-
         value.includes("розгляді") ||
-
         value.includes("очіку") ||
-
         value.includes("нов") ||
-
         value.includes("pending")
-
     ) {
 
         return "status-pending";
@@ -1690,15 +1519,10 @@ function getStatusClass(
 
 
     if (
-
         value.includes("прийнято") ||
-
         value.includes("схвалено") ||
-
         value.includes("затверджено") ||
-
         value.includes("approved")
-
     ) {
 
         return "status-approved";
@@ -1707,13 +1531,9 @@ function getStatusClass(
 
 
     if (
-
         value.includes("виконано") ||
-
         value.includes("завершено") ||
-
         value.includes("completed")
-
     ) {
 
         return "status-completed";
@@ -1722,13 +1542,9 @@ function getStatusClass(
 
 
     if (
-
         value.includes("відхилено") ||
-
         value.includes("відмовлено") ||
-
         value.includes("rejected")
-
     ) {
 
         return "status-rejected";
@@ -1737,11 +1553,8 @@ function getStatusClass(
 
 
     if (
-
         value.includes("документ") ||
-
         value.includes("documents")
-
     ) {
 
         return "status-documents";
@@ -1893,60 +1706,42 @@ function createDetail(
 ) {
 
     const wrapper =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     wrapper.style.marginBottom =
         "15px";
 
 
     const title =
-        document.createElement(
-            "strong"
-        );
-
+        document.createElement("strong");
 
     title.textContent =
         label;
 
-
     title.style.display =
         "block";
-
 
     title.style.marginBottom =
         "5px";
 
 
     const text =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     text.textContent =
         value ||
         "—";
 
-
     text.style.color =
         "#59656e";
-
 
     text.style.lineHeight =
         "1.6";
 
 
-    wrapper.appendChild(
-        title
-    );
+    wrapper.appendChild(title);
 
-
-    wrapper.appendChild(
-        text
-    );
+    wrapper.appendChild(text);
 
 
     return wrapper;
@@ -1996,11 +1791,6 @@ function saveCitizen(
 
 
     try {
-
-        /*
-         * Сохраняем только профиль.
-         * Пароль сюда не сохраняем.
-         */
 
         const safeCitizen = {
 
@@ -2064,10 +1854,7 @@ function getSavedCitizen() {
         }
 
 
-        return JSON.parse(
-            data
-        );
-
+        return JSON.parse(data);
 
     } catch (error) {
 
@@ -2120,7 +1907,7 @@ function logout() {
     if (cabinetRegister) {
 
         cabinetRegister.style.display =
-            "block";
+            "none";
 
     }
 
@@ -2164,7 +1951,6 @@ function logout() {
 
     hideRegisterSuccess();
 
-
     updateStatistics([]);
 
 
@@ -2201,6 +1987,11 @@ function showLogin() {
 
     }
 
+
+    /*
+     * При обычном открытии страницы
+     * регистрация тоже доступна.
+     */
 
     if (cabinetRegister) {
 
@@ -2473,17 +2264,12 @@ function hideRegisterSuccess() {
 
 
 /* =========================================================
-   CABINET LOAD ERROR
+   CABINET ERROR
 ========================================================= */
 
 function showCabinetError(
     message
 ) {
-
-    /*
-     * Используем loginError как универсальное
-     * сообщение, если отдельного блока нет.
-     */
 
     if (!loginError) {
 
@@ -2572,9 +2358,7 @@ async function getRequest(
 
     if (
         !CABINET_API_URL ||
-        CABINET_API_URL.includes(
-            "ВСТАВЬ"
-        )
+        CABINET_API_URL.includes("ВСТАВЬ")
     ) {
 
         throw new Error(
@@ -2624,14 +2408,11 @@ async function getRequest(
 
             {
 
-                method:
-                    "GET",
+                method: "GET",
 
-                cache:
-                    "no-store",
+                cache: "no-store",
 
-                redirect:
-                    "follow"
+                redirect: "follow"
 
             }
 
@@ -2654,9 +2435,7 @@ async function getRequest(
 
     try {
 
-        return JSON.parse(
-            text
-        );
+        return JSON.parse(text);
 
     } catch (error) {
 
@@ -2685,9 +2464,7 @@ async function postRequest(
 
     if (
         !CABINET_API_URL ||
-        CABINET_API_URL.includes(
-            "ВСТАВЬ"
-        )
+        CABINET_API_URL.includes("ВСТАВЬ")
     ) {
 
         throw new Error(
@@ -2725,8 +2502,7 @@ async function postRequest(
 
             {
 
-                method:
-                    "POST",
+                method: "POST",
 
                 headers: {
 
@@ -2762,9 +2538,7 @@ async function postRequest(
 
     try {
 
-        return JSON.parse(
-            text
-        );
+        return JSON.parse(text);
 
     } catch (error) {
 
