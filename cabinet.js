@@ -1,9 +1,8 @@
 /* =========================================================
    OLYMP GOVERNMENT
-   PERSONAL CABINET 3.0
-   ---------------------------------------------------------
-   Система:
+   PERSONAL CABINET 4.0
 
+   Система:
    • Вход по номеру заявки
    • Вход по коду доступа
    • Автоматическое восстановление сессии
@@ -13,10 +12,9 @@
    • Ответственный сотрудник
    • Комментарий государственного органа
    • Подробности заявки
-   • Обновление заявки
    • Выход
    • Работа без регистрации
-   • Совместимость с новым Google Apps Script 3.0
+   • Совместимость с Google Apps Script Web App
 ========================================================= */
 
 
@@ -26,7 +24,6 @@
 
 const CABINET_API_URL =
     "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec";
-
 
 
 /* =========================================================
@@ -42,34 +39,22 @@ const STORAGE_KEY =
 ========================================================= */
 
 const cabinetLogin =
-    document.getElementById(
-        "cabinetLogin"
-    );
+    document.getElementById("cabinetLogin");
 
 const loginForm =
-    document.getElementById(
-        "cabinetLoginForm"
-    );
+    document.getElementById("cabinetLoginForm");
 
 const loginNumber =
-    document.getElementById(
-        "cabinetIdNumber"
-    );
+    document.getElementById("cabinetIdNumber");
 
 const loginCode =
-    document.getElementById(
-        "cabinetPassword"
-    );
+    document.getElementById("cabinetPassword");
 
 const loginError =
-    document.getElementById(
-        "cabinetLoginError"
-    );
+    document.getElementById("cabinetLoginError");
 
 const loginButton =
-    document.getElementById(
-        "cabinetLoginButton"
-    );
+    document.getElementById("cabinetLoginButton");
 
 
 /* =========================================================
@@ -77,24 +62,16 @@ const loginButton =
 ========================================================= */
 
 const cabinetDashboard =
-    document.getElementById(
-        "cabinetDashboard"
-    );
+    document.getElementById("cabinetDashboard");
 
 const logoutButton =
-    document.getElementById(
-        "logoutButton"
-    );
+    document.getElementById("logoutButton");
 
 const refreshApplications =
-    document.getElementById(
-        "refreshApplications"
-    );
+    document.getElementById("refreshApplications");
 
 const cabinetLoading =
-    document.getElementById(
-        "cabinetLoading"
-    );
+    document.getElementById("cabinetLoading");
 
 
 /* =========================================================
@@ -102,19 +79,13 @@ const cabinetLoading =
 ========================================================= */
 
 const profileName =
-    document.getElementById(
-        "profileName"
-    );
+    document.getElementById("profileName");
 
 const profileId =
-    document.getElementById(
-        "profileId"
-    );
+    document.getElementById("profileId");
 
 const profileAvatar =
-    document.getElementById(
-        "profileAvatar"
-    );
+    document.getElementById("profileAvatar");
 
 
 /* =========================================================
@@ -122,14 +93,10 @@ const profileAvatar =
 ========================================================= */
 
 const applicationsList =
-    document.getElementById(
-        "applicationsList"
-    );
+    document.getElementById("applicationsList");
 
 const applicationsEmpty =
-    document.getElementById(
-        "applicationsEmpty"
-    );
+    document.getElementById("applicationsEmpty");
 
 
 /* =========================================================
@@ -137,24 +104,16 @@ const applicationsEmpty =
 ========================================================= */
 
 const totalApplications =
-    document.getElementById(
-        "totalApplications"
-    );
+    document.getElementById("totalApplications");
 
 const pendingApplications =
-    document.getElementById(
-        "pendingApplications"
-    );
+    document.getElementById("pendingApplications");
 
 const approvedApplications =
-    document.getElementById(
-        "approvedApplications"
-    );
+    document.getElementById("approvedApplications");
 
 const rejectedApplications =
-    document.getElementById(
-        "rejectedApplications"
-    );
+    document.getElementById("rejectedApplications");
 
 
 /* =========================================================
@@ -162,9 +121,7 @@ const rejectedApplications =
 ========================================================= */
 
 const applicationModal =
-    document.getElementById(
-        "cabinetApplicationModal"
-    );
+    document.getElementById("cabinetApplicationModal");
 
 const closeModal =
     document.getElementById(
@@ -177,14 +134,10 @@ const closeModalButton =
     );
 
 const detailsTitle =
-    document.getElementById(
-        "detailsTitle"
-    );
+    document.getElementById("detailsTitle");
 
 const detailsContent =
-    document.getElementById(
-        "detailsContent"
-    );
+    document.getElementById("detailsContent");
 
 
 /* =========================================================
@@ -252,7 +205,6 @@ function initEvents() {
 
                 const session =
                     getSavedSession();
-
 
                 if (
                     session &&
@@ -327,8 +279,7 @@ function initEvents() {
         function (event) {
 
             if (
-                event.key ===
-                "Escape"
+                event.key === "Escape"
             ) {
 
                 closeApplicationModal();
@@ -378,15 +329,11 @@ function prepareLoginForm() {
    LOGIN
 ========================================================= */
 
-async function handleLogin(
-    event
-) {
+async function handleLogin(event) {
 
     event.preventDefault();
 
-
     hideLoginError();
-
 
     const number =
         String(
@@ -394,7 +341,6 @@ async function handleLogin(
         )
         .trim()
         .toUpperCase();
-
 
     const accessCode =
         String(
@@ -442,16 +388,13 @@ async function handleLogin(
     }
 
 
-    setLoginLoading(
-        true
-    );
+    setLoginLoading(true);
 
 
     try {
 
-
         const response =
-            await postRequest({
+            await getRequest({
 
                 action:
                     "login",
@@ -464,10 +407,6 @@ async function handleLogin(
 
             });
 
-
-        /* =================================================
-           ERROR
-        ================================================= */
 
         if (
             !response ||
@@ -487,10 +426,6 @@ async function handleLogin(
         }
 
 
-        /* =================================================
-           APPLICATION
-        ================================================= */
-
         if (
             !response.application
         ) {
@@ -504,16 +439,14 @@ async function handleLogin(
         }
 
 
-        /* =================================================
-           SAVE SESSION
-        ================================================= */
-
         saveSession({
 
             number:
+                response.application.number ||
                 number,
 
             accessCode:
+                response.application.accessCode ||
                 accessCode,
 
             application:
@@ -522,16 +455,8 @@ async function handleLogin(
         });
 
 
-        /* =================================================
-           SHOW DASHBOARD
-        ================================================= */
-
         showDashboard();
 
-
-        /* =================================================
-           RENDER
-        ================================================= */
 
         renderApplication(
             response.application
@@ -548,16 +473,13 @@ async function handleLogin(
 
         showLoginError(
 
-            "Не вдалося підключитися до державного порталу."
+            "Не вдалося отримати відповідь від сервера. Перевірте підключення Google Apps Script."
 
         );
-
 
     } finally {
 
-        setLoginLoading(
-            false
-        );
+        setLoginLoading(false);
 
     }
 
@@ -590,12 +512,14 @@ function restoreSession() {
     showDashboard();
 
 
+    renderApplication(
+        session.application
+    );
+
+
     loadApplication(
-
         session.number,
-
         session.accessCode
-
     );
 
 }
@@ -606,11 +530,8 @@ function restoreSession() {
 ========================================================= */
 
 async function loadApplication(
-
     number,
-
     accessCode
-
 ) {
 
     if (
@@ -623,13 +544,10 @@ async function loadApplication(
     }
 
 
-    showLoading(
-        true
-    );
+    showLoading(true);
 
 
     try {
-
 
         const response =
             await getRequest({
@@ -652,15 +570,9 @@ async function loadApplication(
             !response.application
         ) {
 
-
-            /* =============================================
-               СЕССИЯ НЕДЕЙСТВИТЕЛЬНА
-            ============================================= */
-
             removeSession();
 
             showLogin();
-
 
             showLoginError(
 
@@ -670,22 +582,19 @@ async function loadApplication(
 
             );
 
-
             return;
 
         }
 
 
-        /* =================================================
-           SAVE UPDATED SESSION
-        ================================================= */
-
         saveSession({
 
             number:
+                response.application.number ||
                 number,
 
             accessCode:
+                response.application.accessCode ||
                 accessCode,
 
             application:
@@ -693,10 +602,6 @@ async function loadApplication(
 
         });
 
-
-        /* =================================================
-           RENDER
-        ================================================= */
 
         renderApplication(
             response.application
@@ -711,18 +616,21 @@ async function loadApplication(
         );
 
 
+        /*
+         * Не выбрасываем пользователя
+         * из кабинета при временной
+         * ошибке подключения.
+         */
+
         showCabinetError(
 
-            "Не вдалося завантажити актуальні дані. Спробуйте оновити сторінку."
+            "Не вдалося оновити дані. Перевірте підключення та спробуйте ще раз."
 
         );
-
 
     } finally {
 
-        showLoading(
-            false
-        );
+        showLoading(false);
 
     }
 
@@ -733,9 +641,7 @@ async function loadApplication(
    RENDER APPLICATION
 ========================================================= */
 
-function renderApplication(
-    application
-) {
+function renderApplication(application) {
 
     if (!application) {
 
@@ -744,23 +650,13 @@ function renderApplication(
     }
 
 
-    /* =====================================================
-       PROFILE
-    ===================================================== */
-
     renderProfile(
         application
     );
 
 
-    /* =====================================================
-       APPLICATION
-    ===================================================== */
-
     renderApplications([
-
         application
-
     ]);
 
 }
@@ -770,9 +666,7 @@ function renderApplication(
    PROFILE
 ========================================================= */
 
-function renderProfile(
-    application
-) {
+function renderProfile(application) {
 
     if (!application) {
 
@@ -815,14 +709,10 @@ function renderProfile(
    APPLICATIONS
 ========================================================= */
 
-function renderApplications(
-    applications
-) {
+function renderApplications(applications) {
 
     applications =
-        Array.isArray(
-            applications
-        )
+        Array.isArray(applications)
             ? applications
             : [];
 
@@ -840,10 +730,6 @@ function renderApplications(
     }
 
 
-    /* =====================================================
-       EMPTY
-    ===================================================== */
-
     if (
         applications.length === 0
     ) {
@@ -854,36 +740,7 @@ function renderApplications(
                 "visible"
             );
 
-
-            const title =
-                applicationsEmpty.querySelector(
-                    "h3"
-                );
-
-
-            const text =
-                applicationsEmpty.querySelector(
-                    "p"
-                );
-
-
-            if (title) {
-
-                title.textContent =
-                    "Заявку не знайдено";
-
-            }
-
-
-            if (text) {
-
-                text.textContent =
-                    "Перевірте номер заявки та код доступу.";
-
-            }
-
         }
-
 
         return;
 
@@ -900,7 +757,6 @@ function renderApplications(
 
 
     applications.forEach(
-
         function (application) {
 
             if (applicationsList) {
@@ -916,7 +772,6 @@ function renderApplications(
             }
 
         }
-
     );
 
 }
@@ -926,15 +781,10 @@ function renderApplications(
    APPLICATION CARD
 ========================================================= */
 
-function createApplicationCard(
-    application
-) {
+function createApplicationCard(application) {
 
     const card =
-        document.createElement(
-            "article"
-        );
-
+        document.createElement("article");
 
     card.className =
         "application-card";
@@ -945,30 +795,21 @@ function createApplicationCard(
     ===================================================== */
 
     const top =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     top.className =
         "application-card-top";
 
 
     const left =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     const number =
-        document.createElement(
-            "span"
-        );
-
+        document.createElement("span");
 
     number.className =
         "application-number";
-
 
     number.textContent =
         application.number ||
@@ -976,28 +817,19 @@ function createApplicationCard(
 
 
     const title =
-        document.createElement(
-            "h3"
-        );
-
+        document.createElement("h3");
 
     title.className =
         "application-title";
-
 
     title.textContent =
         application.service ||
         "Державна послуга";
 
 
-    left.appendChild(
-        number
-    );
+    left.appendChild(number);
 
-
-    left.appendChild(
-        title
-    );
+    left.appendChild(title);
 
 
     /* =====================================================
@@ -1005,42 +837,24 @@ function createApplicationCard(
     ===================================================== */
 
     const status =
-        document.createElement(
-            "span"
-        );
-
+        document.createElement("span");
 
     status.className =
-
         "application-status-badge " +
-
         getStatusClass(
-
             application.status
-
         );
 
-
     status.textContent =
-
         application.status ||
-
         "🟡 На розгляді";
 
 
-    top.appendChild(
-        left
-    );
+    top.appendChild(left);
 
+    top.appendChild(status);
 
-    top.appendChild(
-        status
-    );
-
-
-    card.appendChild(
-        top
-    );
+    card.appendChild(top);
 
 
     /* =====================================================
@@ -1048,59 +862,38 @@ function createApplicationCard(
     ===================================================== */
 
     const info =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     info.className =
         "application-info";
 
 
     info.appendChild(
-
         createInfoItem(
-
             "Дата подання",
-
             application.date
-
         )
-
     );
 
 
     info.appendChild(
-
         createInfoItem(
-
             "Номер заявки",
-
             application.number
-
         )
-
     );
 
 
     info.appendChild(
-
         createInfoItem(
-
             "Відповідальний",
-
             application.responsible ||
-
             "Ще не призначено"
-
         )
-
     );
 
 
-    card.appendChild(
-        info
-    );
+    card.appendChild(info);
 
 
     /* =====================================================
@@ -1108,35 +901,24 @@ function createApplicationCard(
     ===================================================== */
 
     const description =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     description.className =
         "application-description";
 
 
     const descriptionTitle =
-        document.createElement(
-            "strong"
-        );
-
+        document.createElement("strong");
 
     descriptionTitle.textContent =
         "Опис звернення";
 
 
     const descriptionText =
-        document.createElement(
-            "p"
-        );
-
+        document.createElement("p");
 
     descriptionText.textContent =
-
         application.message ||
-
         "Опис відсутній.";
 
 
@@ -1144,11 +926,9 @@ function createApplicationCard(
         descriptionTitle
     );
 
-
     description.appendChild(
         descriptionText
     );
-
 
     card.appendChild(
         description
@@ -1163,35 +943,24 @@ function createApplicationCard(
         application.comment
     ) {
 
-
         const comment =
-            document.createElement(
-                "div"
-            );
-
+            document.createElement("div");
 
         comment.className =
             "application-comment";
 
 
         const commentTitle =
-            document.createElement(
-                "strong"
-            );
-
+            document.createElement("strong");
 
         commentTitle.textContent =
             "Коментар державного органу";
 
 
         const commentText =
-            document.createElement(
-                "p"
-            );
-
+            document.createElement("p");
 
         commentText.textContent =
-
             application.comment;
 
 
@@ -1199,11 +968,9 @@ function createApplicationCard(
             commentTitle
         );
 
-
         comment.appendChild(
             commentText
         );
-
 
         card.appendChild(
             comment
@@ -1217,37 +984,27 @@ function createApplicationCard(
     ===================================================== */
 
     const actions =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     actions.style.marginTop =
         "18px";
 
 
     const button =
-        document.createElement(
-            "button"
-        );
-
+        document.createElement("button");
 
     button.type =
         "button";
 
-
     button.className =
         "btn btn-light";
-
 
     button.textContent =
         "Детальніше";
 
 
     button.addEventListener(
-
         "click",
-
         function () {
 
             openApplicationDetails(
@@ -1255,14 +1012,12 @@ function createApplicationCard(
             );
 
         }
-
     );
 
 
     actions.appendChild(
         button
     );
-
 
     card.appendChild(
         actions
@@ -1278,53 +1033,33 @@ function createApplicationCard(
    INFO ITEM
 ========================================================= */
 
-function createInfoItem(
-
-    label,
-
-    value
-
-) {
+function createInfoItem(label, value) {
 
     const item =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     item.className =
         "application-info-item";
 
 
     const span =
-        document.createElement(
-            "span"
-        );
-
+        document.createElement("span");
 
     span.textContent =
         label;
 
 
     const strong =
-        document.createElement(
-            "strong"
-        );
-
+        document.createElement("strong");
 
     strong.textContent =
         value ||
         "—";
 
 
-    item.appendChild(
-        span
-    );
+    item.appendChild(span);
 
-
-    item.appendChild(
-        strong
-    );
+    item.appendChild(strong);
 
 
     return item;
@@ -1336,61 +1071,32 @@ function createInfoItem(
    STATISTICS
 ========================================================= */
 
-function updateStatistics(
-    applications
-) {
+function updateStatistics(applications) {
 
-    let pending =
-        0;
+    let pending = 0;
 
-    let approved =
-        0;
+    let approved = 0;
 
-    let rejected =
-        0;
+    let rejected = 0;
 
 
     applications.forEach(
-
         function (application) {
 
             const status =
-
                 String(
-
                     application.status ||
-
                     ""
-
                 )
-
                 .toLowerCase()
-
                 .trim();
 
 
-            /* =============================================
-               PENDING
-            ============================================= */
-
             if (
-
-                status.includes(
-                    "розгляді"
-                ) ||
-
-                status.includes(
-                    "очіку"
-                ) ||
-
-                status.includes(
-                    "нов"
-                ) ||
-
-                status.includes(
-                    "pending"
-                )
-
+                status.includes("розгляді") ||
+                status.includes("очіку") ||
+                status.includes("нов") ||
+                status.includes("pending")
             ) {
 
                 pending++;
@@ -1398,28 +1104,11 @@ function updateStatistics(
             }
 
 
-            /* =============================================
-               APPROVED
-            ============================================= */
-
             if (
-
-                status.includes(
-                    "прийнято"
-                ) ||
-
-                status.includes(
-                    "схвалено"
-                ) ||
-
-                status.includes(
-                    "затверджено"
-                ) ||
-
-                status.includes(
-                    "approved"
-                )
-
+                status.includes("прийнято") ||
+                status.includes("схвалено") ||
+                status.includes("затверджено") ||
+                status.includes("approved")
             ) {
 
                 approved++;
@@ -1427,24 +1116,10 @@ function updateStatistics(
             }
 
 
-            /* =============================================
-               REJECTED
-            ============================================= */
-
             if (
-
-                status.includes(
-                    "відхилено"
-                ) ||
-
-                status.includes(
-                    "відмовлено"
-                ) ||
-
-                status.includes(
-                    "rejected"
-                )
-
+                status.includes("відхилено") ||
+                status.includes("відмовлено") ||
+                status.includes("rejected")
             ) {
 
                 rejected++;
@@ -1452,7 +1127,6 @@ function updateStatistics(
             }
 
         }
-
     );
 
 
@@ -1494,43 +1168,21 @@ function updateStatistics(
    STATUS CLASS
 ========================================================= */
 
-function getStatusClass(
-    status
-) {
+function getStatusClass(status) {
 
     const value =
-
         String(
-
-            status ||
-
-            ""
-
+            status || ""
         )
-
         .toLowerCase()
-
         .trim();
 
 
     if (
-
-        value.includes(
-            "розгляді"
-        ) ||
-
-        value.includes(
-            "очіку"
-        ) ||
-
-        value.includes(
-            "нов"
-        ) ||
-
-        value.includes(
-            "pending"
-        )
-
+        value.includes("розгляді") ||
+        value.includes("очіку") ||
+        value.includes("нов") ||
+        value.includes("pending")
     ) {
 
         return "status-pending";
@@ -1539,23 +1191,10 @@ function getStatusClass(
 
 
     if (
-
-        value.includes(
-            "прийнято"
-        ) ||
-
-        value.includes(
-            "схвалено"
-        ) ||
-
-        value.includes(
-            "затверджено"
-        ) ||
-
-        value.includes(
-            "approved"
-        )
-
+        value.includes("прийнято") ||
+        value.includes("схвалено") ||
+        value.includes("затверджено") ||
+        value.includes("approved")
     ) {
 
         return "status-approved";
@@ -1564,19 +1203,9 @@ function getStatusClass(
 
 
     if (
-
-        value.includes(
-            "виконано"
-        ) ||
-
-        value.includes(
-            "завершено"
-        ) ||
-
-        value.includes(
-            "completed"
-        )
-
+        value.includes("виконано") ||
+        value.includes("завершено") ||
+        value.includes("completed")
     ) {
 
         return "status-completed";
@@ -1585,19 +1214,9 @@ function getStatusClass(
 
 
     if (
-
-        value.includes(
-            "відхилено"
-        ) ||
-
-        value.includes(
-            "відмовлено"
-        ) ||
-
-        value.includes(
-            "rejected"
-        )
-
+        value.includes("відхилено") ||
+        value.includes("відмовлено") ||
+        value.includes("rejected")
     ) {
 
         return "status-rejected";
@@ -1606,15 +1225,8 @@ function getStatusClass(
 
 
     if (
-
-        value.includes(
-            "документ"
-        ) ||
-
-        value.includes(
-            "documents"
-        )
-
+        value.includes("документ") ||
+        value.includes("documents")
     ) {
 
         return "status-documents";
@@ -1631,9 +1243,7 @@ function getStatusClass(
    APPLICATION DETAILS
 ========================================================= */
 
-function openApplicationDetails(
-    application
-) {
+function openApplicationDetails(application) {
 
     if (!applicationModal) {
 
@@ -1645,9 +1255,7 @@ function openApplicationDetails(
     if (detailsTitle) {
 
         detailsTitle.textContent =
-
             application.service ||
-
             "Заявка";
 
     }
@@ -1660,199 +1268,124 @@ function openApplicationDetails(
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Номер заявки",
-
                 application.number
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Код доступу",
-
                 application.accessCode
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Дата подання",
-
                 application.date
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "ПІБ",
-
                 application.fullName
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Дата народження",
-
                 application.birthDate
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Телефон",
-
                 application.phone
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Email",
-
                 application.email
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Discord",
-
                 application.discord
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Послуга",
-
                 application.service
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Контакт",
-
                 application.contact
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Статус",
-
                 application.status
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Відповідальний",
-
                 application.responsible ||
-
                 "Не призначено"
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Опис звернення",
-
                 application.message
-
             )
-
         );
 
 
         detailsContent.appendChild(
-
             createDetail(
-
                 "Коментар державного органу",
-
                 application.comment ||
-
                 "Коментар відсутній."
-
             )
-
         );
 
     }
 
 
     applicationModal.setAttribute(
-
         "aria-hidden",
-
         "false"
-
     );
 
 
@@ -1867,69 +1400,45 @@ function openApplicationDetails(
    DETAIL
 ========================================================= */
 
-function createDetail(
-
-    label,
-
-    value
-
-) {
+function createDetail(label, value) {
 
     const wrapper =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     wrapper.style.marginBottom =
         "15px";
 
 
     const title =
-        document.createElement(
-            "strong"
-        );
-
+        document.createElement("strong");
 
     title.textContent =
         label;
 
-
     title.style.display =
         "block";
-
 
     title.style.marginBottom =
         "5px";
 
 
     const text =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     text.textContent =
         value ||
         "—";
 
-
     text.style.color =
         "#59656e";
-
 
     text.style.lineHeight =
         "1.6";
 
 
-    wrapper.appendChild(
-        title
-    );
+    wrapper.appendChild(title);
 
-
-    wrapper.appendChild(
-        text
-    );
+    wrapper.appendChild(text);
 
 
     return wrapper;
@@ -1967,9 +1476,7 @@ function closeApplicationModal() {
    STORAGE
 ========================================================= */
 
-function saveSession(
-    session
-) {
+function saveSession(session) {
 
     if (!session) {
 
@@ -1983,39 +1490,30 @@ function saveSession(
         const safeSession = {
 
             number:
-                session.number ||
-                "",
+                session.number || "",
 
             accessCode:
-                session.accessCode ||
-                "",
+                session.accessCode || "",
 
             application:
-                session.application ||
-                null
+                session.application || null
 
         };
 
 
         localStorage.setItem(
-
             STORAGE_KEY,
-
             JSON.stringify(
                 safeSession
             )
-
         );
 
 
     } catch (error) {
 
         console.error(
-
             "SESSION SAVE ERROR:",
-
             error
-
         );
 
     }
@@ -2045,9 +1543,7 @@ function getSavedSession() {
 
 
         const session =
-            JSON.parse(
-                data
-            );
+            JSON.parse(data);
 
 
         if (
@@ -2067,16 +1563,11 @@ function getSavedSession() {
     } catch (error) {
 
         console.error(
-
             "SESSION READ ERROR:",
-
             error
-
         );
 
-
         removeSession();
-
 
         return null;
 
@@ -2115,13 +1606,8 @@ function removeSession() {
 
 function logout() {
 
-
     removeSession();
 
-
-    /* =====================================================
-       DASHBOARD
-    ===================================================== */
 
     if (cabinetDashboard) {
 
@@ -2132,10 +1618,6 @@ function logout() {
     }
 
 
-    /* =====================================================
-       LOGIN
-    ===================================================== */
-
     if (cabinetLogin) {
 
         cabinetLogin.style.display =
@@ -2143,10 +1625,6 @@ function logout() {
 
     }
 
-
-    /* =====================================================
-       CLEAR FORM
-    ===================================================== */
 
     if (loginNumber) {
 
@@ -2163,10 +1641,6 @@ function logout() {
 
     }
 
-
-    /* =====================================================
-       CLEAR APPLICATION
-    ===================================================== */
 
     if (applicationsList) {
 
@@ -2193,11 +1667,9 @@ function logout() {
 
     window.scrollTo({
 
-        top:
-            0,
+        top: 0,
 
-        behavior:
-            "smooth"
+        behavior: "smooth"
 
     });
 
@@ -2209,7 +1681,6 @@ function logout() {
 ========================================================= */
 
 function showLogin() {
-
 
     if (cabinetDashboard) {
 
@@ -2239,7 +1710,6 @@ function showLogin() {
 
 function showDashboard() {
 
-
     if (cabinetLogin) {
 
         cabinetLogin.style.display =
@@ -2263,9 +1733,7 @@ function showDashboard() {
    LOADING
 ========================================================= */
 
-function showLoading(
-    visible
-) {
+function showLoading(visible) {
 
     if (!cabinetLoading) {
 
@@ -2295,9 +1763,7 @@ function showLoading(
    LOGIN LOADING
 ========================================================= */
 
-function setLoginLoading(
-    loading
-) {
+function setLoginLoading(loading) {
 
     if (!loginButton) {
 
@@ -2311,11 +1777,8 @@ function setLoginLoading(
 
 
     loginButton.textContent =
-
         loading
-
             ? "Вхід..."
-
             : "Увійти до кабінету";
 
 }
@@ -2325,9 +1788,7 @@ function setLoginLoading(
    LOGIN ERROR
 ========================================================= */
 
-function showLoginError(
-    message
-) {
+function showLoginError(message) {
 
     if (!loginError) {
 
@@ -2371,9 +1832,12 @@ function hideLoginError() {
    CABINET ERROR
 ========================================================= */
 
-function showCabinetError(
-    message
-) {
+function showCabinetError(message) {
+
+    /*
+     * Если отдельного блока ошибки кабинета нет,
+     * используем loginError.
+     */
 
     if (!loginError) {
 
@@ -2397,24 +1861,14 @@ function showCabinetError(
    INITIALS
 ========================================================= */
 
-function getInitials(
-    fullName
-) {
+function getInitials(fullName) {
 
     const words =
-
         String(
-
-            fullName ||
-
-            "O"
-
+            fullName || "O"
         )
-
         .trim()
-
         .split(/\s+/)
-
         .filter(Boolean);
 
 
@@ -2432,72 +1886,25 @@ function getInitials(
     ) {
 
         return words[0]
-
-            .substring(
-
-                0,
-
-                1
-
-            )
-
+            .substring(0, 1)
             .toUpperCase();
 
     }
 
 
     return (
-
-        words[0]
-
-            .substring(
-
-                0,
-
-                1
-
-            ) +
-
-        words[1]
-
-            .substring(
-
-                0,
-
-                1
-
-            )
-
+        words[0].substring(0, 1) +
+        words[1].substring(0, 1)
     ).toUpperCase();
 
 }
 
 
 /* =========================================================
-   GET REQUEST
+   API URL
 ========================================================= */
 
-async function getRequest(
-    params
-) {
-
-
-    if (
-
-        !CABINET_API_URL ||
-
-        CABINET_API_URL.includes(
-            "ВСТАВЬ"
-        )
-
-    ) {
-
-        throw new Error(
-            "CABINET_API_URL не налаштований."
-        );
-
-    }
-
+function getApiUrl(params) {
 
     const query =
         new URLSearchParams();
@@ -2506,69 +1913,85 @@ async function getRequest(
     Object.keys(
         params || {}
     ).forEach(
-
         function (key) {
 
-            query.append(
+            const value =
+                params[key];
 
-                key,
+            if (
+                value !== undefined &&
+                value !== null
+            ) {
 
-                params[key] ?? ""
+                query.append(
+                    key,
+                    String(value)
+                );
 
-            );
+            }
 
         }
-
     );
 
 
     const separator =
-
         CABINET_API_URL.includes("?")
-
             ? "&"
-
             : "?";
 
 
-    const url =
-
+    return (
         CABINET_API_URL +
-
         separator +
+        query.toString()
+    );
 
-        query.toString();
+}
+
+
+/* =========================================================
+   GET REQUEST
+========================================================= */
+
+async function getRequest(params) {
+
+    if (
+        !CABINET_API_URL
+    ) {
+
+        throw new Error(
+            "CABINET_API_URL не настроен."
+        );
+
+    }
+
+
+    const url =
+        getApiUrl(params);
+
+
+    console.log(
+        "GET API:",
+        url
+    );
 
 
     const response =
         await fetch(
-
             url,
-
             {
-
-                method:
-                    "GET",
-
-                cache:
-                    "no-store",
-
-                redirect:
-                    "follow"
-
+                method: "GET",
+                cache: "no-store",
+                redirect: "follow"
             }
-
         );
 
 
     if (!response.ok) {
 
         throw new Error(
-
             "HTTP " +
-
             response.status
-
         );
 
     }
@@ -2578,27 +2001,28 @@ async function getRequest(
         await response.text();
 
 
+    if (!text) {
+
+        throw new Error(
+            "Пустой ответ сервера."
+        );
+
+    }
+
+
     try {
 
-        return JSON.parse(
-            text
-        );
+        return JSON.parse(text);
 
     } catch (error) {
 
         console.error(
-
             "INVALID JSON:",
-
             text
-
         );
 
-
         throw new Error(
-
-            "Сервер повернув некоректну відповідь."
-
+            "Google Apps Script вернул некорректный ответ."
         );
 
     }
@@ -2610,25 +2034,14 @@ async function getRequest(
    POST REQUEST
 ========================================================= */
 
-async function postRequest(
-    params
-) {
-
+async function postRequest(params) {
 
     if (
-
-        !CABINET_API_URL ||
-
-        CABINET_API_URL.includes(
-            "ВСТАВЬ"
-        )
-
+        !CABINET_API_URL
     ) {
 
         throw new Error(
-
-            "CABINET_API_URL не налаштований."
-
+            "CABINET_API_URL не настроен."
         );
 
     }
@@ -2641,91 +2054,176 @@ async function postRequest(
     Object.keys(
         params || {}
     ).forEach(
-
         function (key) {
 
-            body.append(
+            const value =
+                params[key];
 
-                key,
+            if (
+                value !== undefined &&
+                value !== null
+            ) {
 
-                params[key] ?? ""
-
-            );
-
-        }
-
-    );
-
-
-    const response =
-        await fetch(
-
-            CABINET_API_URL,
-
-            {
-
-                method:
-                    "POST",
-
-                headers: {
-
-                    "Content-Type":
-
-                        "application/x-www-form-urlencoded;charset=UTF-8"
-
-                },
-
-                body:
-                    body.toString(),
-
-                redirect:
-                    "follow"
+                body.append(
+                    key,
+                    String(value)
+                );
 
             }
 
-        );
+        }
+    );
 
 
-    if (!response.ok) {
+    /*
+     * ВАЖНО:
+     *
+     * Google Apps Script Web App иногда
+     * некорректно обрабатывает CORS POST.
+     *
+     * Поэтому сначала пробуем обычный POST.
+     */
 
-        throw new Error(
+    try {
 
-            "HTTP " +
+        const response =
+            await fetch(
+                CABINET_API_URL,
+                {
+                    method: "POST",
 
-            response.status
+                    headers: {
+                        "Content-Type":
+                            "application/x-www-form-urlencoded;charset=UTF-8"
+                    },
 
+                    body:
+                        body.toString(),
+
+                    redirect:
+                        "follow",
+
+                    cache:
+                        "no-store"
+                }
+            );
+
+
+        if (
+            response.ok
+        ) {
+
+            const text =
+                await response.text();
+
+
+            if (text) {
+
+                try {
+
+                    return JSON.parse(text);
+
+                } catch (error) {
+
+                    console.warn(
+                        "POST returned non JSON:",
+                        text
+                    );
+
+                }
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "POST request failed:",
+            error
         );
 
     }
 
 
-    const text =
-        await response.text();
+    /*
+     * FALLBACK
+     *
+     * Если браузер блокирует POST,
+     * используем GET.
+     *
+     * Для Google Apps Script это
+     * значительно стабильнее.
+     */
+
+    const fallbackUrl =
+        getApiUrl(params);
+
+
+    console.log(
+        "POST fallback GET:",
+        fallbackUrl
+    );
+
+
+    const fallbackResponse =
+        await fetch(
+            fallbackUrl,
+            {
+                method: "GET",
+                cache: "no-store",
+                redirect: "follow"
+            }
+        );
+
+
+    if (
+        !fallbackResponse.ok
+    ) {
+
+        throw new Error(
+            "HTTP " +
+            fallbackResponse.status
+        );
+
+    }
+
+
+    const fallbackText =
+        await fallbackResponse.text();
+
+
+    if (!fallbackText) {
+
+        throw new Error(
+            "Пустой ответ Google Apps Script."
+        );
+
+    }
 
 
     try {
 
         return JSON.parse(
-            text
+            fallbackText
         );
 
     } catch (error) {
 
         console.error(
-
-            "INVALID JSON:",
-
-            text
-
+            "INVALID FALLBACK JSON:",
+            fallbackText
         );
 
-
         throw new Error(
-
-            "Сервер повернув некоректну відповідь."
-
+            "Google Apps Script вернул некорректный ответ."
         );
 
     }
 
 }
+
+
+/* =========================================================
+   END
+========================================================= */
