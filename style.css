@@ -2016,3 +2016,151 @@ button {
         translateY(0);
 
 }
+
+/* =====================================================
+   APPLICATION SUCCESS
+===================================================== */
+
+.success-message {
+    display: none;
+    text-align: center;
+    padding: 10px 0 0;
+}
+
+.success-message.active {
+    display: block;
+}
+
+.success-icon {
+    width: 86px;
+    height: 86px;
+
+    margin: 25px auto 30px;
+
+    border-radius: 50%;
+
+    background: #e8f7ef;
+
+    color: #1d9b59;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 48px;
+    font-weight: 400;
+}
+
+.success-message h3 {
+    margin: 0 0 14px;
+
+    font-size: 30px;
+    line-height: 1.2;
+
+    color: #1b2638;
+}
+
+.success-message p {
+    margin: 0 0 18px;
+
+    color: #718096;
+
+    font-size: 18px;
+}
+
+.application-number {
+    display: block;
+
+    margin-bottom: 22px;
+
+    color: #1976d2;
+
+    font-size: 21px;
+    font-weight: 700;
+}
+
+/* =====================================================
+   APPLICATION STATUS
+===================================================== */
+
+.application-status {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+
+    margin: 0 auto 28px;
+
+    padding: 10px 18px;
+
+    border-radius: 10px;
+
+    background: #f5f7fa;
+
+    border: 1px solid #e2e8f0;
+
+    font-size: 16px;
+}
+
+.status-label {
+    color: #64748b;
+
+    font-weight: 600;
+}
+
+.status-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    font-size: 14px;
+
+    font-weight: 700;
+}
+
+.status-badge.pending {
+    background: #fff7cc;
+
+    color: #9a7500;
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+    .success-icon {
+        width: 72px;
+        height: 72px;
+
+        font-size: 40px;
+
+        margin-bottom: 22px;
+    }
+
+    .success-message h3 {
+        font-size: 25px;
+    }
+
+    .success-message p {
+        font-size: 16px;
+    }
+
+    .application-status {
+        flex-direction: column;
+
+        gap: 6px;
+
+        width: fit-content;
+
+        padding: 12px 18px;
+    }
+
+}
