@@ -972,15 +972,140 @@
 </div>
             </div>
 
+<section
+    class="cabinet-login"
+    id="cabinetRegister">
 
-            <button
-                type="submit"
-                class="btn btn-primary cabinet-login-button"
-                id="cabinetLoginButton">
+    <h2>
+        Реєстрація громадянина
+    </h2>
 
-                Переглянути мої заявки
+    <p>
+        Створіть особистий профіль громадянина штату Olymp.
+        Після реєстрації ви отримаєте номер посвідчення,
+        за допомогою якого зможете користуватися державними послугами.
+    </p>
 
-            </button>
+    <form id="citizenRegisterForm">
+
+        <div class="cabinet-form-group">
+
+            <label for="registerFullName">
+                ПІБ *
+            </label>
+
+            <input
+                type="text"
+                class="cabinet-input"
+                id="registerFullName"
+                placeholder="Ім'я Прізвище"
+                required>
+
+        </div>
+
+
+        <div class="cabinet-form-group">
+
+            <label for="registerBirthDate">
+                Дата народження *
+            </label>
+
+            <input
+                type="date"
+                class="cabinet-input"
+                id="registerBirthDate"
+                required>
+
+        </div>
+
+
+        <div class="cabinet-form-group">
+
+            <label for="registerPhone">
+                Телефон
+            </label>
+
+            <input
+                type="text"
+                class="cabinet-input"
+                id="registerPhone"
+                placeholder="+380...">
+
+        </div>
+
+
+        <div class="cabinet-form-group">
+
+            <label for="registerDiscord">
+                Discord
+            </label>
+
+            <input
+                type="text"
+                class="cabinet-input"
+                id="registerDiscord"
+                placeholder="Ваш Discord">
+
+        </div>
+
+
+        <div class="cabinet-form-group">
+
+            <label for="registerEmail">
+                Email
+            </label>
+
+            <input
+                type="email"
+                class="cabinet-input"
+                id="registerEmail"
+                placeholder="example@email.com">
+
+        </div>
+
+
+        <div class="cabinet-form-group">
+
+            <label for="registerPassword">
+                Пароль *
+            </label>
+
+            <input
+                type="password"
+                class="cabinet-input"
+                id="registerPassword"
+                minlength="6"
+                placeholder="Мінімум 6 символів"
+                required>
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="btn btn-primary cabinet-login-button">
+
+            Зареєструватися
+
+        </button>
+
+    </form>
+
+
+    <div
+        class="cabinet-error"
+        id="registerError">
+    </div>
+
+</section>
+<button
+    type="submit"
+    class="btn btn-primary cabinet-login-button"
+    id="cabinetLoginButton">
+
+    Увійти до кабінету
+
+</button>
 
 
         </form>
