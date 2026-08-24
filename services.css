@@ -1,0 +1,434 @@
+/* =========================================================
+   OLYMP GOVERNMENT
+   SERVICES PAGE
+========================================================= */
+
+.services-page {
+    min-height: 100vh;
+    background: #f4f7fa;
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.services-hero {
+    padding: 110px 24px 80px;
+    background:
+        linear-gradient(
+            135deg,
+            #071525,
+            #102b45
+        );
+    color: #ffffff;
+}
+
+.services-hero-content {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.services-hero h1 {
+    margin: 12px 0;
+    font-size: clamp(42px, 6vw, 68px);
+    line-height: 1.05;
+}
+
+.services-hero p {
+    max-width: 700px;
+    margin: 0;
+    color: #b9c8d7;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   TOOLS
+========================================================= */
+
+.services-tools {
+    max-width: 1200px;
+    margin: -30px auto 0;
+    padding: 0 24px;
+    position: relative;
+    z-index: 5;
+}
+
+.services-search {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #dce4eb;
+    border-radius: 14px;
+    height: 62px;
+    padding: 0 18px;
+    box-shadow: 0 12px 35px rgba(0,0,0,.08);
+}
+
+.search-icon {
+    font-size: 20px;
+    margin-right: 12px;
+}
+
+.services-search input {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-size: 16px;
+}
+
+.clear-search {
+    border: 0;
+    background: transparent;
+    font-size: 28px;
+    cursor: pointer;
+    color: #8493a3;
+    display: none;
+}
+
+.clear-search.active {
+    display: block;
+}
+
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+.services-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.service-filter {
+    border: 1px solid #d8e0e8;
+    background: #ffffff;
+    color: #34495e;
+    padding: 11px 17px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.service-filter:hover,
+.service-filter.active {
+    background: #0b2034;
+    color: #ffffff;
+    border-color: #0b2034;
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.services-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 70px 24px;
+}
+
+
+/* =========================================================
+   GROUP
+========================================================= */
+
+.service-group {
+    margin-bottom: 70px;
+}
+
+.service-group-heading {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.group-icon {
+    width: 58px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border-radius: 14px;
+    font-size: 27px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.06);
+}
+
+.service-group-heading span {
+    color: #7b8a99;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.service-group-heading h2 {
+    margin: 4px 0 0;
+    font-size: 28px;
+    color: #102236;
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(280px, 1fr)
+    );
+    gap: 20px;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.service-card {
+    background: #ffffff;
+    border: 1px solid #e0e7ed;
+    border-radius: 18px;
+    padding: 28px;
+    transition:
+        transform .25s,
+        box-shadow .25s,
+        border-color .25s;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(12, 32, 52, .10);
+    border-color: #c5d1dc;
+}
+
+.service-card-icon {
+    font-size: 34px;
+    margin-bottom: 18px;
+}
+
+.service-card-label {
+    color: #718194;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.service-card h3 {
+    margin: 9px 0 12px;
+    color: #102236;
+    font-size: 21px;
+    line-height: 1.3;
+}
+
+.service-card p {
+    color: #66788a;
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 72px;
+}
+
+.service-open {
+    margin-top: 15px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #0c395e;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.service-open span {
+    margin-left: 7px;
+    transition: .2s;
+}
+
+.service-open:hover span {
+    margin-left: 12px;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.services-empty {
+    display: none;
+    text-align: center;
+    padding: 70px 20px;
+}
+
+.services-empty.visible {
+    display: block;
+}
+
+.services-empty div {
+    font-size: 45px;
+}
+
+.services-empty h3 {
+    color: #172b3d;
+    margin-bottom: 8px;
+}
+
+.services-empty p {
+    color: #788897;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.service-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(3, 14, 25, .72);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+}
+
+.service-modal.active {
+    display: flex;
+}
+
+.service-modal-window {
+    position: relative;
+    width: 100%;
+    max-width: 620px;
+    padding: 38px;
+    background: #ffffff;
+    border-radius: 22px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.25);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 17px;
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 50%;
+    background: #f0f3f6;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.modal-service-icon {
+    font-size: 45px;
+    margin-bottom: 15px;
+}
+
+.service-modal h2 {
+    margin: 8px 0 14px;
+    color: #102236;
+    font-size: 30px;
+}
+
+.service-modal p {
+    color: #66788a;
+    line-height: 1.7;
+}
+
+.modal-information {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.modal-information > div {
+    padding: 16px;
+    border-radius: 12px;
+    background: #f5f7f9;
+}
+
+.modal-information span {
+    display: block;
+    color: #81909e;
+    font-size: 10px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.modal-information strong {
+    color: #1c3144;
+    font-size: 14px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.modal-button {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.modal-button.primary {
+    background: #0b2034;
+    color: #ffffff;
+}
+
+.modal-button.secondary {
+    border: 1px solid #d7dfe6;
+    background: #ffffff;
+    color: #263b4e;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .services-hero {
+        padding: 80px 20px 65px;
+    }
+
+    .services-container {
+        padding: 50px 18px;
+    }
+
+    .services-tools {
+        padding: 0 18px;
+    }
+
+    .service-group-heading h2 {
+        font-size: 23px;
+    }
+
+    .service-modal-window {
+        padding: 28px 20px;
+    }
+
+    .modal-information {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+}
