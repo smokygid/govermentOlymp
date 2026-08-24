@@ -1,0 +1,710 @@
+/* =========================================================
+   OLYMP GOVERNMENT
+   LSPD PAGE
+========================================================= */
+
+.lspd-page {
+    background: #f5f7fa;
+    color: #17212b;
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.lspd-hero {
+    position: relative;
+    min-height: 560px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            110deg,
+            #071525 0%,
+            #0b1d31 55%,
+            #132d46 100%
+        );
+}
+
+
+.lspd-hero::after {
+    content: "LSPD";
+
+    position: absolute;
+
+    right: -80px;
+    bottom: -110px;
+
+    font-size: 300px;
+    font-weight: 900;
+
+    color: rgba(255,255,255,0.035);
+
+    pointer-events: none;
+}
+
+
+.lspd-hero-overlay {
+    position: absolute;
+    inset: 0;
+
+    background:
+        radial-gradient(
+            circle at 75% 35%,
+            rgba(255,255,255,0.09),
+            transparent 35%
+        );
+}
+
+
+.lspd-hero-content {
+    position: relative;
+    z-index: 2;
+
+    width: min(1180px, 92%);
+
+    margin: auto;
+
+    padding: 90px 0;
+}
+
+
+.lspd-badge {
+    width: 82px;
+    height: 82px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid rgba(255,255,255,0.7);
+    border-radius: 50%;
+
+    color: white;
+
+    font-size: 18px;
+    font-weight: 800;
+
+    margin-bottom: 28px;
+}
+
+
+.lspd-label {
+    color: #aebdca;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 3px;
+
+    margin-bottom: 15px;
+}
+
+
+.lspd-hero h1 {
+    max-width: 850px;
+
+    margin: 0 0 25px;
+
+    color: white;
+
+    font-size: clamp(42px, 6vw, 76px);
+    line-height: 1.02;
+
+    font-weight: 800;
+}
+
+
+.lspd-hero p {
+    max-width: 700px;
+
+    margin: 0 0 35px;
+
+    color: #cbd6df;
+
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+
+.lspd-hero-buttons {
+    display: flex;
+    gap: 14px;
+
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.lspd-button {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 50px;
+
+    padding: 0 26px;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    font-weight: 700;
+
+    transition:
+        transform .2s ease,
+        background .2s ease;
+}
+
+
+.lspd-button:hover {
+    transform: translateY(-2px);
+}
+
+
+.lspd-button.primary {
+    background: #ffffff;
+    color: #071525;
+}
+
+
+.lspd-button.primary:hover {
+    background: #e9eef3;
+}
+
+
+.lspd-button.secondary {
+    border: 1px solid rgba(255,255,255,.35);
+
+    color: white;
+
+    background: rgba(255,255,255,.05);
+}
+
+
+.lspd-button.secondary:hover {
+    background: rgba(255,255,255,.12);
+}
+
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+.lspd-section {
+    padding: 90px 0;
+}
+
+
+.lspd-section-light {
+    background: #eef2f5;
+}
+
+
+.lspd-section-dark {
+    background: #071525;
+}
+
+
+.lspd-container {
+    width: min(1180px, 92%);
+    margin: auto;
+}
+
+
+.lspd-section-heading {
+    max-width: 760px;
+
+    margin-bottom: 45px;
+}
+
+
+.lspd-section-heading > span {
+    display: block;
+
+    margin-bottom: 10px;
+
+    color: #71808e;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: 2.5px;
+}
+
+
+.lspd-section-heading h2 {
+    margin: 0;
+
+    font-size: clamp(30px, 4vw, 46px);
+
+    line-height: 1.15;
+}
+
+
+.lspd-section-heading p {
+    margin-top: 18px;
+
+    color: #8f9ca8;
+
+    line-height: 1.7;
+}
+
+
+.lspd-section-heading.light > span {
+    color: #8fa0af;
+}
+
+
+.lspd-section-heading.light h2 {
+    color: white;
+}
+
+
+.lspd-section-heading.light p {
+    color: #aebbc6;
+}
+
+
+/* =========================================================
+   ABOUT
+========================================================= */
+
+.lspd-about-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 22px;
+}
+
+
+.lspd-about-card {
+    padding: 32px;
+
+    background: white;
+
+    border: 1px solid #e0e6eb;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.04);
+}
+
+
+.lspd-card-icon {
+    width: 54px;
+    height: 54px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 22px;
+
+    border-radius: 10px;
+
+    background: #eef2f5;
+
+    font-size: 25px;
+}
+
+
+.lspd-about-card h3 {
+    margin: 0 0 12px;
+
+    font-size: 20px;
+}
+
+
+.lspd-about-card p {
+    margin: 0;
+
+    color: #697681;
+
+    line-height: 1.65;
+}
+
+
+/* =========================================================
+   LEADERSHIP
+========================================================= */
+
+.lspd-leadership-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 22px;
+}
+
+
+.lspd-leader-card {
+    display: flex;
+
+    align-items: center;
+
+    gap: 22px;
+
+    padding: 28px;
+
+    background: white;
+
+    border-radius: 12px;
+
+    border: 1px solid #dde4e9;
+}
+
+
+.lspd-leader-avatar {
+    width: 75px;
+    height: 75px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #071525;
+
+    font-size: 30px;
+}
+
+
+.lspd-leader-card span {
+    color: #7a8792;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+
+.lspd-leader-card h3 {
+    margin: 7px 0 4px;
+
+    font-size: 20px;
+}
+
+
+.lspd-leader-card p {
+    margin: 0;
+
+    color: #71808b;
+}
+
+
+/* =========================================================
+   DIRECTIONS
+========================================================= */
+
+.lspd-directions-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 1px;
+
+    background: #dce2e7;
+
+    border: 1px solid #dce2e7;
+}
+
+
+.lspd-direction {
+    padding: 35px;
+
+    background: white;
+}
+
+
+.lspd-direction > strong {
+    color: #9ba7b1;
+
+    font-size: 14px;
+}
+
+
+.lspd-direction h3 {
+    margin: 14px 0 10px;
+
+    font-size: 22px;
+}
+
+
+.lspd-direction p {
+    margin: 0;
+
+    color: #6d7983;
+
+    line-height: 1.65;
+}
+
+
+/* =========================================================
+   SERVICES
+========================================================= */
+
+.lspd-services-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 18px;
+}
+
+
+.lspd-service-card {
+    display: flex;
+
+    flex-direction: column;
+
+    min-height: 250px;
+
+    padding: 27px;
+
+    color: white;
+
+    text-decoration: none;
+
+    background: #10253a;
+
+    border: 1px solid rgba(255,255,255,.08);
+
+    border-radius: 10px;
+
+    transition:
+        transform .2s ease,
+        background .2s ease;
+}
+
+
+.lspd-service-card:hover {
+    transform: translateY(-5px);
+
+    background: #163149;
+}
+
+
+.lspd-service-icon {
+    font-size: 30px;
+
+    margin-bottom: 20px;
+}
+
+
+.lspd-service-card h3 {
+    margin: 0 0 12px;
+
+    font-size: 18px;
+}
+
+
+.lspd-service-card p {
+    margin: 0;
+
+    color: #b4c0ca;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+.lspd-service-card span {
+    margin-top: auto;
+
+    padding-top: 20px;
+
+    color: white;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   CONTACT
+========================================================= */
+
+.lspd-contact {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 40px;
+
+    padding: 45px;
+
+    background: white;
+
+    border: 1px solid #dfe5e9;
+
+    border-radius: 14px;
+}
+
+
+.lspd-contact > div {
+    max-width: 700px;
+}
+
+
+.lspd-contact span {
+    color: #7d8a95;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+
+.lspd-contact h2 {
+    margin: 10px 0;
+
+    font-size: 30px;
+}
+
+
+.lspd-contact p {
+    margin: 0;
+
+    color: #6d7983;
+
+    line-height: 1.6;
+}
+
+
+.lspd-contact .lspd-button.primary {
+    flex-shrink: 0;
+
+    background: #071525;
+
+    color: white;
+}
+
+
+.lspd-contact .lspd-button.primary:hover {
+    background: #10263b;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .lspd-about-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .lspd-services-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .lspd-hero {
+        min-height: 500px;
+    }
+
+
+    .lspd-hero-content {
+        padding: 70px 0;
+    }
+
+
+    .lspd-hero h1 {
+        font-size: 42px;
+    }
+
+
+    .lspd-hero p {
+        font-size: 16px;
+    }
+
+
+    .lspd-section {
+        padding: 65px 0;
+    }
+
+
+    .lspd-leadership-grid,
+    .lspd-directions-grid,
+    .lspd-services-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .lspd-contact {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        padding: 30px;
+    }
+
+
+    .lspd-contact .lspd-button {
+        width: 100%;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .lspd-hero h1 {
+        font-size: 36px;
+    }
+
+
+    .lspd-badge {
+        width: 68px;
+        height: 68px;
+    }
+
+
+    .lspd-hero-buttons {
+        flex-direction: column;
+    }
+
+
+    .lspd-button {
+        width: 100%;
+    }
+
+
+    .lspd-about-card,
+    .lspd-direction,
+    .lspd-service-card {
+        padding: 24px;
+    }
+
+}
