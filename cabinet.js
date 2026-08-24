@@ -36,7 +36,7 @@
 */
 
 const API_URL =
-    "ВСТАВЬ_СЮДА_URL_GOOGLE_APPS_SCRIPT";
+    "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec";
 
 
 /*
