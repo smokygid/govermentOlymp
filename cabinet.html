@@ -22,6 +22,396 @@
         href="cabinet.css"
     >
 
+    <!-- =====================================================
+         AVATAR OVERRIDE
+         Фіксуємо розмір аватара незалежно від cabinet.css
+    ====================================================== -->
+
+    <style>
+
+        /* =================================================
+           PROFILE HEADER
+        ================================================== */
+
+        .profile-card .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 40px;
+            padding: 32px;
+        }
+
+
+        /* =================================================
+           AVATAR BLOCK
+        ================================================== */
+
+        .profile-avatar-wrapper {
+
+            width: 320px;
+            max-width: 100%;
+
+            flex-shrink: 0;
+
+            display: flex;
+            flex-direction: column;
+
+            align-items: center;
+
+            gap: 16px;
+
+        }
+
+
+        /* =================================================
+           CURRENT AVATAR
+        ================================================== */
+
+        .profile-avatar {
+
+            width: 180px !important;
+            height: 180px !important;
+
+            min-width: 180px !important;
+            min-height: 180px !important;
+
+            max-width: 180px !important;
+            max-height: 180px !important;
+
+            border-radius: 50%;
+
+            overflow: hidden;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            background: #eef2f7;
+
+            border: 4px solid #ffffff;
+
+            box-shadow:
+                0 8px 30px rgba(0, 0, 0, 0.12);
+
+            font-size: 48px;
+
+            flex-shrink: 0;
+
+        }
+
+
+        /* =================================================
+           AVATAR IMAGE
+        ================================================== */
+
+        .profile-avatar img,
+        .profile-avatar-image {
+
+            width: 100% !important;
+            height: 100% !important;
+
+            min-width: 100% !important;
+            min-height: 100% !important;
+
+            max-width: 100% !important;
+            max-height: 100% !important;
+
+            display: block;
+
+            object-fit: cover;
+
+            object-position: center;
+
+            border-radius: 50%;
+
+        }
+
+
+        /* =================================================
+           AVATAR ACTIONS
+        ================================================== */
+
+        .avatar-actions {
+
+            width: 100%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+
+        }
+
+
+        .avatar-actions label,
+        .avatar-actions button {
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+        }
+
+
+        /* =================================================
+           URL INPUT
+        ================================================== */
+
+        .avatar-url-input {
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            padding: 12px 14px;
+
+            border: 1px solid #d7dee8;
+
+            border-radius: 10px;
+
+            background: #ffffff;
+
+            font-size: 14px;
+
+            color: #182235;
+
+            outline: none;
+
+        }
+
+
+        .avatar-url-input:focus {
+
+            border-color: #64748b;
+
+            box-shadow:
+                0 0 0 3px rgba(100, 116, 139, 0.12);
+
+        }
+
+
+        /* =================================================
+           AVATAR HELP
+        ================================================== */
+
+        .avatar-help-text {
+
+            display: block;
+
+            font-size: 12px;
+
+            line-height: 1.5;
+
+            color: #718096;
+
+        }
+
+
+        /* =================================================
+           AVATAR BUTTONS
+        ================================================== */
+
+        .avatar-button,
+        .avatar-save-button,
+        .avatar-remove-button {
+
+            min-height: 42px;
+
+            padding: 10px 14px;
+
+            border-radius: 10px;
+
+            border: 1px solid #d7dee8;
+
+            background: #ffffff;
+
+            color: #182235;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition:
+                0.2s ease;
+
+            box-sizing: border-box;
+
+            text-align: center;
+
+        }
+
+
+        .avatar-button:hover,
+        .avatar-save-button:hover {
+
+            background: #f3f6fa;
+
+        }
+
+
+        .avatar-save-button {
+
+            background: #182235;
+
+            color: #ffffff;
+
+            border-color: #182235;
+
+        }
+
+
+        .avatar-save-button:hover {
+
+            background: #273449;
+
+        }
+
+
+        .avatar-remove-button {
+
+            color: #b42318;
+
+            border-color: #f0c7c3;
+
+        }
+
+
+        .avatar-remove-button:hover {
+
+            background: #fff5f4;
+
+        }
+
+
+        /* =================================================
+           PREVIEW
+        ================================================== */
+
+        .avatar-preview-box {
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            gap: 14px;
+
+            padding: 24px;
+
+            border-top: 1px solid #e7ebf0;
+
+            border-bottom: 1px solid #e7ebf0;
+
+            background: #fafbfc;
+
+        }
+
+
+        .avatar-preview-box > span {
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.04em;
+
+            color: #718096;
+
+        }
+
+
+        .avatar-preview-box img {
+
+            width: 140px !important;
+
+            height: 140px !important;
+
+            max-width: 140px !important;
+            max-height: 140px !important;
+
+            object-fit: cover;
+
+            object-position: center;
+
+            border-radius: 50%;
+
+            border: 3px solid #ffffff;
+
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.12);
+
+        }
+
+
+        /* =================================================
+           MOBILE
+        ================================================== */
+
+        @media (max-width: 900px) {
+
+            .profile-card .card-header {
+
+                flex-direction: column;
+
+                align-items: stretch;
+
+            }
+
+
+            .profile-avatar-wrapper {
+
+                width: 100%;
+
+                max-width: 420px;
+
+                margin: 0 auto;
+
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .profile-avatar {
+
+                width: 150px !important;
+                height: 150px !important;
+
+                min-width: 150px !important;
+                min-height: 150px !important;
+
+                max-width: 150px !important;
+                max-height: 150px !important;
+
+            }
+
+
+            .avatar-preview-box img {
+
+                width: 120px !important;
+                height: 120px !important;
+
+                max-width: 120px !important;
+                max-height: 120px !important;
+
+            }
+
+        }
+
+    </style>
+
 </head>
 
 
@@ -306,10 +696,17 @@
                         Особиста інформація
                     </h2>
 
+                    <p>
+                        Ваші персональні дані та аватар
+                        доступні лише після авторизації.
+                    </p>
+
                 </div>
 
 
-                <!-- AVATAR -->
+                <!-- =================================================
+                     AVATAR
+                ================================================== -->
 
                 <div class="profile-avatar-wrapper">
 
@@ -324,7 +721,7 @@
                     </div>
 
 
-                    <!-- AVATAR URL ACTIONS -->
+                    <!-- AVATAR ACTIONS -->
 
                     <div class="avatar-actions">
 
@@ -342,16 +739,22 @@
                             id="avatarUrlInput"
                             name="avatarUrl"
                             class="avatar-url-input"
-                            placeholder="https://example.com/avatar.jpg"
+                            placeholder="https://i.ibb.co/example/avatar.jpg"
                             autocomplete="off"
                             spellcheck="false"
                         >
 
 
                         <small class="avatar-help-text">
-                            Вставте пряме посилання на зображення.
+
+                            Вставте саме пряме посилання
+                            на файл зображення.
+
+                            <br>
+
                             Наприклад:
-                            https://example.com/avatar.jpg
+                            https://i.ibb.co/example/avatar.jpg
+
                         </small>
 
 
