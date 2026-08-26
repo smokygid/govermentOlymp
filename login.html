@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="uk">
 
@@ -52,7 +51,7 @@
 
             justify-content: center;
 
-            padding: 25px 15px;
+            padding: 30px 15px;
 
         }
 
@@ -61,7 +60,7 @@
 
             width: 100%;
 
-            max-width: 480px;
+            max-width: 520px;
 
         }
 
@@ -85,8 +84,7 @@
 
             height: 78px;
 
-            margin:
-                0 auto 15px;
+            margin: 0 auto 15px;
 
             border-radius: 50%;
 
@@ -124,6 +122,8 @@
             font-size: 28px;
 
             font-weight: 800;
+
+            letter-spacing: 0.5px;
 
             margin-bottom: 7px;
 
@@ -181,26 +181,88 @@
         }
 
 
-        .title {
+        .section-title {
 
-            font-size: 20px;
+            font-size: 19px;
 
             font-weight: 700;
 
-            margin-bottom: 7px;
+            margin-bottom: 20px;
 
         }
 
 
-        .subtitle {
+        /* =================================================
+           MESSAGE
+        ================================================= */
 
-            color: #71859d;
+        .message {
+
+            display: none;
+
+            padding: 13px 15px;
+
+            border-radius: 10px;
+
+            margin-bottom: 18px;
 
             font-size: 13px;
 
-            margin-bottom: 25px;
-
             line-height: 1.5;
+
+        }
+
+
+        .message.error {
+
+            display: block;
+
+            background:
+                rgba(
+                    220,
+                    53,
+                    69,
+                    0.12
+                );
+
+            border:
+                1px solid
+                rgba(
+                    220,
+                    53,
+                    69,
+                    0.25
+                );
+
+            color:
+                #ff8d96;
+
+        }
+
+
+        .message.success {
+
+            display: block;
+
+            background:
+                rgba(
+                    40,
+                    167,
+                    69,
+                    0.12
+                );
+
+            border:
+                1px solid
+                rgba(
+                    40,
+                    167,
+                    69,
+                    0.25
+                );
+
+            color:
+                #79e89a;
 
         }
 
@@ -222,11 +284,20 @@
 
             margin-bottom: 7px;
 
-            color: #dbe7f5;
+            color:
+                #dbe7f5;
 
             font-size: 13px;
 
             font-weight: 600;
+
+        }
+
+
+        .required {
+
+            color:
+                #ff6b6b;
 
         }
 
@@ -254,7 +325,8 @@
             background:
                 #071525;
 
-            color: #ffffff;
+            color:
+                #ffffff;
 
             outline: none;
 
@@ -268,7 +340,8 @@
 
         input::placeholder {
 
-            color: #647891;
+            color:
+                #647891;
 
         }
 
@@ -325,7 +398,8 @@
             background:
                 transparent;
 
-            color: #7890aa;
+            color:
+                #7890aa;
 
             cursor: pointer;
 
@@ -336,7 +410,77 @@
 
         .show-password:hover {
 
-            color: #ffffff;
+            color:
+                #ffffff;
+
+        }
+
+
+        /* =================================================
+           OPTIONS
+        ================================================= */
+
+        .options {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin:
+                3px 0 22px;
+
+        }
+
+
+        .remember {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            color:
+                #8ea1b8;
+
+            font-size: 12px;
+
+            cursor: pointer;
+
+        }
+
+
+        .remember input {
+
+            width: 16px;
+
+            height: 16px;
+
+            accent-color:
+                #168cff;
+
+        }
+
+
+        .forgot {
+
+            color:
+                #4da5ff;
+
+            text-decoration:
+                none;
+
+            font-size: 12px;
+
+        }
+
+
+        .forgot:hover {
+
+            text-decoration:
+                underline;
 
         }
 
@@ -345,7 +489,7 @@
            BUTTON
         ================================================= */
 
-        .login-button {
+        .submit-button {
 
             width: 100%;
 
@@ -362,7 +506,8 @@
                     #0064c7
                 );
 
-            color: #ffffff;
+            color:
+                #ffffff;
 
             font-size: 15px;
 
@@ -385,7 +530,7 @@
         }
 
 
-        .login-button:hover {
+        .submit-button:hover {
 
             transform:
                 translateY(-1px);
@@ -402,87 +547,16 @@
         }
 
 
-        .login-button:disabled {
+        .submit-button:disabled {
 
-            opacity: 0.55;
+            opacity:
+                0.55;
 
-            cursor: not-allowed;
+            cursor:
+                not-allowed;
 
-            transform: none;
-
-        }
-
-
-        /* =================================================
-           MESSAGE
-        ================================================= */
-
-        .message {
-
-            display: none;
-
-            padding:
-                13px 15px;
-
-            border-radius: 10px;
-
-            margin-bottom: 18px;
-
-            font-size: 13px;
-
-            line-height: 1.5;
-
-        }
-
-
-        .message.error {
-
-            display: block;
-
-            background:
-                rgba(
-                    220,
-                    53,
-                    69,
-                    0.12
-                );
-
-            border:
-                1px solid
-                rgba(
-                    220,
-                    53,
-                    69,
-                    0.25
-                );
-
-            color: #ff8d96;
-
-        }
-
-
-        .message.success {
-
-            display: block;
-
-            background:
-                rgba(
-                    40,
-                    167,
-                    69,
-                    0.12
-                );
-
-            border:
-                1px solid
-                rgba(
-                    40,
-                    167,
-                    69,
-                    0.25
-                );
-
-            color: #79e89a;
+            transform:
+                none;
 
         }
 
@@ -491,13 +565,16 @@
            REGISTER
         ================================================= */
 
-        .register {
+        .register-box {
 
-            text-align: center;
+            text-align:
+                center;
 
-            margin-top: 22px;
+            margin-top:
+                23px;
 
-            padding-top: 20px;
+            padding-top:
+                20px;
 
             border-top:
                 1px solid
@@ -508,67 +585,33 @@
                     0.07
                 );
 
-            color: #71859d;
+            color:
+                #71859d;
 
-            font-size: 13px;
-
-        }
-
-
-        .register a {
-
-            color: #4da5ff;
-
-            text-decoration: none;
-
-            font-weight: 600;
+            font-size:
+                12px;
 
         }
 
 
-        .register a:hover {
+        .register-box a {
+
+            color:
+                #4da5ff;
+
+            text-decoration:
+                none;
+
+            font-weight:
+                600;
+
+        }
+
+
+        .register-box a:hover {
 
             text-decoration:
                 underline;
-
-        }
-
-
-        /* =================================================
-           INFO
-        ================================================= */
-
-        .info {
-
-            margin-top: 20px;
-
-            padding:
-                13px 15px;
-
-            border-radius: 10px;
-
-            background:
-                rgba(
-                    22,
-                    140,
-                    255,
-                    0.06
-                );
-
-            border:
-                1px solid
-                rgba(
-                    22,
-                    140,
-                    255,
-                    0.12
-                );
-
-            color: #7890aa;
-
-            font-size: 11px;
-
-            line-height: 1.5;
 
         }
 
@@ -579,9 +622,11 @@
 
         .loader {
 
-            width: 18px;
+            width:
+                18px;
 
-            height: 18px;
+            height:
+                18px;
 
             border:
                 2px solid
@@ -595,13 +640,17 @@
             border-top-color:
                 #ffffff;
 
-            border-radius: 50%;
+            border-radius:
+                50%;
 
-            display: inline-block;
+            display:
+                inline-block;
 
-            vertical-align: middle;
+            vertical-align:
+                middle;
 
-            margin-right: 8px;
+            margin-right:
+                8px;
 
             animation:
                 spin 0.8s linear infinite;
@@ -622,6 +671,46 @@
 
 
         /* =================================================
+           FOOTER
+        ================================================= */
+
+        .footer {
+
+            text-align:
+                center;
+
+            margin-top:
+                20px;
+
+            color:
+                #60758d;
+
+            font-size:
+                12px;
+
+        }
+
+
+        .footer a {
+
+            color:
+                #4da5ff;
+
+            text-decoration:
+                none;
+
+        }
+
+
+        .footer a:hover {
+
+            text-decoration:
+                underline;
+
+        }
+
+
+        /* =================================================
            MOBILE
         ================================================= */
 
@@ -632,14 +721,26 @@
             .card {
 
                 padding:
-                    23px 18px;
+                    22px 18px;
 
             }
 
 
             .header h1 {
 
-                font-size: 24px;
+                font-size:
+                    24px;
+
+            }
+
+
+            .options {
+
+                align-items:
+                    flex-start;
+
+                gap:
+                    10px;
 
             }
 
@@ -656,11 +757,12 @@
 <div class="page">
 
 
-    <!-- ================================================
+    <!-- =================================================
          HEADER
     ================================================= -->
 
     <div class="header">
+
 
         <div class="logo">
 
@@ -682,35 +784,23 @@
 
         </p>
 
+
     </div>
 
 
-    <!-- ================================================
+    <!-- =================================================
          CARD
     ================================================= -->
 
     <div class="card">
 
 
-        <div class="title">
+        <div class="section-title">
 
-            Вхід до кабінету
-
-        </div>
-
-
-        <div class="subtitle">
-
-            Введіть ваш OLYMP-ID та пароль,
-            щоб отримати доступ до особистої
-            інформації та заявок.
+            Вхід до особистого кабінету
 
         </div>
 
-
-        <!-- ============================================
-             MESSAGE
-        ============================================= -->
 
         <div
             id="message"
@@ -718,9 +808,9 @@
         ></div>
 
 
-        <!-- ============================================
+        <!-- =================================================
              FORM
-        ============================================= -->
+        ================================================= -->
 
         <form
             id="loginForm"
@@ -728,13 +818,20 @@
         >
 
 
-            <!-- OLYMP-ID -->
+            <!-- OLYMP ID -->
 
             <div class="form-group">
+
 
                 <label for="olympId">
 
                     OLYMP-ID
+
+                    <span class="required">
+
+                        *
+
+                    </span>
 
                 </label>
 
@@ -743,11 +840,12 @@
                     type="text"
                     id="olympId"
                     name="olympId"
-                    placeholder="OLYMP-000001"
-                    maxlength="20"
+                    placeholder="Наприклад: OLYMP-000001"
+                    maxlength="30"
                     autocomplete="username"
                     required
                 >
+
 
             </div>
 
@@ -756,14 +854,22 @@
 
             <div class="form-group">
 
+
                 <label for="password">
 
                     Пароль
+
+                    <span class="required">
+
+                        *
+
+                    </span>
 
                 </label>
 
 
                 <div class="password-wrapper">
+
 
                     <input
                         type="password"
@@ -782,20 +888,62 @@
                         id="showPassword"
                         aria-label="Показати пароль"
                     >
+
                         👁
+
                     </button>
 
+
                 </div>
+
 
             </div>
 
 
-            <!-- LOGIN -->
+            <!-- OPTIONS -->
+
+            <div class="options">
+
+
+                <label class="remember">
+
+
+                    <input
+                        type="checkbox"
+                        id="rememberMe"
+                    >
+
+
+                    <span>
+
+                        Запам'ятати мене
+
+                    </span>
+
+
+                </label>
+
+
+                <a
+                    href="#"
+                    class="forgot"
+                    id="forgotPassword"
+                >
+
+                    Забули пароль?
+
+                </a>
+
+
+            </div>
+
+
+            <!-- SUBMIT -->
 
             <button
                 type="submit"
-                class="login-button"
-                id="loginButton"
+                class="submit-button"
+                id="submitButton"
             >
 
                 Увійти
@@ -806,38 +954,49 @@
         </form>
 
 
-        <!-- ============================================
-             REGISTER
-        ============================================= -->
+        <!-- REGISTER -->
 
-        <div class="register">
+        <div class="register-box">
+
 
             Ще не маєте облікового запису?
 
-            <a href="register.html">
+
+            <a href="registration.html">
 
                 Зареєструватися
 
             </a>
 
-        </div>
-
-
-        <!-- ============================================
-             INFO
-        ============================================= -->
-
-        <div class="info">
-
-            💡 Після реєстрації ви отримаєте
-            персональний OLYMP-ID. Збережіть його —
-            він використовується для входу до
-            особистого кабінету.
 
         </div>
 
 
     </div>
+
+
+    <!-- =================================================
+         FOOTER
+    ================================================= -->
+
+    <div class="footer">
+
+
+        OLYMP Government
+
+
+        ·
+
+
+        <a href="index.html">
+
+            На головну
+
+        </a>
+
+
+    </div>
+
 
 </div>
 
@@ -846,7 +1005,7 @@
 
 
 /* =========================================================
-   GOOGLE APPS SCRIPT URL
+   GOOGLE APPS SCRIPT
 ========================================================= */
 
 const GOOGLE_SCRIPT_URL =
@@ -869,9 +1028,15 @@ const message =
     );
 
 
-const loginButton =
+const submitButton =
     document.getElementById(
-        "loginButton"
+        "submitButton"
+    );
+
+
+const olympIdInput =
+    document.getElementById(
+        "olympId"
     );
 
 
@@ -881,9 +1046,9 @@ const passwordInput =
     );
 
 
-const showPassword =
+const rememberMe =
     document.getElementById(
-        "showPassword"
+        "rememberMe"
     );
 
 
@@ -905,63 +1070,84 @@ function showMessage(
 }
 
 
+function hideMessage() {
+
+    message.textContent =
+        "";
+
+    message.className =
+        "message";
+
+}
+
+
 /* =========================================================
    PASSWORD VISIBILITY
 ========================================================= */
 
-showPassword.addEventListener(
-    "click",
-    function() {
+document
+    .getElementById(
+        "showPassword"
+    )
+    .addEventListener(
+        "click",
+        function() {
 
-        if (
-            passwordInput.type ===
-            "password"
-        ) {
 
-            passwordInput.type =
-                "text";
+            if (
+                passwordInput.type ===
+                "password"
+            ) {
 
-            showPassword.textContent =
-                "🙈";
+                passwordInput.type =
+                    "text";
 
-        } else {
+                this.textContent =
+                    "🙈";
 
-            passwordInput.type =
-                "password";
+            } else {
 
-            showPassword.textContent =
-                "👁";
+                passwordInput.type =
+                    "password";
+
+                this.textContent =
+                    "👁";
+
+            }
+
 
         }
-
-    }
-);
-
-
-/* =========================================================
-   OLYMP-ID FORMAT
-========================================================= */
-
-const olympIdInput =
-    document.getElementById(
-        "olympId"
     );
 
 
-olympIdInput.addEventListener(
-    "input",
-    function() {
+/* =========================================================
+   NORMALIZE OLYMP-ID
+========================================================= */
 
-        this.value =
-            this.value
-                .toUpperCase()
-                .replace(
-                    /\s/g,
-                    ""
-                );
+function normalizeOlympId(
+    value
+) {
 
-    }
-);
+    return String(value || "")
+        .trim()
+        .toUpperCase();
+
+}
+
+
+/* =========================================================
+   RESET BUTTON
+========================================================= */
+
+function resetButton() {
+
+    submitButton.disabled =
+        false;
+
+    submitButton.textContent =
+        "Увійти";
+
+}
 
 
 /* =========================================================
@@ -972,29 +1158,34 @@ loginForm.addEventListener(
     "submit",
     async function(event) {
 
+
         event.preventDefault();
 
 
-        message.className =
-            "message";
+        hideMessage();
 
+
+        /* =============================================
+           DATA
+        ============================================= */
 
         const olympId =
-            olympIdInput.value
-                .trim()
-                .toUpperCase();
+            normalizeOlympId(
+                olympIdInput.value
+            );
 
 
         const password =
-            passwordInput.value
-                .trim();
+            passwordInput.value;
 
 
         /* =============================================
            VALIDATION
         ============================================= */
 
-        if (!olympId) {
+        if (
+            !olympId
+        ) {
 
             showMessage(
                 "Введіть OLYMP-ID."
@@ -1005,7 +1196,11 @@ loginForm.addEventListener(
         }
 
 
-        if (!/^OLYMP-\d{6}$/.test(olympId)) {
+        if (
+            !/^OLYMP-\d{4,12}$/.test(
+                olympId
+            )
+        ) {
 
             showMessage(
                 "Невірний формат OLYMP-ID. Приклад: OLYMP-000001."
@@ -1016,7 +1211,9 @@ loginForm.addEventListener(
         }
 
 
-        if (!password) {
+        if (
+            !password
+        ) {
 
             showMessage(
                 "Введіть пароль."
@@ -1027,15 +1224,21 @@ loginForm.addEventListener(
         }
 
 
-        /* =============================================
-           URL
-        ============================================= */
+        if (
+            password.length < 6
+        ) {
+
+            showMessage(
+                "Пароль повинен містити щонайменше 6 символів."
+            );
+
+            return;
+
+        }
+
 
         if (
-            !GOOGLE_SCRIPT_URL ||
-            GOOGLE_SCRIPT_URL.includes(
-                "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec"
-            )
+            !GOOGLE_SCRIPT_URL
         ) {
 
             showMessage(
@@ -1051,16 +1254,16 @@ loginForm.addEventListener(
            BUTTON
         ============================================= */
 
-        loginButton.disabled =
+        submitButton.disabled =
             true;
 
 
-        loginButton.innerHTML =
+        submitButton.innerHTML =
             '<span class="loader"></span> Вхід...';
 
 
         /* =============================================
-           DATA
+           REQUEST DATA
         ============================================= */
 
         const formData =
@@ -1091,6 +1294,7 @@ loginForm.addEventListener(
 
         try {
 
+
             const response =
                 await fetch(
                     GOOGLE_SCRIPT_URL,
@@ -1106,12 +1310,39 @@ loginForm.addEventListener(
                 );
 
 
-            const result =
-                await response.json();
+            const rawText =
+                await response.text();
+
+
+            let result;
+
+
+            try {
+
+                result =
+                    JSON.parse(
+                        rawText
+                    );
+
+            } catch (
+                jsonError
+            ) {
+
+                console.error(
+                    "Google Apps Script response:",
+                    rawText
+                );
+
+
+                throw new Error(
+                    "INVALID_SERVER_RESPONSE"
+                );
+
+            }
 
 
             /* =========================================
-               ERROR
+               LOGIN ERROR
             ========================================= */
 
             if (
@@ -1121,17 +1352,12 @@ loginForm.addEventListener(
                 showMessage(
 
                     result.message ||
-                    "Не вдалося виконати вхід."
+                    "Невірний OLYMP-ID або пароль."
 
                 );
 
 
-                loginButton.disabled =
-                    false;
-
-
-                loginButton.textContent =
-                    "Увійти";
+                resetButton();
 
 
                 return;
@@ -1157,12 +1383,7 @@ loginForm.addEventListener(
                 );
 
 
-                loginButton.disabled =
-                    false;
-
-
-                loginButton.textContent =
-                    "Увійти";
+                resetButton();
 
 
                 return;
@@ -1171,127 +1392,305 @@ loginForm.addEventListener(
 
 
             /* =========================================
-               SAVE USER
+               SAVE SESSION
             ========================================= */
 
-            localStorage.setItem(
+            const sessionUser = {
 
-                "olymp_user",
+                olympId:
+                    user.olympId,
 
-                JSON.stringify({
+                fullName:
+                    user.fullName || "",
 
-                    olympId:
-                        user.olympId,
+                birthDate:
+                    user.birthDate || "",
 
-                    fullName:
-                        user.fullName,
+                phone:
+                    user.phone || "",
 
-                    birthDate:
-                        user.birthDate,
+                email:
+                    user.email || "",
 
-                    phone:
-                        user.phone,
+                discord:
+                    user.discord || "",
 
-                    email:
-                        user.email,
+                status:
+                    user.status ||
+                    "Активний"
 
-                    discord:
-                        user.discord,
-
-                    status:
-                        user.status,
-
-                    registrationDate:
-                        user.registrationDate
-
-                })
-
-            );
+            };
 
 
-            localStorage.setItem(
-
-                "olymp_id",
-
-                user.olympId
-
-            );
+            /*
+             * ВАЖЛИВО:
+             * Пароль тут НЕ зберігається.
+             */
 
 
-            localStorage.setItem(
+            if (
+                rememberMe.checked
+            ) {
 
-                "olymp_logged_in",
+                localStorage.setItem(
+                    "olymp_user",
+                    JSON.stringify(
+                        sessionUser
+                    )
+                );
 
-                "true"
 
-            );
+                localStorage.setItem(
+                    "olymp_id",
+                    sessionUser.olympId
+                );
+
+
+                localStorage.setItem(
+                    "olymp_remember",
+                    "true"
+                );
+
+            } else {
+
+                sessionStorage.setItem(
+                    "olymp_user",
+                    JSON.stringify(
+                        sessionUser
+                    )
+                );
+
+
+                sessionStorage.setItem(
+                    "olymp_id",
+                    sessionUser.olympId
+                );
+
+
+                sessionStorage.setItem(
+                    "olymp_remember",
+                    "false"
+                );
+
+
+                /*
+                 * Якщо раніше було
+                 * "Запам'ятати мене",
+                 * очищаємо стару сесію.
+                 */
+
+                localStorage.removeItem(
+                    "olymp_user"
+                );
+
+                localStorage.removeItem(
+                    "olymp_id"
+                );
+
+                localStorage.removeItem(
+                    "olymp_remember"
+                );
+
+            }
 
 
             /* =========================================
-               REDIRECT
+               SUCCESS
             ========================================= */
 
-            window.location.href =
-                "cabinet.html";
+            showMessage(
+                "Вхід успішний. Перенаправлення...",
+                "success"
+            );
 
 
-        } catch (error) {
+            /*
+             * Невелика затримка,
+             * щоб користувач побачив повідомлення.
+             */
+
+            setTimeout(
+                function() {
+
+                    window.location.href =
+                        "cabinet.html";
+
+                },
+                500
+            );
+
+
+        } catch (
+            error
+        ) {
+
 
             console.error(
                 error
             );
 
 
-            showMessage(
+            if (
+                error.message ===
+                "INVALID_SERVER_RESPONSE"
+            ) {
 
-                "Не вдалося підключитися до сервера. Перевірте URL Google Apps Script."
+                showMessage(
+                    "Google Apps Script повернув некоректну відповідь. Перевірте публікацію Web App та актуальність Code.gs 6.0."
+                );
 
-            );
+            } else {
+
+                showMessage(
+                    "Помилка з'єднання з сервером. Перевірте URL Google Apps Script та налаштування доступу."
+                );
+
+            }
 
 
-            loginButton.disabled =
-                false;
+            resetButton();
 
-
-            loginButton.textContent =
-                "Увійти";
 
         }
+
 
     }
 );
 
 
 /* =========================================================
-   AUTO REDIRECT
-   ЕСЛИ УЖЕ ВОШЕЛ
+   LOAD SAVED USER
 ========================================================= */
 
-(function() {
+(function loadSavedUser() {
 
-    const loggedIn =
+
+    const savedUser =
         localStorage.getItem(
-            "olymp_logged_in"
+            "olymp_user"
         );
 
 
-    const olympId =
+    const savedId =
         localStorage.getItem(
             "olymp_id"
         );
 
 
+    const remember =
+        localStorage.getItem(
+            "olymp_remember"
+        );
+
+
     if (
-        loggedIn === "true" &&
-        olympId
+        savedUser &&
+        savedId &&
+        remember === "true"
     ) {
 
-        window.location.href =
-            "cabinet.html";
+
+        try {
+
+
+            const user =
+                JSON.parse(
+                    savedUser
+                );
+
+
+            if (
+                user &&
+                user.olympId
+            ) {
+
+                olympIdInput.value =
+                    user.olympId;
+
+                rememberMe.checked =
+                    true;
+
+            }
+
+
+        } catch (
+            error
+        ) {
+
+
+            console.error(
+                "Помилка читання збереженого профілю:",
+                error
+            );
+
+
+            localStorage.removeItem(
+                "olymp_user"
+            );
+
+
+            localStorage.removeItem(
+                "olymp_id"
+            );
+
+
+            localStorage.removeItem(
+                "olymp_remember"
+            );
+
+
+        }
+
 
     }
 
+
 })();
+
+
+/* =========================================================
+   FORGOT PASSWORD
+========================================================= */
+
+document
+    .getElementById(
+        "forgotPassword"
+    )
+    .addEventListener(
+        "click",
+        function(event) {
+
+
+            event.preventDefault();
+
+
+            showMessage(
+                "Для відновлення пароля зверніться до адміністрації OLYMP Government."
+            );
+
+
+        }
+    );
+
+
+/* =========================================================
+   CLEAN INPUT
+========================================================= */
+
+olympIdInput.addEventListener(
+    "input",
+    function() {
+
+        this.value =
+            this.value
+                .replace(
+                    /[^a-zA-Z0-9-]/g,
+                    ""
+                )
+                .toUpperCase();
+
+    }
+);
 
 
 </script>
@@ -1300,4 +1699,3 @@ loginForm.addEventListener(
 </body>
 
 </html>
-```
