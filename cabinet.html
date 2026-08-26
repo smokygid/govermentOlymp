@@ -309,45 +309,67 @@
                 </div>
 
 
-                <!-- =================================================
-                     AVATAR
-                ================================================== -->
+                <!-- AVATAR -->
 
                 <div class="profile-avatar-wrapper">
 
 
-                    <!-- АВАТАР -->
+                    <!-- CURRENT AVATAR -->
 
                     <div
                         id="profileAvatar"
                         class="profile-avatar"
                     >
-
-                        <span id="profileAvatarPlaceholder">
-                            👤
-                        </span>
-
-                        <img
-                            id="profileAvatarImage"
-                            src=""
-                            alt="Аватар громадянина"
-                            class="hidden"
-                        >
-
+                        👤
                     </div>
 
 
-                    <!-- УПРАВЛІННЯ АВАТАРОМ -->
+                    <!-- AVATAR URL ACTIONS -->
 
                     <div class="avatar-actions">
 
 
-                        <button
-                            type="button"
-                            id="changeAvatarButton"
+                        <label
+                            for="avatarUrlInput"
                             class="avatar-button"
                         >
-                            Змінити аватар
+                            🔗 Посилання на аватар
+                        </label>
+
+
+                        <input
+                            type="url"
+                            id="avatarUrlInput"
+                            name="avatarUrl"
+                            class="avatar-url-input"
+                            placeholder="https://example.com/avatar.jpg"
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+
+
+                        <small class="avatar-help-text">
+                            Вставте пряме посилання на зображення.
+                            Наприклад:
+                            https://example.com/avatar.jpg
+                        </small>
+
+
+                        <button
+                            type="button"
+                            id="previewAvatarButton"
+                            class="avatar-button"
+                        >
+                            👁 Переглянути
+                        </button>
+
+
+                        <button
+                            type="button"
+                            id="saveAvatarButton"
+                            class="avatar-save-button hidden"
+                        >
+                            💾 Зберегти аватар
                         </button>
 
 
@@ -356,12 +378,11 @@
                             id="removeAvatarButton"
                             class="avatar-remove-button hidden"
                         >
-                            Видалити аватар
+                            🗑 Видалити аватар
                         </button>
 
 
                     </div>
-
 
                 </div>
 
@@ -370,96 +391,24 @@
 
 
             <!-- =================================================
-                 AVATAR URL
+                 AVATAR PREVIEW
             ================================================== -->
 
             <div
-                id="avatarUrlBox"
-                class="avatar-url-box hidden"
+                id="avatarPreviewBox"
+                class="avatar-preview-box hidden"
             >
 
-                <div class="form-group">
-
-                    <label for="avatarUrl">
-
-                        Посилання на аватар
-
-                    </label>
+                <span>
+                    Попередній перегляд аватара
+                </span>
 
 
-                    <input
-                        type="url"
-                        id="avatarUrl"
-                        name="avatarUrl"
-                        placeholder="https://example.com/avatar.png"
-                        autocomplete="off"
-                        spellcheck="false"
-                    >
-
-
-                    <small>
-
-                        Вставте пряме посилання
-                        на зображення аватара.
-
-                        <br>
-
-                        Підтримуються посилання
-                        HTTP/HTTPS.
-
-                    </small>
-
-                </div>
-
-
-
-                <!-- PREVIEW -->
-
-                <div
-                    id="avatarPreviewBox"
-                    class="avatar-preview-box hidden"
+                <img
+                    id="avatarPreview"
+                    src=""
+                    alt="Попередній перегляд аватара"
                 >
-
-                    <span>
-                        Попередній перегляд
-                    </span>
-
-
-                    <img
-                        id="avatarPreview"
-                        src=""
-                        alt="Попередній перегляд аватара"
-                    >
-
-                </div>
-
-
-
-                <!-- BUTTONS -->
-
-                <div class="avatar-url-actions">
-
-
-                    <button
-                        type="button"
-                        id="saveAvatarButton"
-                        class="avatar-save-button"
-                    >
-                        Зберегти аватар
-                    </button>
-
-
-                    <button
-                        type="button"
-                        id="cancelAvatarButton"
-                        class="secondary-button"
-                    >
-                        Скасувати
-                    </button>
-
-
-                </div>
-
 
             </div>
 
