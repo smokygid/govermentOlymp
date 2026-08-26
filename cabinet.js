@@ -2,24 +2,25 @@
    OLYMP GOVERNMENT
    PERSONAL CABINET 4.0
 
-   FRONTEND
+   ИСПРАВЛЕННАЯ ВЕРСИЯ
 
-   НОВАЯ СИСТЕМА:
-
-   • Вхід за OLYMP-ID + паролем
+   • Вхід за ID громадянина + паролем
+   • Підтримка citizenId
+   • Підтримка olympId
    • Автоматичне збереження сесії
-   • Відновлення сесії після перезавантаження
-   • Перегляд особистої інформації
-   • Перегляд OLYMP-ID
-   • Перегляд усіх заявок громадянина
-   • Перегляд статусу кожної заявки
-   • Перегляд відповіді державного органу
-   • Відкриття конкретної заявки
+   • Відновлення сесії
+   • Особиста інформація
+   • OLYMP-ID
+   • Всі заявки громадянина
+   • Статуси заявок
+   • Відповіді державних органів
+   • Перегляд конкретної заявки
    • Копіювання номера заявки
+   • Статистика
    • Вихід
-   • Toast повідомлення
+   • Toast
    • Loading
-   • Захист від некоректних відповідей API
+   • Сумісність зі старим HTML
 
    OLYMP GOVERNMENT 4.0
 ========================================================= */
@@ -29,37 +30,21 @@
    НАСТРОЙКИ
 ========================================================= */
 
-
-/*
-   URL РАЗВЁРНУТОГО GOOGLE APPS SCRIPT
-
-   ТЕКУЩИЙ URL:
-*/
-
 const API_URL =
     "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec";
 
 
-/*
-   Ключ сессии
-*/
-
 const STORAGE_KEY =
     "olympCitizenSession";
 
-
-/*
-   Версия кабинета
-*/
 
 const CABINET_VERSION =
     "4.0";
 
 
 /*
-   Максимальный возраст сессии.
-
-   30 дней.
+   Максимальний час сесії:
+   30 днів
 */
 
 const SESSION_MAX_AGE =
@@ -71,83 +56,56 @@ const SESSION_MAX_AGE =
 ========================================================= */
 
 const loginSection =
-    document.getElementById(
-        "loginSection"
-    );
+    document.getElementById("loginSection");
 
 
 const cabinetSection =
-    document.getElementById(
-        "cabinetSection"
-    );
+    document.getElementById("cabinetSection");
 
 
 const loginForm =
-    document.getElementById(
-        "loginForm"
-    );
+    document.getElementById("loginForm");
 
 
 const loginButton =
-    document.getElementById(
-        "loginButton"
-    );
+    document.getElementById("loginButton");
 
 
 const loginButtonText =
-    document.getElementById(
-        "loginButtonText"
-    );
+    document.getElementById("loginButtonText");
 
 
 const loginError =
-    document.getElementById(
-        "loginError"
-    );
+    document.getElementById("loginError");
 
 
 const logoutButton =
-    document.getElementById(
-        "logoutButton"
-    );
+    document.getElementById("logoutButton");
 
 
 const loadingOverlay =
-    document.getElementById(
-        "loadingOverlay"
-    );
+    document.getElementById("loadingOverlay");
 
 
 const toast =
-    document.getElementById(
-        "toast"
-    );
+    document.getElementById("toast");
 
 
 const copyNumberButton =
-    document.getElementById(
-        "copyNumberButton"
-    );
+    document.getElementById("copyNumberButton");
 
 
 /* =========================================================
    STATE
 ========================================================= */
 
-let currentCitizen =
-    null;
+let currentCitizen = null;
 
+let currentApplications = [];
 
-let currentApplications =
-    [];
+let currentApplication = null;
 
-
-let currentApplication =
-    null;
-
-
-let toastTimer =
-    null;
+let toastTimer = null;
 
 
 /* =========================================================
@@ -179,7 +137,6 @@ function initCabinet() {
 
 function setupEvents() {
 
-
     /* -----------------------------------------------------
        LOGIN
     ----------------------------------------------------- */
@@ -209,7 +166,7 @@ function setupEvents() {
 
 
     /* -----------------------------------------------------
-       COPY APPLICATION NUMBER
+       COPY NUMBER
     ----------------------------------------------------- */
 
     if (copyNumberButton) {
@@ -223,7 +180,35 @@ function setupEvents() {
 
 
     /* -----------------------------------------------------
-       OLYMP ID
+       ID ГРОМАДЯНИНА
+    ----------------------------------------------------- */
+
+    const citizenIdInput =
+        document.getElementById(
+            "citizenId"
+        );
+
+
+    if (citizenIdInput) {
+
+        citizenIdInput.addEventListener(
+            "input",
+            function () {
+
+                this.value =
+                    normalizeOlympId(
+                        this.value
+                    );
+
+            }
+        );
+
+    }
+
+
+    /* -----------------------------------------------------
+       НОВИЙ olympId
+       ДЛЯ СУМІСНОСТІ
     ----------------------------------------------------- */
 
     const olympIdInput =
@@ -249,13 +234,9 @@ function setupEvents() {
     }
 
 
-    /*
-       Сумісність зі старим полем.
-
-       Якщо login.html ще має
-       applicationNumber,
-       використовуємо його як OLYMP-ID.
-    */
+    /* -----------------------------------------------------
+       СТАРЕ applicationNumber
+    ----------------------------------------------------- */
 
     const applicationNumberInput =
         document.getElementById(
@@ -284,6 +265,33 @@ function setupEvents() {
        PASSWORD
     ----------------------------------------------------- */
 
+    const citizenPasswordInput =
+        document.getElementById(
+            "citizenPassword"
+        );
+
+
+    if (citizenPasswordInput) {
+
+        citizenPasswordInput.addEventListener(
+            "input",
+            function () {
+
+                this.value =
+                    cleanPassword(
+                        this.value
+                    );
+
+            }
+        );
+
+    }
+
+
+    /* -----------------------------------------------------
+       password
+    ----------------------------------------------------- */
+
     const passwordInput =
         document.getElementById(
             "password"
@@ -297,11 +305,8 @@ function setupEvents() {
             function () {
 
                 this.value =
-                    String(
+                    cleanPassword(
                         this.value
-                    ).replace(
-                        /\s+/g,
-                        ""
                     );
 
             }
@@ -311,8 +316,7 @@ function setupEvents() {
 
 
     /* -----------------------------------------------------
-       СТАРЕ ПОЛЕ ACCESS CODE
-       НЕ ЛАМАЄМО СТАРИЙ HTML
+       СТАРИЙ ACCESS CODE
     ----------------------------------------------------- */
 
     const accessCodeInput =
@@ -328,11 +332,8 @@ function setupEvents() {
             function () {
 
                 this.value =
-                    String(
+                    cleanPassword(
                         this.value
-                    ).replace(
-                        /\s+/g,
-                        ""
                     );
 
             }
@@ -350,8 +351,7 @@ function setupEvents() {
         function (event) {
 
             if (
-                event.key ===
-                "Escape"
+                event.key === "Escape"
             ) {
 
                 hideToast();
@@ -368,9 +368,7 @@ function setupEvents() {
    LOGIN
 ========================================================= */
 
-async function handleLogin(
-    event
-) {
+async function handleLogin(event) {
 
     event.preventDefault();
 
@@ -378,16 +376,25 @@ async function handleLogin(
 
 
     /*
-       Поддерживаем новый login.html:
+       =====================================================
+       ВАЖЛИВО
 
-       olympId
-       password
+       Твій поточний cabinet.html має:
 
-       И старый:
+       id="citizenId"
 
-       applicationNumber
-       accessCode
+       id="citizenPassword"
+
+       Саме їх використовуємо першими.
+       =====================================================
     */
+
+
+    const citizenIdInput =
+        document.getElementById(
+            "citizenId"
+        );
+
 
     const olympIdInput =
         document.getElementById(
@@ -398,6 +405,12 @@ async function handleLogin(
     const applicationNumberInput =
         document.getElementById(
             "applicationNumber"
+        );
+
+
+    const citizenPasswordInput =
+        document.getElementById(
+            "citizenPassword"
         );
 
 
@@ -415,26 +428,47 @@ async function handleLogin(
 
     let olympId = "";
 
-
     let password = "";
 
 
+    /* =====================================================
+       ПОЛУЧАЕМ OLYMP-ID
+    ===================================================== */
+
+
     /*
-       Новый вариант
+       1. Основное поле текущего HTML
     */
 
-    if (olympIdInput) {
+    if (citizenIdInput) {
 
         olympId =
-            clean(
-                olympIdInput.value
-            ).toUpperCase();
+            normalizeOlympId(
+                citizenIdInput.value
+            );
 
     }
 
 
     /*
-       Совместимость со старым HTML
+       2. Дополнительная совместимость
+    */
+
+    if (
+        !olympId &&
+        olympIdInput
+    ) {
+
+        olympId =
+            normalizeOlympId(
+                olympIdInput.value
+            );
+
+    }
+
+
+    /*
+       3. Старый HTML
     */
 
     if (
@@ -443,18 +477,40 @@ async function handleLogin(
     ) {
 
         olympId =
-            clean(
+            normalizeOlympId(
                 applicationNumberInput.value
-            ).toUpperCase();
+            );
+
+    }
+
+
+    /* =====================================================
+       ПОЛУЧАЕМ ПАРОЛЬ
+    ===================================================== */
+
+
+    /*
+       1. Основное поле текущего HTML
+    */
+
+    if (citizenPasswordInput) {
+
+        password =
+            cleanPassword(
+                citizenPasswordInput.value
+            );
 
     }
 
 
     /*
-       Новый пароль
+       2. Совместимость
     */
 
-    if (passwordInput) {
+    if (
+        !password &&
+        passwordInput
+    ) {
 
         password =
             cleanPassword(
@@ -465,7 +521,7 @@ async function handleLogin(
 
 
     /*
-       Совместимость со старым HTML
+       3. Старый accessCode
     */
 
     if (
@@ -482,6 +538,19 @@ async function handleLogin(
 
 
     /* =====================================================
+       DEBUG
+    ===================================================== */
+
+    console.log(
+        "OLYMP LOGIN:",
+        {
+            olympId: olympId,
+            passwordEntered: !!password
+        }
+    );
+
+
+    /* =====================================================
        VALIDATION
     ===================================================== */
 
@@ -492,13 +561,15 @@ async function handleLogin(
         );
 
 
-        if (olympIdInput) {
+        if (citizenIdInput) {
+
+            citizenIdInput.focus();
+
+        } else if (olympIdInput) {
 
             olympIdInput.focus();
 
-        } else if (
-            applicationNumberInput
-        ) {
+        } else if (applicationNumberInput) {
 
             applicationNumberInput.focus();
 
@@ -508,6 +579,25 @@ async function handleLogin(
         return;
 
     }
+
+
+    /*
+       Проверяем формат.
+
+       Разрешаем:
+
+       OLYMP-000001
+       olymp-000001
+       OLYMP000001
+
+       Последний вариант автоматически
+       превращается в OLYMP-000001.
+    */
+
+    olympId =
+        formatOlympId(
+            olympId
+        );
 
 
     if (
@@ -521,15 +611,9 @@ async function handleLogin(
         );
 
 
-        if (olympIdInput) {
+        if (citizenIdInput) {
 
-            olympIdInput.focus();
-
-        } else if (
-            applicationNumberInput
-        ) {
-
-            applicationNumberInput.focus();
+            citizenIdInput.focus();
 
         }
 
@@ -546,15 +630,13 @@ async function handleLogin(
         );
 
 
-        if (passwordInput) {
+        if (citizenPasswordInput) {
+
+            citizenPasswordInput.focus();
+
+        } else if (passwordInput) {
 
             passwordInput.focus();
-
-        } else if (
-            accessCodeInput
-        ) {
-
-            accessCodeInput.focus();
 
         }
 
@@ -568,10 +650,7 @@ async function handleLogin(
        LOADING
     ===================================================== */
 
-    setLoginLoading(
-        true
-    );
-
+    setLoginLoading(true);
 
     showLoading(
         "Перевірка даних..."
@@ -579,7 +658,6 @@ async function handleLogin(
 
 
     try {
-
 
         const response =
             await apiRequest(
@@ -592,6 +670,9 @@ async function handleLogin(
                     idNumber:
                         olympId,
 
+                    citizenId:
+                        olympId,
+
                     password:
                         password
 
@@ -599,9 +680,15 @@ async function handleLogin(
             );
 
 
+        console.log(
+            "LOGIN RESPONSE:",
+            response
+        );
+
+
         if (
             !response ||
-            !response.success
+            response.success !== true
         ) {
 
             throw new Error(
@@ -615,41 +702,43 @@ async function handleLogin(
 
                     :
 
-                "Не вдалося виконати вхід."
+                "Невірний OLYMP-ID або пароль."
 
             );
 
         }
 
 
-        /*
-           Громадянин
-        */
+        /* =================================================
+           CITIZEN
+        ================================================= */
 
         currentCitizen =
             normalizeCitizen(
                 response.citizen ||
                 response.profile ||
                 response.user ||
+                response.data ||
                 null
             );
 
 
-        /*
-           Заявки
-        */
+        /* =================================================
+           APPLICATIONS
+        ================================================= */
 
         currentApplications =
             normalizeApplications(
                 response.applications ||
                 response.requests ||
                 response.myApplications ||
+                response.data?.applications ||
                 []
             );
 
 
         /*
-           Если API возвращает только одну заявку
+           Якщо API повернув тільки одну заявку
         */
 
         if (
@@ -668,14 +757,47 @@ async function handleLogin(
 
 
         /*
-           Без профиля вход считаем неуспешным
+           Якщо профіль не повернувся,
+           створюємо мінімальний профіль
+           з OLYMP-ID.
         */
 
         if (!currentCitizen) {
 
-            throw new Error(
-                "Сервер не повернув дані громадянина."
-            );
+            currentCitizen = {
+
+                olympId:
+                    olympId,
+
+                fullName:
+                    response.fullName ||
+                    "",
+
+                birthDate:
+                    response.birthDate ||
+                    "",
+
+                phone:
+                    response.phone ||
+                    "",
+
+                email:
+                    response.email ||
+                    "",
+
+                discord:
+                    response.discord ||
+                    "",
+
+                contact:
+                    response.contact ||
+                    "",
+
+                registrationDate:
+                    response.registrationDate ||
+                    ""
+
+            };
 
         }
 
@@ -696,9 +818,7 @@ async function handleLogin(
 
         renderCabinet();
 
-
         hideLoading();
-
 
         showToast(
             "Вхід успішно виконано.",
@@ -753,14 +873,14 @@ async function restoreSession() {
     }
 
 
-    /*
-       Проверка возраста сессии
-    */
+    /* =====================================================
+       SESSION AGE
+    ===================================================== */
 
     if (
         session.savedAt &&
         Date.now() -
-        session.savedAt >
+        Number(session.savedAt) >
         SESSION_MAX_AGE
     ) {
 
@@ -768,10 +888,12 @@ async function restoreSession() {
 
         showLogin();
 
+
         showToast(
             "Сесія завершилася. Увійдіть повторно.",
             "error"
         );
+
 
         return;
 
@@ -799,7 +921,6 @@ async function restoreSession() {
 
     try {
 
-
         const response =
             await apiRequest(
                 "profile",
@@ -811,6 +932,9 @@ async function restoreSession() {
                     idNumber:
                         session.olympId,
 
+                    citizenId:
+                        session.olympId,
+
                     password:
                         session.password
 
@@ -818,17 +942,27 @@ async function restoreSession() {
             );
 
 
+        console.log(
+            "PROFILE RESPONSE:",
+            response
+        );
+
+
         if (
             !response ||
-            !response.success
+            response.success !== true
         ) {
 
             throw new Error(
                 response &&
                 response.message
+
                     ?
+
                 response.message
+
                     :
+
                 "Сесія недійсна."
             );
 
@@ -840,6 +974,7 @@ async function restoreSession() {
                 response.citizen ||
                 response.profile ||
                 response.user ||
+                response.data ||
                 null
             );
 
@@ -849,6 +984,7 @@ async function restoreSession() {
                 response.applications ||
                 response.requests ||
                 response.myApplications ||
+                response.data?.applications ||
                 []
             );
 
@@ -868,17 +1004,45 @@ async function restoreSession() {
         }
 
 
+        /*
+           Fallback
+        */
+
         if (!currentCitizen) {
 
-            throw new Error(
-                "Дані громадянина не отримано."
-            );
+            currentCitizen = {
+
+                olympId:
+                    session.olympId,
+
+                fullName:
+                    "",
+
+                birthDate:
+                    "",
+
+                phone:
+                    "",
+
+                email:
+                    "",
+
+                discord:
+                    "",
+
+                contact:
+                    "",
+
+                registrationDate:
+                    ""
+
+            };
 
         }
 
 
         /*
-           Обновляем время сессии
+           Оновлюємо час сесії
         */
 
         saveSession(
@@ -912,11 +1076,14 @@ async function restoreSession() {
             [];
 
 
+        currentApplication =
+            null;
+
+
         hideLoading();
 
 
         showLogin();
-
 
     }
 
@@ -931,7 +1098,6 @@ async function apiRequest(
     action,
     params = {}
 ) {
-
 
     if (
         !API_URL ||
@@ -973,7 +1139,7 @@ async function apiRequest(
 
                 query.append(
                     key,
-                    value
+                    String(value)
                 );
 
             }
@@ -986,6 +1152,12 @@ async function apiRequest(
         API_URL +
         "?" +
         query.toString();
+
+
+    console.log(
+        "API REQUEST:",
+        action
+    );
 
 
     let response;
@@ -1025,9 +1197,7 @@ async function apiRequest(
     }
 
 
-    if (
-        !response.ok
-    ) {
+    if (!response.ok) {
 
         throw new Error(
             "Сервер повернув помилку HTTP " +
@@ -1096,18 +1266,10 @@ function renderCabinet() {
     showCabinet();
 
 
-    /*
-       Профіль
-    */
-
     renderCitizenProfile(
         currentCitizen
     );
 
-
-    /*
-       Заявки
-    */
 
     renderApplications(
         currentApplications
@@ -1115,8 +1277,9 @@ function renderCabinet() {
 
 
     /*
-       Перша заявка для сумісності
-       зі старим HTML
+       Перша заявка
+       автоматично показується
+       тільки для сумісності
     */
 
     if (
@@ -1145,7 +1308,7 @@ function renderCabinet() {
 
 
 /* =========================================================
-   RENDER CITIZEN PROFILE
+   RENDER CITIZEN
 ========================================================= */
 
 function renderCitizenProfile(
@@ -1162,6 +1325,7 @@ function renderCitizenProfile(
     const olympId =
         citizen.olympId ||
         citizen.idNumber ||
+        citizen.citizenId ||
         citizen.number ||
         "";
 
@@ -1200,92 +1364,32 @@ function renderCitizenProfile(
         "";
 
 
-    /*
-       OLYMP-ID
-    */
+    const registrationDate =
+        citizen.registrationDate ||
+        citizen.createdAt ||
+        "";
+
+
+    /* =====================================================
+       ID
+
+       ТВОЙ HTML:
+
+       profileCitizenId
+    ===================================================== */
 
     setText(
-        "profileOlympId",
+        "profileCitizenId",
         olympId || "—"
     );
 
 
     /*
-       ПІБ
-    */
-
-    setText(
-        "profileFullName",
-        fullName
-    );
-
-
-    /*
-       Дата народження
-    */
-
-    setText(
-        "profileBirthDate",
-        birthDate
-    );
-
-
-    /*
-       Телефон
-    */
-
-    setText(
-        "profilePhone",
-        phone
-    );
-
-
-    /*
-       Email
-    */
-
-    setText(
-        "profileEmail",
-        email
-    );
-
-
-    /*
-       Discord
-    */
-
-    setText(
-        "profileDiscord",
-        discord
-    );
-
-
-    /*
-       Контакт
-    */
-
-    setText(
-        "profileContact",
-        contact
-    );
-
-
-    /*
-       Avatar
-    */
-
-    updateAvatar(
-        fullName
-    );
-
-
-    /*
-       Додаткові поля,
-       якщо вони є в HTML
+       Дополнительная совместимость
     */
 
     setTextIfExists(
-        "citizenId",
+        "profileOlympId",
         olympId
     );
 
@@ -1295,11 +1399,100 @@ function renderCitizenProfile(
         olympId
     );
 
+
+    setTextIfExists(
+        "citizenId",
+        olympId
+    );
+
+
+    /* =====================================================
+       FULL NAME
+    ===================================================== */
+
+    setText(
+        "profileFullName",
+        fullName
+    );
+
+
+    /* =====================================================
+       BIRTH DATE
+    ===================================================== */
+
+    setText(
+        "profileBirthDate",
+        formatDate(
+            birthDate
+        )
+    );
+
+
+    /* =====================================================
+       PHONE
+    ===================================================== */
+
+    setText(
+        "profilePhone",
+        phone
+    );
+
+
+    /* =====================================================
+       EMAIL
+    ===================================================== */
+
+    setText(
+        "profileEmail",
+        email
+    );
+
+
+    /* =====================================================
+       DISCORD
+    ===================================================== */
+
+    setText(
+        "profileDiscord",
+        discord
+    );
+
+
+    /* =====================================================
+       CONTACT
+    ===================================================== */
+
+    setText(
+        "profileContact",
+        contact
+    );
+
+
+    /* =====================================================
+       REGISTRATION DATE
+    ===================================================== */
+
+    setText(
+        "profileCreatedAt",
+        formatDateTime(
+            registrationDate
+        )
+    );
+
+
+    /* =====================================================
+       AVATAR
+    ===================================================== */
+
+    updateAvatar(
+        fullName
+    );
+
 }
 
 
 /* =========================================================
-   RENDER ALL APPLICATIONS
+   APPLICATIONS
 ========================================================= */
 
 function renderApplications(
@@ -1316,57 +1509,39 @@ function renderApplications(
         normalized;
 
 
+    const container =
+        document.getElementById(
+            "applicationsList"
+        );
+
+
+    const loading =
+        document.getElementById(
+            "applicationsLoading"
+        );
+
+
+    const empty =
+        document.getElementById(
+            "applicationsEmpty"
+        );
+
+
     /*
-       Ищем специальный контейнер
-       новой версии HTML.
+       Скрываем loading
     */
 
-    const containers = [
+    if (loading) {
 
-        "applicationsList",
-
-        "myApplications",
-
-        "applicationsContainer",
-
-        "requestsList",
-
-        "applicationList"
-
-    ];
-
-
-    let container =
-        null;
-
-
-    for (
-        let i = 0;
-        i < containers.length;
-        i++
-    ) {
-
-        const element =
-            document.getElementById(
-                containers[i]
-            );
-
-
-        if (element) {
-
-            container =
-                element;
-
-            break;
-
-        }
+        loading.classList.add(
+            "hidden"
+        );
 
     }
 
 
     /*
-       Если нового контейнера
-       ещё нет — не ломаем старый HTML.
+       Если контейнер отсутствует
     */
 
     if (!container) {
@@ -1380,37 +1555,62 @@ function renderApplications(
     }
 
 
-    container.innerHTML =
-        "";
+    /*
+       Удаляем старые динамические карточки,
+       но сохраняем loading / empty
+    */
 
+    const oldCards =
+        container.querySelectorAll(
+            ".application-history-card"
+        );
+
+
+    oldCards.forEach(
+        function (card) {
+
+            card.remove();
+
+        }
+    );
+
+
+    /*
+       EMPTY
+    */
 
     if (
         normalized.length === 0
     ) {
 
-        container.innerHTML =
+        if (empty) {
 
-            '<div class="history-empty">' +
+            empty.classList.remove(
+                "hidden"
+            );
 
-                '<div class="history-icon">📁</div>' +
+        }
 
-                '<h3>Заявок поки немає</h3>' +
-
-                '<p>' +
-
-                    'У вашому особистому кабінеті ' +
-
-                    'ще не зареєстровано жодної заявки.' +
-
-                '</p>' +
-
-            '</div>';
 
         updateApplicationsCounter(
             normalized
         );
 
+
         return;
+
+    }
+
+
+    /*
+       Есть заявки
+    */
+
+    if (empty) {
+
+        empty.classList.add(
+            "hidden"
+        );
 
     }
 
@@ -1467,9 +1667,9 @@ function createApplicationCard(
         "";
 
 
-    /*
+    /* =====================================================
        TOP
-    */
+    ===================================================== */
 
     const top =
         document.createElement(
@@ -1481,9 +1681,9 @@ function createApplicationCard(
         "application-history-top";
 
 
-    /*
-       Number
-    */
+    /* =====================================================
+       NUMBER
+    ===================================================== */
 
     const numberBlock =
         document.createElement(
@@ -1526,9 +1726,9 @@ function createApplicationCard(
     );
 
 
-    /*
-       Status
-    */
+    /* =====================================================
+       STATUS
+    ===================================================== */
 
     const status =
         document.createElement(
@@ -1563,9 +1763,9 @@ function createApplicationCard(
     );
 
 
-    /*
+    /* =====================================================
        GRID
-    */
+    ===================================================== */
 
     const grid =
         document.createElement(
@@ -1580,7 +1780,9 @@ function createApplicationCard(
     addApplicationInfo(
         grid,
         "Дата",
-        application.date
+        formatDateTime(
+            application.date
+        )
     );
 
 
@@ -1599,9 +1801,14 @@ function createApplicationCard(
     );
 
 
-    /*
-       Message preview
-    */
+    card.appendChild(
+        grid
+    );
+
+
+    /* =====================================================
+       MESSAGE
+    ===================================================== */
 
     const messageBlock =
         document.createElement(
@@ -1648,18 +1855,13 @@ function createApplicationCard(
 
 
     card.appendChild(
-        grid
-    );
-
-
-    card.appendChild(
         messageBlock
     );
 
 
-    /*
-       BUTTON
-    */
+    /* =====================================================
+       ACTIONS
+    ===================================================== */
 
     const actions =
         document.createElement(
@@ -1670,6 +1872,10 @@ function createApplicationCard(
     actions.className =
         "application-history-actions";
 
+
+    /* =====================================================
+       VIEW
+    ===================================================== */
 
     const viewButton =
         document.createElement(
@@ -1706,9 +1912,9 @@ function createApplicationCard(
     );
 
 
-    /*
-       COPY BUTTON
-    */
+    /* =====================================================
+       COPY
+    ===================================================== */
 
     const copyButton =
         document.createElement(
@@ -1838,28 +2044,34 @@ function openApplication(
     );
 
 
-    /*
-       Если в HTML есть
-       подробный блок заявки,
-       прокручиваем к нему.
-    */
-
-    const section =
-        document.querySelector(
-            ".applications-section"
+    const details =
+        document.getElementById(
+            "applicationDetails"
         );
 
 
-    if (section) {
+    if (details) {
 
-        section.scrollIntoView(
-            {
-                behavior:
-                    "smooth",
+        details.classList.remove(
+            "hidden"
+        );
 
-                block:
-                    "start"
-            }
+
+        setTimeout(
+            function () {
+
+                details.scrollIntoView(
+                    {
+                        behavior:
+                            "smooth",
+
+                        block:
+                            "start"
+                    }
+                );
+
+            },
+            50
         );
 
     }
@@ -1896,7 +2108,9 @@ function renderSingleApplication(
 
     setText(
         "applicationDate",
-        application.date
+        formatDateTime(
+            application.date
+        )
     );
 
 
@@ -1997,44 +2211,34 @@ function clearSingleApplication() {
 
 
 /* =========================================================
-   APPLICATION COUNTER
+   STATISTICS
 ========================================================= */
 
 function updateApplicationsCounter(
     applications
 ) {
 
-    const count =
+    const list =
+        Array.isArray(
+            applications
+        )
+            ?
         applications
-            ? applications.length
-            : 0;
+            :
+        [];
 
 
-    setTextIfExists(
-        "applicationsCount",
-        String(count)
-    );
+    const total =
+        list.length;
 
-
-    setTextIfExists(
-        "totalApplications",
-        String(count)
-    );
-
-
-    /*
-       Статистика
-    */
 
     const pending =
-        applications.filter(
+        list.filter(
             function (item) {
 
-                return (
-                    clean(item.status)
-                        .includes(
-                            "На розгляді"
-                        )
+                return statusContains(
+                    item.status,
+                    "На розгляді"
                 );
 
             }
@@ -2042,14 +2246,12 @@ function updateApplicationsCounter(
 
 
     const accepted =
-        applications.filter(
+        list.filter(
             function (item) {
 
-                return (
-                    clean(item.status)
-                        .includes(
-                            "Прийнято"
-                        )
+                return statusContains(
+                    item.status,
+                    "Прийнято"
                 );
 
             }
@@ -2057,14 +2259,12 @@ function updateApplicationsCounter(
 
 
     const completed =
-        applications.filter(
+        list.filter(
             function (item) {
 
-                return (
-                    clean(item.status)
-                        .includes(
-                            "Виконано"
-                        )
+                return statusContains(
+                    item.status,
+                    "Виконано"
                 );
 
             }
@@ -2072,41 +2272,114 @@ function updateApplicationsCounter(
 
 
     const rejected =
-        applications.filter(
+        list.filter(
             function (item) {
 
-                return (
-                    clean(item.status)
-                        .includes(
-                            "Відхилено"
-                        )
+                return statusContains(
+                    item.status,
+                    "Відхилено"
                 );
 
             }
         ).length;
 
 
+    const closed =
+        list.filter(
+            function (item) {
+
+                return statusContains(
+                    item.status,
+                    "Закрито"
+                );
+
+            }
+        ).length;
+
+
+    /* =====================================================
+       HTML IDS ИЗ ТВОЕГО CABINET.HTML
+    ===================================================== */
+
+    setText(
+        "statTotal",
+        total
+    );
+
+
+    setText(
+        "statPending",
+        pending
+    );
+
+
+    setText(
+        "statAccepted",
+        accepted
+    );
+
+
+    setText(
+        "statCompleted",
+        completed
+    );
+
+
+    setText(
+        "statRejected",
+        rejected
+    );
+
+
+    setText(
+        "statClosed",
+        closed
+    );
+
+
+    /* =====================================================
+       СТАРЫЕ IDS
+    ===================================================== */
+
+    setTextIfExists(
+        "applicationsCount",
+        total
+    );
+
+
+    setTextIfExists(
+        "totalApplications",
+        total
+    );
+
+
     setTextIfExists(
         "pendingApplications",
-        String(pending)
+        pending
     );
 
 
     setTextIfExists(
         "acceptedApplications",
-        String(accepted)
+        accepted
     );
 
 
     setTextIfExists(
         "completedApplications",
-        String(completed)
+        completed
     );
 
 
     setTextIfExists(
         "rejectedApplications",
-        String(rejected)
+        rejected
+    );
+
+
+    setTextIfExists(
+        "closedApplications",
+        closed
     );
 
 }
@@ -2133,7 +2406,7 @@ function updateStatus(
     }
 
 
-    const cleanStatus =
+    const value =
         clean(
             status
         ) ||
@@ -2141,7 +2414,7 @@ function updateStatus(
 
 
     element.textContent =
-        cleanStatus;
+        value;
 
 
     element.className =
@@ -2150,7 +2423,7 @@ function updateStatus(
 
     element.classList.add(
         getStatusClass(
-            cleanStatus
+            value
         )
     );
 
@@ -2168,12 +2441,12 @@ function getStatusClass(
     const value =
         clean(
             status
-        );
+        ).toLowerCase();
 
 
     if (
         value.includes(
-            "На розгляді"
+            "на розгляді"
         )
     ) {
 
@@ -2184,7 +2457,7 @@ function getStatusClass(
 
     if (
         value.includes(
-            "Прийнято"
+            "прийнято"
         )
     ) {
 
@@ -2195,7 +2468,7 @@ function getStatusClass(
 
     if (
         value.includes(
-            "Виконано"
+            "виконано"
         )
     ) {
 
@@ -2206,7 +2479,7 @@ function getStatusClass(
 
     if (
         value.includes(
-            "Відхилено"
+            "відхилено"
         )
     ) {
 
@@ -2217,7 +2490,7 @@ function getStatusClass(
 
     if (
         value.includes(
-            "Закрито"
+            "закрито"
         )
     ) {
 
@@ -2227,6 +2500,27 @@ function getStatusClass(
 
 
     return "status-pending";
+
+}
+
+
+/* =========================================================
+   STATUS CONTAINS
+========================================================= */
+
+function statusContains(
+    status,
+    text
+) {
+
+    return clean(
+        status
+    )
+        .toLowerCase()
+        .includes(
+            String(text)
+                .toLowerCase()
+        );
 
 }
 
@@ -2315,7 +2609,9 @@ function saveSession(
             CABINET_VERSION,
 
         olympId:
-            olympId,
+            formatOlympId(
+                olympId
+            ),
 
         password:
             password,
@@ -2386,6 +2682,12 @@ function loadSession() {
             return null;
 
         }
+
+
+        session.olympId =
+            formatOlympId(
+                session.olympId
+            );
 
 
         return session;
@@ -2482,7 +2784,7 @@ function showCabinet() {
 
 
 /* =========================================================
-   RESET LOGIN FORM
+   RESET LOGIN
 ========================================================= */
 
 function resetLoginForm() {
@@ -2568,24 +2870,24 @@ function setLoginLoading(
         loading;
 
 
-    if (
-        loginButtonText
-    ) {
+    if (!loginButtonText) {
 
-        if (loading) {
+        return;
 
-            loginButtonText.innerHTML =
+    }
 
-                '<span class="button-loader"></span>' +
 
-                'Перевірка...';
+    if (loading) {
 
-        } else {
+        loginButtonText.innerHTML =
 
-            loginButtonText.textContent =
-                "Увійти до кабінету";
+            '<span class="button-loader"></span>' +
+            'Перевірка...';
 
-        }
+    } else {
+
+        loginButtonText.textContent =
+            "Увійти до кабінету";
 
     }
 
@@ -2665,6 +2967,7 @@ async function copyApplicationNumber() {
             "error"
         );
 
+
         return;
 
     }
@@ -2711,7 +3014,7 @@ async function copyText(
         } else {
 
             throw new Error(
-                "Clipboard API unavailable"
+                "Clipboard unavailable"
             );
 
         }
@@ -2748,6 +3051,10 @@ async function copyText(
             "-9999px";
 
 
+        textarea.style.top =
+            "0";
+
+
         textarea.style.opacity =
             "0";
 
@@ -2758,7 +3065,6 @@ async function copyText(
 
 
         textarea.focus();
-
 
         textarea.select();
 
@@ -2843,6 +3149,7 @@ function updateAvatar(
         avatar.textContent =
             "👤";
 
+
         return;
 
     }
@@ -2858,9 +3165,7 @@ function updateAvatar(
         "";
 
 
-    if (
-        words[0]
-    ) {
+    if (words[0]) {
 
         initials +=
             words[0]
@@ -2870,9 +3175,7 @@ function updateAvatar(
     }
 
 
-    if (
-        words[1]
-    ) {
+    if (words[1]) {
 
         initials +=
             words[1]
@@ -2899,8 +3202,7 @@ function normalizeCitizen(
 
     if (
         !citizen ||
-        typeof citizen !==
-        "object"
+        typeof citizen !== "object"
     ) {
 
         return null;
@@ -2911,12 +3213,13 @@ function normalizeCitizen(
     return {
 
         olympId:
-            clean(
+            normalizeOlympId(
                 citizen.olympId ||
                 citizen.idNumber ||
+                citizen.citizenId ||
                 citizen.number ||
                 ""
-            ).toUpperCase(),
+            ),
 
 
         fullName:
@@ -2976,6 +3279,7 @@ function normalizeCitizen(
             clean(
                 citizen.registrationDate ||
                 citizen.createdAt ||
+                citizen.registration ||
                 ""
             )
 
@@ -3003,25 +3307,23 @@ function normalizeApplications(
     }
 
 
-    return applications.map(
-        function (
-            application
-        ) {
+    return applications
+        .map(
+            function (application) {
 
-            return normalizeApplication(
-                application
-            );
+                return normalizeApplication(
+                    application
+                );
 
-        }
-    ).filter(
-        function (
-            application
-        ) {
+            }
+        )
+        .filter(
+            function (application) {
 
-            return !!application;
+                return !!application;
 
-        }
-    );
+            }
+        );
 
 }
 
@@ -3036,8 +3338,7 @@ function normalizeApplication(
 
     if (
         !application ||
-        typeof application !==
-        "object"
+        typeof application !== "object"
     ) {
 
         return null;
@@ -3052,22 +3353,25 @@ function normalizeApplication(
                 application.number ||
                 application.applicationNumber ||
                 application.requestNumber ||
+                application.id ||
                 ""
             ).toUpperCase(),
 
 
         olympId:
-            clean(
+            normalizeOlympId(
                 application.olympId ||
                 application.idNumber ||
+                application.citizenId ||
                 ""
-            ).toUpperCase(),
+            ),
 
 
         date:
             clean(
                 application.date ||
                 application.createdAt ||
+                application.timestamp ||
                 ""
             ),
 
@@ -3076,6 +3380,7 @@ function normalizeApplication(
             clean(
                 application.fullName ||
                 application.name ||
+                application.fio ||
                 ""
             ),
 
@@ -3083,6 +3388,7 @@ function normalizeApplication(
         birthDate:
             clean(
                 application.birthDate ||
+                application.dateOfBirth ||
                 ""
             ),
 
@@ -3112,6 +3418,7 @@ function normalizeApplication(
             clean(
                 application.service ||
                 application.serviceName ||
+                application.type ||
                 ""
             ),
 
@@ -3119,6 +3426,7 @@ function normalizeApplication(
         contact:
             clean(
                 application.contact ||
+                application.preferredContact ||
                 ""
             ),
 
@@ -3127,6 +3435,7 @@ function normalizeApplication(
             clean(
                 application.message ||
                 application.description ||
+                application.text ||
                 ""
             ),
 
@@ -3142,6 +3451,7 @@ function normalizeApplication(
             clean(
                 application.responsible ||
                 application.responsibleName ||
+                application.employee ||
                 ""
             ),
 
@@ -3151,6 +3461,7 @@ function normalizeApplication(
                 application.comment ||
                 application.answer ||
                 application.response ||
+                application.adminComment ||
                 ""
             ),
 
@@ -3158,6 +3469,7 @@ function normalizeApplication(
         accessCode:
             clean(
                 application.accessCode ||
+                application.code ||
                 ""
             ).toUpperCase()
 
@@ -3174,14 +3486,100 @@ function normalizeOlympId(
     value
 ) {
 
-    return String(
-        value || ""
-    )
+    let result =
+        String(
+            value || ""
+        )
         .toUpperCase()
+        .trim()
         .replace(
             /\s+/g,
             ""
         );
+
+
+    /*
+       Если пользователь ввёл:
+
+       OLYMP000001
+
+       превращаем в:
+
+       OLYMP-000001
+    */
+
+    if (
+        /^OLYMP\d{6}$/.test(
+            result
+        )
+    ) {
+
+        result =
+            result.replace(
+                /^OLYMP/,
+                "OLYMP-"
+            );
+
+    }
+
+
+    /*
+       Если пользователь ввёл:
+
+       OLYMP-000001
+    */
+
+    return result;
+
+}
+
+
+/* =========================================================
+   FORMAT OLYMP ID
+========================================================= */
+
+function formatOlympId(
+    value
+) {
+
+    let result =
+        normalizeOlympId(
+            value
+        );
+
+
+    /*
+       Удаляем возможные
+       двойные дефисы
+    */
+
+    result =
+        result.replace(
+            /-+/g,
+            "-"
+        );
+
+
+    /*
+       OLYMP000001
+    */
+
+    if (
+        /^OLYMP\d{6}$/.test(
+            result
+        )
+    ) {
+
+        result =
+            "OLYMP-" +
+            result.substring(
+                5
+            );
+
+    }
+
+
+    return result;
 
 }
 
@@ -3310,7 +3708,7 @@ function setTextIfExists(
     }
 
 
-    element.textContent =
+    const text =
         value !== undefined &&
         value !== null &&
         String(value).trim() !== ""
@@ -3322,6 +3720,122 @@ function setTextIfExists(
             :
 
         "—";
+
+
+    element.textContent =
+        text;
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(
+    value
+) {
+
+    if (!value) {
+
+        return "—";
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return String(
+            value
+        );
+
+    }
+
+
+    return date.toLocaleDateString(
+        "uk-UA",
+        {
+
+            day:
+                "2-digit",
+
+            month:
+                "2-digit",
+
+            year:
+                "numeric"
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT DATE TIME
+========================================================= */
+
+function formatDateTime(
+    value
+) {
+
+    if (!value) {
+
+        return "—";
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return String(
+            value
+        );
+
+    }
+
+
+    return date.toLocaleString(
+        "uk-UA",
+        {
+
+            day:
+                "2-digit",
+
+            month:
+                "2-digit",
+
+            year:
+                "numeric",
+
+            hour:
+                "2-digit",
+
+            minute:
+                "2-digit"
+
+        }
+    );
 
 }
 
@@ -3342,8 +3856,7 @@ function truncateText(
 
 
     if (
-        text.length <=
-        maxLength
+        text.length <= maxLength
     ) {
 
         return text;
@@ -3436,12 +3949,12 @@ function hideToast() {
 console.log(
     "OLYMP Government Personal Cabinet " +
     CABINET_VERSION +
-    " loaded."
+    " loaded successfully."
 );
 
 
 /* =========================================================
-   GLOBAL DEBUG OBJECT
+   GLOBAL DEBUG
 ========================================================= */
 
 window.OlympCabinet = {
