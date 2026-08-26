@@ -4382,3 +4382,1117 @@ console.log(
 console.log(
     "Personal Cabinet + Admin Panel"
 );
+
+/* =========================================================
+   OLYMP GOVERNMENT
+   SCRIPT.JS 6.2
+   FIX: APPLICATION MODAL + SERVICES
+========================================================= */
+
+(function () {
+
+    "use strict";
+
+    console.log("OLYMP Government Script 6.2 — UI FIX loaded");
+
+
+    /* =====================================================
+       ПОИСК ЭЛЕМЕНТА
+    ===================================================== */
+
+    function findElement(selectors) {
+
+        if (!Array.isArray(selectors)) {
+            selectors = [selectors];
+        }
+
+        for (const selector of selectors) {
+
+            try {
+
+                const element =
+                    document.querySelector(selector);
+
+                if (element) {
+                    return element;
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Invalid selector:",
+                    selector
+                );
+
+            }
+
+        }
+
+        return null;
+
+    }
+
+
+    /* =====================================================
+       ОТКРЫТИЕ ФОРМЫ ЗАЯВКИ
+    ===================================================== */
+
+    window.openApplicationModal = function (service) {
+
+        console.log(
+            "openApplicationModal:",
+            service
+        );
+
+
+        /*
+         * Возможные ID модального окна
+         */
+
+        const modal = findElement([
+
+            "#applicationModal",
+            "#application-modal",
+            "#requestModal",
+            "#request-modal",
+            ".application-modal",
+            ".request-modal"
+
+        ]);
+
+
+        /*
+         * Если модальное окно уже есть
+         */
+
+        if (modal) {
+
+            modal.classList.add("active");
+
+            modal.classList.add("show");
+
+            modal.style.display = "flex";
+
+            modal.removeAttribute("hidden");
+
+
+            /*
+             * Если передали услугу —
+             * автоматически устанавливаем её
+             */
+
+            if (service) {
+
+                setServiceValue(service);
+
+            }
+
+
+            /*
+             * Заполняем профиль пользователя
+             */
+
+            fillApplicationProfile();
+
+
+            document.body.classList.add(
+                "modal-open"
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+         * Если модального окна нет —
+         * создаём его автоматически.
+         */
+
+        createApplicationModal(
+            service
+        );
+
+    };
+
+
+    /* =====================================================
+       УСТАНОВКА УСЛУГИ
+    ===================================================== */
+
+    function setServiceValue(service) {
+
+        const select = findElement([
+
+            "#service",
+            "#applicationService",
+            "#requestService",
+            "select[name='service']"
+
+        ]);
+
+
+        if (!select) {
+            return;
+        }
+
+
+        /*
+         * Ищем option
+         */
+
+        const options =
+            Array.from(
+                select.options
+            );
+
+
+        const option =
+            options.find(
+                item =>
+                    item.value === service ||
+                    item.textContent.trim() === service
+            );
+
+
+        if (option) {
+
+            select.value =
+                option.value;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       ЗАПОЛНЕНИЕ ПРОФИЛЯ
+    ===================================================== */
+
+    function fillApplicationProfile() {
+
+        let user = null;
+
+
+        /*
+         * Пытаемся получить пользователя
+         * из существующих переменных
+         */
+
+        try {
+
+            if (
+                window.currentUser
+            ) {
+
+                user =
+                    window.currentUser;
+
+            }
+
+            else if (
+                window.currentCitizen
+            ) {
+
+                user =
+                    window.currentCitizen;
+
+            }
+
+            else {
+
+                const saved =
+                    localStorage.getItem(
+                        "olymp_user"
+                    );
+
+                if (saved) {
+
+                    user =
+                        JSON.parse(saved);
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Не удалось получить профиль:",
+                error
+            );
+
+        }
+
+
+        if (!user) {
+            return;
+        }
+
+
+        /*
+         * ПІБ
+         */
+
+        const fullNameInput =
+            findElement([
+
+                "#fullName",
+                "#applicationFullName",
+                "#requestFullName",
+                "input[name='fullName']"
+
+            ]);
+
+
+        if (
+            fullNameInput &&
+            user.fullName
+        ) {
+
+            fullNameInput.value =
+                user.fullName;
+
+        }
+
+
+        /*
+         * Посвідчення
+         */
+
+        const idInput =
+            findElement([
+
+                "#idNumber",
+                "#applicationIdNumber",
+                "#requestIdNumber",
+                "input[name='idNumber']"
+
+            ]);
+
+
+        if (
+            idInput &&
+            (
+                user.idNumber ||
+                user.id
+            )
+        ) {
+
+            idInput.value =
+                user.idNumber ||
+                user.id;
+
+        }
+
+
+        /*
+         * Контакт
+         */
+
+        const contactInput =
+            findElement([
+
+                "#contact",
+                "#applicationContact",
+                "#requestContact",
+                "input[name='contact']"
+
+            ]);
+
+
+        if (
+            contactInput &&
+            user.contact
+        ) {
+
+            contactInput.value =
+                user.contact;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       СОЗДАНИЕ МОДАЛЬНОГО ОКНА
+    ===================================================== */
+
+    function createApplicationModal(
+        service
+    ) {
+
+        /*
+         * Если уже существует —
+         * повторно не создаём
+         */
+
+        let modal =
+            document.getElementById(
+                "applicationModal"
+            );
+
+
+        if (modal) {
+
+            modal.style.display =
+                "flex";
+
+            modal.classList.add(
+                "active"
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * HTML модального окна
+         */
+
+        modal =
+            document.createElement(
+                "div"
+            );
+
+
+        modal.id =
+            "applicationModal";
+
+
+        modal.className =
+            "application-modal active";
+
+
+        modal.innerHTML = `
+
+            <div
+                class="application-modal-overlay"
+                data-close-modal
+            ></div>
+
+            <div
+                class="application-modal-content"
+            >
+
+                <div
+                    class="application-modal-header"
+                >
+
+                    <div>
+
+                        <span
+                            class="application-modal-label"
+                        >
+                            OLYMP GOVERNMENT
+                        </span>
+
+                        <h2>
+                            Подати заяву
+                        </h2>
+
+                        <p>
+                            Заповніть форму звернення
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="application-modal-close"
+                        id="closeApplicationModal"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <form
+                    id="applicationForm"
+                    class="application-form"
+                >
+
+                    <div class="form-group">
+
+                        <label>
+                            ПІБ
+                        </label>
+
+                        <input
+                            type="text"
+                            name="fullName"
+                            id="fullName"
+                            placeholder="Ваше ПІБ"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Номер посвідчення
+                        </label>
+
+                        <input
+                            type="text"
+                            name="idNumber"
+                            id="idNumber"
+                            placeholder="OLYMP-000001"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Державна послуга
+                        </label>
+
+                        <select
+                            name="service"
+                            id="service"
+                            required
+                        >
+
+                            <option value="">
+                                Оберіть послугу
+                            </option>
+
+                            <option value="Державна юридична консультація">
+                                Державна юридична консультація
+                            </option>
+
+                            <option value="Звернення до Уряду">
+                                Звернення до Уряду
+                            </option>
+
+                            <option value="Житлове питання">
+                                Житлове питання
+                            </option>
+
+                            <option value="Соціальна допомога">
+                                Соціальна допомога
+                            </option>
+
+                            <option value="Питання документів">
+                                Питання документів
+                            </option>
+
+                            <option value="Інше">
+                                Інше
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Контакт
+                        </label>
+
+                        <input
+                            type="text"
+                            name="contact"
+                            id="contact"
+                            placeholder="Discord / телефон"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Опис звернення
+                        </label>
+
+                        <textarea
+                            name="message"
+                            id="message"
+                            rows="6"
+                            placeholder="Опишіть ваше питання..."
+                            required
+                        ></textarea>
+
+                    </div>
+
+
+                    <div
+                        id="applicationFormMessage"
+                        class="application-form-message"
+                    ></div>
+
+
+                    <button
+                        type="submit"
+                        class="application-submit"
+                    >
+
+                        <span>
+                            Подати заяву
+                        </span>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(
+            modal
+        );
+
+
+        /*
+         * Устанавливаем услугу
+         */
+
+        if (service) {
+
+            setServiceValue(
+                service
+            );
+
+        }
+
+
+        /*
+         * Заполняем данные
+         */
+
+        fillApplicationProfile();
+
+
+        /*
+         * Закрытие
+         */
+
+        const closeButton =
+            document.getElementById(
+                "closeApplicationModal"
+            );
+
+
+        if (closeButton) {
+
+            closeButton.addEventListener(
+                "click",
+                closeApplicationModal
+            );
+
+        }
+
+
+        const overlay =
+            modal.querySelector(
+                "[data-close-modal]"
+            );
+
+
+        if (overlay) {
+
+            overlay.addEventListener(
+                "click",
+                closeApplicationModal
+            );
+
+        }
+
+
+        /*
+         * ESC
+         */
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    closeApplicationModal();
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Отправка формы
+         */
+
+        const form =
+            document.getElementById(
+                "applicationForm"
+            );
+
+
+        if (form) {
+
+            form.addEventListener(
+                "submit",
+                submitApplication
+            );
+
+        }
+
+
+        /*
+         * Анимация
+         */
+
+        requestAnimationFrame(
+            () => {
+
+                modal.classList.add(
+                    "visible"
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       ЗАКРЫТИЕ ФОРМЫ
+    ===================================================== */
+
+    window.closeApplicationModal =
+        function () {
+
+            const modal =
+                findElement([
+
+                    "#applicationModal",
+                    "#application-modal",
+                    "#requestModal",
+                    "#request-modal"
+
+                ]);
+
+
+            if (!modal) {
+                return;
+            }
+
+
+            modal.classList.remove(
+                "active"
+            );
+
+            modal.classList.remove(
+                "show"
+            );
+
+            modal.classList.remove(
+                "visible"
+            );
+
+
+            setTimeout(
+                () => {
+
+                    if (
+                        modal.id ===
+                        "applicationModal"
+                    ) {
+
+                        modal.style.display =
+                            "none";
+
+                    }
+
+                },
+                200
+            );
+
+
+            document.body.classList.remove(
+                "modal-open"
+            );
+
+        };
+
+
+    /* =====================================================
+       OPEN SERVICE
+    ===================================================== */
+
+    window.openService =
+        function (service) {
+
+            console.log(
+                "openService:",
+                service
+            );
+
+
+            /*
+             * Если функция вызвана
+             * из карточки услуги,
+             * открываем форму.
+             */
+
+            openApplicationModal(
+                service
+            );
+
+        };
+
+
+    /* =====================================================
+       ОТПРАВКА ЗАЯВКИ
+    ===================================================== */
+
+    async function submitApplication(
+        event
+    ) {
+
+        event.preventDefault();
+
+
+        const form =
+            event.target;
+
+
+        const button =
+            form.querySelector(
+                "button[type='submit']"
+            );
+
+
+        const messageBox =
+            document.getElementById(
+                "applicationFormMessage"
+            );
+
+
+        if (button) {
+
+            button.disabled =
+                true;
+
+        }
+
+
+        if (messageBox) {
+
+            messageBox.textContent =
+                "Надсилання заявки...";
+
+            messageBox.className =
+                "application-form-message loading";
+
+        }
+
+
+        try {
+
+            /*
+             * Получаем URL Google Apps Script
+             */
+
+            const scriptUrl =
+                getGoogleScriptUrl();
+
+
+            if (!scriptUrl) {
+
+                throw new Error(
+                    "URL Google Apps Script не налаштований."
+                );
+
+            }
+
+
+            /*
+             * Формируем данные
+             */
+
+            const formData =
+                new FormData(form);
+
+
+            /*
+             * Отправляем
+             */
+
+            const response =
+                await fetch(
+                    scriptUrl,
+                    {
+
+                        method:
+                            "POST",
+
+                        body:
+                            formData
+
+                    }
+                );
+
+
+            const result =
+                await response.json();
+
+
+            if (
+                !result ||
+                result.success !== true
+            ) {
+
+                throw new Error(
+                    result?.message ||
+                    "Не вдалося зареєструвати заявку."
+                );
+
+            }
+
+
+            /*
+             * Успешно
+             */
+
+            if (messageBox) {
+
+                messageBox.textContent =
+                    `Заявку успішно зареєстровано. Номер: ${result.number}`;
+
+                messageBox.className =
+                    "application-form-message success";
+
+            }
+
+
+            /*
+             * Очищаем форму
+             */
+
+            form.reset();
+
+
+            /*
+             * Сохраняем номер заявки
+             */
+
+            try {
+
+                localStorage.setItem(
+                    "lastApplicationNumber",
+                    result.number
+                );
+
+            } catch (error) {}
+
+
+
+            /*
+             * Обновляем кабинет,
+             * если такая функция существует.
+             */
+
+            setTimeout(
+                () => {
+
+                    if (
+                        typeof window.loadApplications ===
+                        "function"
+                    ) {
+
+                        window.loadApplications();
+
+                    }
+
+                    if (
+                        typeof window.loadUserApplications ===
+                        "function"
+                    ) {
+
+                        window.loadUserApplications();
+
+                    }
+
+                },
+                500
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Application error:",
+                error
+            );
+
+
+            if (messageBox) {
+
+                messageBox.textContent =
+                    error.message ||
+                    "Помилка надсилання заявки.";
+
+                messageBox.className =
+                    "application-form-message error";
+
+            }
+
+        } finally {
+
+            if (button) {
+
+                button.disabled =
+                    false;
+
+            }
+
+        }
+
+    }
+
+
+    /* =====================================================
+       GOOGLE APPS SCRIPT URL
+    ===================================================== */
+
+    function getGoogleScriptUrl() {
+
+        /*
+         * Проверяем несколько вариантов,
+         * чтобы не ломать существующий script.js.
+         */
+
+        const possibleKeys = [
+
+            "OLYMP_SCRIPT_URL",
+            "GOOGLE_SCRIPT_URL",
+            "googleScriptUrl",
+            "scriptUrl"
+
+        ];
+
+
+        for (
+            const key of possibleKeys
+        ) {
+
+            try {
+
+                const value =
+                    localStorage.getItem(
+                        key
+                    );
+
+
+                if (value) {
+
+                    return value.trim();
+
+                }
+
+            } catch (error) {}
+
+        }
+
+
+        /*
+         * Глобальные переменные
+         */
+
+        if (
+            window.GOOGLE_SCRIPT_URL
+        ) {
+
+            return
+                window.GOOGLE_SCRIPT_URL;
+
+        }
+
+
+        if (
+            window.OLYMP_SCRIPT_URL
+        ) {
+
+            return
+                window.OLYMP_SCRIPT_URL;
+
+        }
+
+
+        /*
+         * Meta tag
+         */
+
+        const meta =
+            document.querySelector(
+                'meta[name="google-script-url"]'
+            );
+
+
+        if (
+            meta &&
+            meta.content
+        ) {
+
+            return meta.content.trim();
+
+        }
+
+
+        /*
+         * data-атрибут body
+         */
+
+        const bodyUrl =
+            document.body.dataset
+                ?.googleScriptUrl;
+
+
+        if (bodyUrl) {
+
+            return bodyUrl.trim();
+
+        }
+
+
+        return "";
+
+    }
+
+
+    /* =====================================================
+       GLOBAL HELPERS
+    ===================================================== */
+
+    window.OLYMP =
+        window.OLYMP || {};
+
+
+    window.OLYMP.openApplication =
+        window.openApplicationModal;
+
+
+    window.OLYMP.openService =
+        window.openService;
+
+
+    window.OLYMP.closeApplication =
+        window.closeApplicationModal;
+
+
+})();
