@@ -39,7 +39,7 @@
 const OLYMP_CONFIG = {
 
     API_URL:
-        "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec",
+        "Вhttps://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec",
 
     DEBUG:
         true
@@ -1344,48 +1344,28 @@ async function submitApplication(
     }
 
 
-/*
- * =========================================================
- * ПРОВЕРКА API
- * =========================================================
- */
+    /*
+     * Проверка API
+     */
 
-const apiUrl =
-    String(
-        OLYMP_CONFIG.API_URL || ""
-    ).trim();
+    if (
+        !OLYMP_CONFIG.API_URL ||
+        OLYMP_CONFIG.API_URL.includes(
+            "ВСТАВЬ_СЮДА"
+        )
+    ) {
 
+        showFormError(
+            "Система заявок ще не налаштована. Адміністратору необхідно додати URL Google Apps Script."
+        );
 
-if (
-    !apiUrl ||
-    !apiUrl.startsWith(
-        "https://script.google.com/macros/s/"
-    ) ||
-    !apiUrl.endsWith(
-        "/exec"
-    )
-) {
+        console.error(
+            "OLYMP_CONFIG.API_URL не настроен."
+        );
 
-    showFormError(
-        "Система заявок ще не налаштована. Адміністратору необхідно додати правильний URL Google Apps Script."
-    );
+        return;
 
-    console.error(
-        "[OLYMP 6.2] Неправильний API URL:",
-        apiUrl
-    );
-
-    applicationSending = false;
-
-    return;
-
-}
-
-
-log(
-    "[OLYMP 6.2] API:",
-    apiUrl
-);
+    }
 
 
     /*
