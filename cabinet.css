@@ -2129,5 +2129,316 @@ input:focus-visible {
         font-size:
             19px;
     }
+   /* =========================================================
+   AVATAR 6.1 — URL AVATAR FIX
+========================================================= */
+
+/* Контейнер блока аватара */
+.profile-avatar-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+
+/* Сам аватар */
+.profile-avatar {
+    width: 150px !important;
+    height: 150px !important;
+
+    min-width: 150px;
+    min-height: 150px;
+
+    max-width: 150px;
+    max-height: 150px;
+
+    border-radius: 50%;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    background: #eef2f7;
+}
+
+
+/* Картинка внутри аватара */
+.profile-avatar-image {
+    display: block;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+}
+
+
+/* Блок управления аватаром */
+.avatar-actions {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 10px;
+
+    min-width: 280px;
+    max-width: 420px;
+
+    position: relative;
+
+    padding: 0;
+}
+
+
+/* Поле URL */
+.avatar-url-input {
+    width: 100%;
+
+    min-height: 44px;
+
+    padding: 10px 14px;
+
+    border: 1px solid #d8dee8;
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    color: #182337;
+
+    font-size: 14px;
+
+    outline: none;
+
+    box-sizing: border-box;
+}
+
+
+.avatar-url-input:focus {
+    border-color: #64748b;
+
+    box-shadow:
+        0 0 0 3px rgba(100, 116, 139, 0.12);
+}
+
+
+/* Кнопки */
+.avatar-button,
+.avatar-save-button,
+.avatar-remove-button {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 40px;
+
+    padding: 9px 15px;
+
+    border-radius: 9px;
+
+    border: 1px solid #d8dee8;
+
+    background: #ffffff;
+
+    color: #1e293b;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    text-decoration: none;
+
+    box-sizing: border-box;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.avatar-button:hover,
+.avatar-save-button:hover,
+.avatar-remove-button:hover {
+    background: #f4f7fa;
+
+    border-color: #b9c3d0;
+
+    transform: translateY(-1px);
+}
+
+
+/* Сохранить */
+.avatar-save-button {
+    background: #162338;
+
+    color: #ffffff;
+
+    border-color: #162338;
+}
+
+
+.avatar-save-button:hover {
+    background: #24344d;
+
+    border-color: #24344d;
+}
+
+
+/* Удалить */
+.avatar-remove-button {
+    color: #b42318;
+
+    border-color: #e2b8b5;
+}
+
+
+.avatar-remove-button:hover {
+    background: #fff5f4;
+
+    border-color: #d99b96;
+}
+
+
+/* Подсказка */
+.avatar-help-text {
+    display: block;
+
+    width: 100%;
+
+    margin: 0;
+
+    color: #718096;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   AVATAR PREVIEW
+========================================================= */
+
+.avatar-preview-box {
+    margin-top: 24px;
+
+    padding: 20px;
+
+    border: 1px solid #e1e7ef;
+
+    border-radius: 14px;
+
+    background: #f8fafc;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+
+    flex-wrap: wrap;
+}
+
+
+.avatar-preview-box > span {
+    width: 100%;
+
+    display: block;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #64748b;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.04em;
+}
+
+
+.avatar-preview-box img {
+    display: block;
+
+    width: 120px !important;
+    height: 120px !important;
+
+    max-width: 120px !important;
+    max-height: 120px !important;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    border: 3px solid #ffffff;
+
+    box-shadow:
+        0 5px 20px rgba(15, 23, 42, 0.12);
+}
+
+
+/* =========================================================
+   HIDDEN
+========================================================= */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .profile-avatar-wrapper {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+
+    .avatar-actions {
+        width: 100%;
+
+        min-width: 0;
+
+        max-width: none;
+    }
+
+
+    .avatar-url-input {
+        width: 100%;
+    }
+
+
+    .profile-avatar {
+        width: 130px !important;
+        height: 130px !important;
+
+        min-width: 130px;
+        min-height: 130px;
+
+        max-width: 130px;
+        max-height: 130px;
+    }
+
+}
 
 }
