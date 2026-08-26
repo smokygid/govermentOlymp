@@ -3,17 +3,19 @@
    PERSONAL CABINET 6.1
 
    • OLYMP-ID + пароль
-   • Авторизація
-   • Автоматичне відновлення сесії
+   • Авторизация
+   • Автоматическое восстановление сессии
    • Профіль громадянина
-   • Аватар
+   • Аватар ТІЛЬКИ ПО ПРЯМОМУ URL
+   • Предпросмотр аватара
+   • Сохранение URL аватара
+   • Удаление аватара
    • Заявки
    • Статуси
    • Статистика
    • Перегляд заявки
    • Копіювання номера
    • Вихід
-   • POST для великих даних аватара
 ========================================================= */
 
 
@@ -73,8 +75,11 @@ const copyNumberButton =
    AVATAR DOM
 ========================================================= */
 
-const avatarInput =
-    document.getElementById("avatarInput");
+const avatarUrlInput =
+    document.getElementById("avatarUrlInput");
+
+const previewAvatarButton =
+    document.getElementById("previewAvatarButton");
 
 const saveAvatarButton =
     document.getElementById("saveAvatarButton");
@@ -102,7 +107,7 @@ let currentApplications = [];
 
 let currentApplication = null;
 
-let selectedAvatarData = "";
+let selectedAvatarUrl = "";
 
 let toastTimer = null;
 
@@ -136,6 +141,10 @@ function initCabinet() {
 
 function setupEvents() {
 
+    /* =========================
+       LOGIN
+    ========================= */
+
     if (loginForm) {
 
         loginForm.addEventListener(
@@ -145,6 +154,10 @@ function setupEvents() {
 
     }
 
+
+    /* =========================
+       LOGOUT
+    ========================= */
 
     if (logoutButton) {
 
@@ -156,6 +169,10 @@ function setupEvents() {
     }
 
 
+    /* =========================
+       COPY APPLICATION NUMBER
+    ========================= */
+
     if (copyNumberButton) {
 
         copyNumberButton.addEventListener(
@@ -166,15 +183,76 @@ function setupEvents() {
     }
 
 
-    if (avatarInput) {
+    /* =========================
+       AVATAR URL INPUT
+    ========================= */
 
-        avatarInput.addEventListener(
-            "change",
-            handleAvatarSelect
+    if (avatarUrlInput) {
+
+        avatarUrlInput.addEventListener(
+            "input",
+            function () {
+
+                selectedAvatarUrl =
+                    cleanUrl(
+                        this.value
+                    );
+
+                if (
+                    selectedAvatarUrl
+                ) {
+
+                    showAvatarPreview(
+                        selectedAvatarUrl
+                    );
+
+                } else {
+
+                    hideAvatarPreview();
+
+                }
+
+            }
+        );
+
+
+        avatarUrlInput.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    previewAvatar();
+
+                }
+
+            }
         );
 
     }
 
+
+    /* =========================
+       PREVIEW AVATAR
+    ========================= */
+
+    if (previewAvatarButton) {
+
+        previewAvatarButton.addEventListener(
+            "click",
+            previewAvatar
+        );
+
+    }
+
+
+    /* =========================
+       SAVE AVATAR
+    ========================= */
 
     if (saveAvatarButton) {
 
@@ -186,6 +264,10 @@ function setupEvents() {
     }
 
 
+    /* =========================
+       REMOVE AVATAR
+    ========================= */
+
     if (removeAvatarButton) {
 
         removeAvatarButton.addEventListener(
@@ -196,8 +278,14 @@ function setupEvents() {
     }
 
 
+    /* =========================
+       OLYMP ID
+    ========================= */
+
     const citizenIdInput =
-        document.getElementById("citizenId");
+        document.getElementById(
+            "citizenId"
+        );
 
 
     if (citizenIdInput) {
@@ -217,11 +305,17 @@ function setupEvents() {
     }
 
 
+    /* =========================
+       ESCAPE
+    ========================= */
+
     document.addEventListener(
         "keydown",
         function (event) {
 
-            if (event.key === "Escape") {
+            if (
+                event.key === "Escape"
+            ) {
 
                 hideToast();
 
@@ -237,7 +331,9 @@ function setupEvents() {
    LOGIN
 ========================================================= */
 
-async function handleLogin(event) {
+async function handleLogin(
+    event
+) {
 
     event.preventDefault();
 
@@ -272,11 +368,16 @@ async function handleLogin(event) {
         );
 
 
-    if (!/^OLYMP-\d{6}$/.test(olympId)) {
+    if (
+        !/^OLYMP-\d{6}$/.test(
+            olympId
+        )
+    ) {
 
         showLoginError(
             "Невірний формат OLYMP-ID. Приклад: OLYMP-000001"
         );
+
 
         if (citizenIdInput) {
 
@@ -295,6 +396,7 @@ async function handleLogin(event) {
             "Вкажіть пароль."
         );
 
+
         if (passwordInput) {
 
             passwordInput.focus();
@@ -306,7 +408,10 @@ async function handleLogin(event) {
     }
 
 
-    setLoginLoading(true);
+    setLoginLoading(
+        true
+    );
+
 
     showLoading(
         "Перевірка даних..."
@@ -319,10 +424,17 @@ async function handleLogin(event) {
             await apiRequest(
                 "login",
                 {
-                    olympId: olympId,
-                    citizenId: olympId,
-                    idNumber: olympId,
-                    password: password
+                    olympId:
+                        olympId,
+
+                    citizenId:
+                        olympId,
+
+                    idNumber:
+                        olympId,
+
+                    password:
+                        password
                 }
             );
 
@@ -383,6 +495,7 @@ async function handleLogin(event) {
 
         hideLoading();
 
+
         showToast(
             "Вхід успішно виконано.",
             "success"
@@ -421,7 +534,9 @@ async function handleLogin(event) {
 
     } finally {
 
-        setLoginLoading(false);
+        setLoginLoading(
+            false
+        );
 
     }
 
@@ -458,10 +573,12 @@ async function restoreSession() {
 
         showLogin();
 
+
         showToast(
             "Сесія завершилася. Увійдіть повторно.",
             "error"
         );
+
 
         return;
 
@@ -589,17 +706,22 @@ async function restoreSession() {
 
             clearSession();
 
-            currentCitizen = null;
+            currentCitizen =
+                null;
 
-            currentApplications = [];
+            currentApplications =
+                [];
 
-            currentApplication = null;
+            currentApplication =
+                null;
 
             showLogin();
+
 
             showLoginError(
                 "Сесію завершено. Увійдіть повторно."
             );
+
 
             return;
 
@@ -608,9 +730,11 @@ async function restoreSession() {
 
         showCabinet();
 
+
         renderCitizenProfile(
             currentCitizen
         );
+
 
         renderApplications(
             currentApplications
@@ -647,41 +771,6 @@ async function apiRequest(
 
     }
 
-
-    /*
-     * Великі дані аватара НЕ відправляємо через GET.
-     */
-
-    const usePost =
-        action === "saveAvatar";
-
-
-    if (usePost) {
-
-        return apiPostRequest(
-            action,
-            params
-        );
-
-    }
-
-
-    return apiGetRequest(
-        action,
-        params
-    );
-
-}
-
-
-/* =========================================================
-   GET REQUEST
-========================================================= */
-
-async function apiGetRequest(
-    action,
-    params = {}
-) {
 
     const query =
         new URLSearchParams();
@@ -740,85 +829,7 @@ async function apiGetRequest(
     } catch (error) {
 
         console.error(
-            "GET FETCH ERROR:",
-            error
-        );
-
-        throw new Error(
-            "Не вдалося підключитися до сервера."
-        );
-
-    }
-
-
-    if (!response.ok) {
-
-        throw new Error(
-            "Сервер повернув помилку HTTP " +
-            response.status
-        );
-
-    }
-
-
-    return parseApiResponse(
-        response
-    );
-
-}
-
-
-/* =========================================================
-   POST REQUEST
-========================================================= */
-
-async function apiPostRequest(
-    action,
-    params = {}
-) {
-
-    const payload = {
-
-        action:
-            action,
-
-        ...params
-
-    };
-
-
-    let response;
-
-
-    try {
-
-        response =
-            await fetch(
-                API_URL,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "text/plain;charset=utf-8"
-                    },
-
-                    body:
-                        JSON.stringify(
-                            payload
-                        ),
-
-                    cache: "no-store",
-
-                    redirect: "follow"
-
-                }
-            );
-
-    } catch (error) {
-
-        console.error(
-            "POST FETCH ERROR:",
+            "FETCH ERROR:",
             error
         );
 
@@ -839,21 +850,6 @@ async function apiPostRequest(
 
     }
 
-
-    return parseApiResponse(
-        response
-    );
-
-}
-
-
-/* =========================================================
-   PARSE API RESPONSE
-========================================================= */
-
-async function parseApiResponse(
-    response
-) {
 
     const text =
         await response.text();
@@ -924,6 +920,7 @@ function renderCabinet() {
         currentApplication =
             currentApplications[0];
 
+
         renderSingleApplication(
             currentApplication
         );
@@ -932,6 +929,7 @@ function renderCabinet() {
 
         currentApplication =
             null;
+
 
         clearSingleApplication();
 
@@ -1030,7 +1028,7 @@ function renderAvatar(
 
 
     const avatarUrl =
-        clean(
+        cleanUrl(
             citizen.avatarUrl
         );
 
@@ -1043,41 +1041,22 @@ function renderAvatar(
 
     if (avatarUrl) {
 
-        profileAvatar.innerHTML =
-            "";
-
-
-        const img =
-            document.createElement(
-                "img"
-            );
-
-
-        img.src =
-            avatarUrl;
-
-
-        img.alt =
-            "Аватар громадянина";
-
-
-        img.className =
-            "profile-avatar-image";
-
-
-        img.onerror =
-            function () {
-
-                showInitialsAvatar(
-                    fullName
-                );
-
-            };
-
-
-        profileAvatar.appendChild(
-            img
+        loadAvatarImage(
+            avatarUrl,
+            fullName
         );
+
+
+        if (avatarUrlInput) {
+
+            avatarUrlInput.value =
+                avatarUrl;
+
+        }
+
+
+        selectedAvatarUrl =
+            avatarUrl;
 
 
         if (removeAvatarButton) {
@@ -1087,6 +1066,7 @@ function renderAvatar(
             );
 
         }
+
 
         return;
 
@@ -1098,6 +1078,21 @@ function renderAvatar(
     );
 
 
+    if (avatarUrlInput) {
+
+        avatarUrlInput.value =
+            "";
+
+    }
+
+
+    selectedAvatarUrl =
+        "";
+
+
+    hideAvatarPreview();
+
+
     if (removeAvatarButton) {
 
         removeAvatarButton.classList.add(
@@ -1105,6 +1100,86 @@ function renderAvatar(
         );
 
     }
+
+}
+
+
+/* =========================================================
+   LOAD AVATAR IMAGE
+========================================================= */
+
+function loadAvatarImage(
+    url,
+    fullName
+) {
+
+    if (!profileAvatar) {
+
+        return;
+
+    }
+
+
+    const image =
+        document.createElement(
+            "img"
+        );
+
+
+    image.className =
+        "profile-avatar-image";
+
+
+    image.alt =
+        "Аватар громадянина";
+
+
+    image.loading =
+        "lazy";
+
+
+    image.referrerPolicy =
+        "no-referrer";
+
+
+    image.onload =
+        function () {
+
+            profileAvatar.innerHTML =
+                "";
+
+
+            profileAvatar.appendChild(
+                image
+            );
+
+        };
+
+
+    image.onerror =
+        function () {
+
+            console.warn(
+                "AVATAR LOAD ERROR:",
+                url
+            );
+
+
+            showInitialsAvatar(
+                fullName
+            );
+
+
+            showToast(
+                "Не вдалося завантажити аватар за вказаним посиланням.",
+                "error"
+            );
+
+        };
+
+
+    image.src =
+        url;
 
 }
 
@@ -1135,6 +1210,7 @@ function showInitialsAvatar(
         profileAvatar.textContent =
             "👤";
 
+
         return;
 
     }
@@ -1144,7 +1220,8 @@ function showInitialsAvatar(
         name.split(" ");
 
 
-    let initials = "";
+    let initials =
+        "";
 
 
     if (words[0]) {
@@ -1175,145 +1252,49 @@ function showInitialsAvatar(
 
 
 /* =========================================================
-   AVATAR SELECT
+   AVATAR URL VALIDATION
 ========================================================= */
 
-async function handleAvatarSelect(
-    event
+function isValidAvatarUrl(
+    value
 ) {
 
-    const file =
-        event.target.files &&
-        event.target.files[0];
-
-
-    if (!file) {
-
-        return;
-
-    }
-
-
-    const allowed = [
-        "image/jpeg",
-        "image/png",
-        "image/webp"
-    ];
-
-
-    if (!allowed.includes(file.type)) {
-
-        showToast(
-            "Дозволені JPG, PNG або WEBP.",
-            "error"
+    const url =
+        cleanUrl(
+            value
         );
 
-        avatarInput.value = "";
 
-        return;
+    if (!url) {
 
-    }
-
-
-    if (
-        file.size >
-        8 * 1024 * 1024
-    ) {
-
-        showToast(
-            "Максимальний розмір фото — 8 МБ.",
-            "error"
-        );
-
-        avatarInput.value = "";
-
-        return;
+        return false;
 
     }
-
-
-    showLoading(
-        "Підготовка аватара..."
-    );
 
 
     try {
 
-        selectedAvatarData =
-            await compressImage(
-                file
+        const parsed =
+            new URL(
+                url
             );
 
 
-        if (!selectedAvatarData) {
+        if (
+            parsed.protocol !== "http:" &&
+            parsed.protocol !== "https:"
+        ) {
 
-            throw new Error(
-                "Не вдалося обробити зображення."
-            );
+            return false;
 
         }
 
 
-        console.log(
-            "AVATAR SIZE:",
-            Math.round(
-                selectedAvatarData.length /
-                1024
-            ),
-            "KB"
-        );
-
-
-        if (avatarPreview) {
-
-            avatarPreview.src =
-                selectedAvatarData;
-
-        }
-
-
-        if (avatarPreviewBox) {
-
-            avatarPreviewBox.classList.remove(
-                "hidden"
-            );
-
-        }
-
-
-        if (saveAvatarButton) {
-
-            saveAvatarButton.classList.remove(
-                "hidden"
-            );
-
-        }
-
-
-        hideLoading();
-
-
-        showToast(
-            "Фото підготовлено. Натисніть «Зберегти аватар».",
-            "success"
-        );
-
+        return true;
 
     } catch (error) {
 
-        console.error(
-            "AVATAR PREPARE ERROR:",
-            error
-        );
-
-
-        hideLoading();
-
-
-        showToast(
-            "Не вдалося підготувати фото.",
-            "error"
-        );
+        return false;
 
     }
 
@@ -1321,206 +1302,195 @@ async function handleAvatarSelect(
 
 
 /* =========================================================
-   COMPRESS IMAGE
+   CLEAN URL
 ========================================================= */
 
-function compressImage(
-    file
+function cleanUrl(
+    value
 ) {
 
-    return new Promise(
-        function (
-            resolve,
-            reject
-        ) {
+    if (
+        value === undefined ||
+        value === null
+    ) {
 
-            const reader =
-                new FileReader();
+        return "";
 
+    }
 
-            reader.onload =
-                function () {
 
-                    const image =
-                        new Image();
+    return String(
+        value
+    )
+        .trim()
+        .replace(
+            /^["']|["']$/g,
+            ""
+        );
 
+}
 
-                    image.onload =
-                        function () {
 
-                            const maxSize =
-                                500;
+/* =========================================================
+   PREVIEW AVATAR
+========================================================= */
 
+function previewAvatar() {
 
-                            let width =
-                                image.width;
+    const value =
+        cleanUrl(
+            avatarUrlInput
+                ? avatarUrlInput.value
+                : ""
+        );
 
 
-                            let height =
-                                image.height;
+    if (!value) {
 
+        showToast(
+            "Вставте пряме посилання на зображення.",
+            "error"
+        );
 
-                            if (
-                                width >
-                                height
-                            ) {
 
-                                if (
-                                    width >
-                                    maxSize
-                                ) {
+        if (avatarUrlInput) {
 
-                                    height =
-                                        Math.round(
-                                            height *
-                                            maxSize /
-                                            width
-                                        );
-
-                                    width =
-                                        maxSize;
-
-                                }
-
-                            } else {
-
-                                if (
-                                    height >
-                                    maxSize
-                                ) {
-
-                                    width =
-                                        Math.round(
-                                            width *
-                                            maxSize /
-                                            height
-                                        );
-
-                                    height =
-                                        maxSize;
-
-                                }
-
-                            }
-
-
-                            const canvas =
-                                document.createElement(
-                                    "canvas"
-                                );
-
-
-                            canvas.width =
-                                width;
-
-
-                            canvas.height =
-                                height;
-
-
-                            const context =
-                                canvas.getContext(
-                                    "2d"
-                                );
-
-
-                            if (!context) {
-
-                                reject(
-                                    new Error(
-                                        "Canvas недоступний."
-                                    )
-                                );
-
-                                return;
-
-                            }
-
-
-                            context.drawImage(
-                                image,
-                                0,
-                                0,
-                                width,
-                                height
-                            );
-
-
-                            const result =
-                                canvas.toDataURL(
-                                    "image/jpeg",
-                                    0.72
-                                );
-
-
-                            /*
-                             * Захист від надто великого Base64.
-                             */
-
-                            if (
-                                result.length >
-                                900000
-                            ) {
-
-                                const smallerResult =
-                                    canvas.toDataURL(
-                                        "image/jpeg",
-                                        0.55
-                                    );
-
-
-                                resolve(
-                                    smallerResult
-                                );
-
-                                return;
-
-                            }
-
-
-                            resolve(
-                                result
-                            );
-
-                        };
-
-
-                    image.onerror =
-                        function () {
-
-                            reject(
-                                new Error(
-                                    "Не вдалося завантажити зображення."
-                                )
-                            );
-
-                        };
-
-
-                    image.src =
-                        reader.result;
-
-                };
-
-
-            reader.onerror =
-                function () {
-
-                    reject(
-                        new Error(
-                            "Не вдалося прочитати файл."
-                        )
-                    );
-
-                };
-
-
-            reader.readAsDataURL(
-                file
-            );
+            avatarUrlInput.focus();
 
         }
+
+
+        return;
+
+    }
+
+
+    if (
+        !isValidAvatarUrl(
+            value
+        )
+    ) {
+
+        showToast(
+            "Вкажіть коректне HTTP/HTTPS-посилання.",
+            "error"
+        );
+
+
+        return;
+
+    }
+
+
+    selectedAvatarUrl =
+        value;
+
+
+    showAvatarPreview(
+        value
     );
+
+}
+
+
+/* =========================================================
+   SHOW AVATAR PREVIEW
+========================================================= */
+
+function showAvatarPreview(
+    url
+) {
+
+    if (!avatarPreviewBox ||
+        !avatarPreview
+    ) {
+
+        return;
+
+    }
+
+
+    avatarPreview.onload =
+        function () {
+
+            avatarPreviewBox.classList.remove(
+                "hidden"
+            );
+
+
+            if (saveAvatarButton) {
+
+                saveAvatarButton.classList.remove(
+                    "hidden"
+                );
+
+            }
+
+        };
+
+
+    avatarPreview.onerror =
+        function () {
+
+            avatarPreviewBox.classList.add(
+                "hidden"
+            );
+
+
+            if (saveAvatarButton) {
+
+                saveAvatarButton.classList.add(
+                    "hidden"
+                );
+
+            }
+
+
+            showToast(
+                "Посилання не веде на доступне зображення.",
+                "error"
+            );
+
+        };
+
+
+    avatarPreview.src =
+        url;
+
+}
+
+
+/* =========================================================
+   HIDE AVATAR PREVIEW
+========================================================= */
+
+function hideAvatarPreview() {
+
+    if (avatarPreviewBox) {
+
+        avatarPreviewBox.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    if (saveAvatarButton) {
+
+        saveAvatarButton.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    if (avatarPreview) {
+
+        avatarPreview.removeAttribute(
+            "src"
+        );
+
+    }
 
 }
 
@@ -1538,17 +1508,44 @@ async function saveAvatar() {
             "error"
         );
 
+
         return;
 
     }
 
 
-    if (!selectedAvatarData) {
+    const avatarUrl =
+        cleanUrl(
+            avatarUrlInput
+                ? avatarUrlInput.value
+                : selectedAvatarUrl
+        );
+
+
+    if (!avatarUrl) {
 
         showToast(
-            "Спочатку виберіть фото.",
+            "Вкажіть посилання на аватар.",
             "error"
         );
+
+
+        return;
+
+    }
+
+
+    if (
+        !isValidAvatarUrl(
+            avatarUrl
+        )
+    ) {
+
+        showToast(
+            "Вкажіть коректне HTTP/HTTPS-посилання.",
+            "error"
+        );
+
 
         return;
 
@@ -1566,16 +1563,46 @@ async function saveAvatar() {
             "error"
         );
 
+
         showLogin();
+
 
         return;
 
     }
 
 
+    /*
+     * Спочатку перевіряємо,
+     * чи посилання дійсно веде
+     * на зображення.
+     */
+
     showLoading(
-        "Збереження аватара..."
+        "Перевірка аватара..."
     );
+
+
+    try {
+
+        await checkImageUrl(
+            avatarUrl
+        );
+
+    } catch (error) {
+
+        hideLoading();
+
+
+        showToast(
+            "За цим посиланням зображення недоступне.",
+            "error"
+        );
+
+
+        return;
+
+    }
 
 
     if (saveAvatarButton) {
@@ -1586,13 +1613,12 @@ async function saveAvatar() {
     }
 
 
-    try {
+    showLoading(
+        "Збереження аватара..."
+    );
 
-        /*
-         * ВАЖЛИВО:
-         * image передається через POST,
-         * а не через GET URL.
-         */
+
+    try {
 
         const response =
             await apiRequest(
@@ -1610,8 +1636,14 @@ async function saveAvatar() {
                     password:
                         session.password,
 
-                    image:
-                        selectedAvatarData
+                    avatarUrl:
+                        avatarUrl,
+
+                    avatar:
+                        avatarUrl,
+
+                    photo:
+                        avatarUrl
                 }
             );
 
@@ -1638,62 +1670,36 @@ async function saveAvatar() {
 
 
         /*
-         * Отримуємо нову URL-адресу
-         * від Google Apps Script.
+         * Беремо URL,
+         * який повернув сервер.
          */
 
-        if (response.avatarUrl) {
-
-            currentCitizen.avatarUrl =
-                response.avatarUrl;
-
-        }
-
-
-        /*
-         * Якщо сервер повернув
-         * оновлений профіль.
-         */
-
-        if (
-            response.citizen
-        ) {
-
-            currentCitizen =
-                normalizeCitizen(
-                    response.citizen
-                );
-
-        }
-
-
-        selectedAvatarData =
-            "";
-
-
-        if (avatarInput) {
-
-            avatarInput.value = "";
-
-        }
-
-
-        if (avatarPreviewBox) {
-
-            avatarPreviewBox.classList.add(
-                "hidden"
+        const savedUrl =
+            cleanUrl(
+                response.avatarUrl ||
+                response.avatar ||
+                response.photo ||
+                avatarUrl
             );
 
+
+        currentCitizen.avatarUrl =
+            savedUrl;
+
+
+        selectedAvatarUrl =
+            savedUrl;
+
+
+        if (avatarUrlInput) {
+
+            avatarUrlInput.value =
+                savedUrl;
+
         }
 
 
-        if (saveAvatarButton) {
-
-            saveAvatarButton.classList.add(
-                "hidden"
-            );
-
-        }
+        hideAvatarPreview();
 
 
         renderAvatar(
@@ -1742,6 +1748,59 @@ async function saveAvatar() {
 
 
 /* =========================================================
+   CHECK IMAGE URL
+========================================================= */
+
+function checkImageUrl(
+    url
+) {
+
+    return new Promise(
+        function (
+            resolve,
+            reject
+        ) {
+
+            const image =
+                new Image();
+
+
+            image.referrerPolicy =
+                "no-referrer";
+
+
+            image.onload =
+                function () {
+
+                    resolve(
+                        true
+                    );
+
+                };
+
+
+            image.onerror =
+                function () {
+
+                    reject(
+                        new Error(
+                            "IMAGE_LOAD_ERROR"
+                        )
+                    );
+
+                };
+
+
+            image.src =
+                url;
+
+        }
+    );
+
+}
+
+
+/* =========================================================
    REMOVE AVATAR
 ========================================================= */
 
@@ -1784,11 +1843,6 @@ async function removeAvatar() {
 
 
     try {
-
-        /*
-         * Видалення аватара залишаємо GET,
-         * оскільки тут немає великого файлу.
-         */
 
         const response =
             await apiRequest(
@@ -1834,8 +1888,19 @@ async function removeAvatar() {
             "";
 
 
-        selectedAvatarData =
+        selectedAvatarUrl =
             "";
+
+
+        if (avatarUrlInput) {
+
+            avatarUrlInput.value =
+                "";
+
+        }
+
+
+        hideAvatarPreview();
 
 
         renderAvatar(
@@ -1921,6 +1986,7 @@ function renderApplications(
             currentApplications
         );
 
+
         return;
 
     }
@@ -1955,6 +2021,7 @@ function renderApplications(
         updateApplicationsCounter(
             currentApplications
         );
+
 
         return;
 
@@ -2471,35 +2538,42 @@ function clearSingleApplication() {
         "—"
     );
 
+
     setText(
         "applicationDate",
         "—"
     );
+
 
     setText(
         "applicationService",
         "—"
     );
 
+
     setText(
         "applicationResponsible",
         "—"
     );
+
 
     setText(
         "applicationAccessCode",
         "—"
     );
 
+
     setText(
         "applicationMessage",
         "Заявок поки немає."
     );
 
+
     setText(
         "applicationComment",
         "Відповідь ще не надана."
     );
+
 
     updateStatus(
         "🟡 На розгляді"
@@ -2748,7 +2822,7 @@ function logout() {
         null;
 
 
-    selectedAvatarData =
+    selectedAvatarUrl =
         "";
 
 
@@ -2889,6 +2963,7 @@ function loadSession() {
             "LOAD SESSION ERROR:",
             error
         );
+
 
         return null;
 
@@ -3139,6 +3214,7 @@ async function copyApplicationNumber() {
             "error"
         );
 
+
         return;
 
     }
@@ -3188,6 +3264,7 @@ async function copyText(
             "success"
         );
 
+
     } catch (error) {
 
         const textarea =
@@ -3216,7 +3293,8 @@ async function copyText(
         textarea.select();
 
 
-        let success = false;
+        let success =
+            false;
 
 
         try {
@@ -3228,7 +3306,8 @@ async function copyText(
 
         } catch (e) {
 
-            success = false;
+            success =
+                false;
 
         }
 
@@ -3334,7 +3413,7 @@ function normalizeCitizen(
 
 
         avatarUrl:
-            clean(
+            cleanUrl(
                 citizen.avatarUrl ||
                 citizen.avatar ||
                 citizen.photo ||
