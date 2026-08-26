@@ -1,10 +1,23 @@
 /* =========================================================
    OLYMP GOVERNMENT
-   PERSONAL CABINET + ADMIN PANEL
+   PERSONAL CABINET / GOVERNMENT PORTAL
    SCRIPT.JS 6.2
 
-   Google Apps Script API
-   Без Discord
+   Совместим с:
+   - index.html
+   - Code.gs 6.2
+
+   Возможности:
+   - Государственные услуги
+   - Поиск
+   - Фильтрация
+   - Модальное окно услуги
+   - Модальное окно заявки
+   - Отправка заявки в Google Apps Script
+   - Получение номера заявки
+   - Отображение статуса
+   - Мобильное меню
+   - Защита от повторной отправки
 ========================================================= */
 
 
@@ -13,1325 +26,133 @@
 ========================================================= */
 
 /*
- * ВСТАВЬ СЮДА URL РАЗВЕРНУТОГО GOOGLE APPS SCRIPT
+ * ВАЖНО!
+ *
+ * Сюда вставь URL опубликованного Google Apps Script.
  *
  * Пример:
  *
- * const API_URL =
- * "https://script.google.com/macros/s/XXXXXXXX/exec";
+ * https://script.google.com/macros/s/XXXXXXXXXXXX/exec
+ *
  */
 
-const API_URL =
-    "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec";
+const OLYMP_CONFIG = {
 
+    API_URL:
+        "ВСТАВЬ_СЮДА_URL_GOOGLE_APPS_SCRIPT",
 
-/*
- * Ключи локального хранилища
- */
-
-const STORAGE = {
-
-    citizen: "olymp_citizen",
-
-    admin: "olymp_admin",
-
-    applications: "olymp_applications"
+    DEBUG:
+        true
 
 };
 
 
-/*
- * Статусы заявок
- */
-
-const STATUSES = [
-
-    "🟡 На розгляді",
-
-    "🔵 Прийнято",
-
-    "🟢 Виконано",
-
-    "🔴 Відхилено",
-
-    "⚫ Закрито"
-
-];
-
-
 /* =========================================================
-   ГЛОБАЛЬНОЕ СОСТОЯНИЕ
+   ЛОГ
 ========================================================= */
 
-const OLYMP = {
+function log(...args) {
 
-    citizen: null,
+    if (
+        OLYMP_CONFIG.DEBUG &&
+        typeof console !== "undefined"
+    ) {
 
-    admin: null,
+        console.log(
+            "[OLYMP 6.2]",
+            ...args
+        );
 
-    applications: [],
+    }
 
-    currentApplication: null,
+}
 
-    initialized: false
 
-};
+log(
+    "OLYMP Government Script 6.2"
+);
+
+log(
+    "Personal Cabinet + Government Portal"
+);
 
 
 /* =========================================================
-   DOM
+   СОСТОЯНИЕ
 ========================================================= */
 
-const $ = (selector) => {
+let currentService = null;
 
-    return document.querySelector(selector);
-
-};
-
-
-const $$ = (selector) => {
-
-    return document.querySelectorAll(selector);
-
-};
+let applicationSending = false;
 
 
 /* =========================================================
-   ИНИЦИАЛИЗАЦИЯ
+   DOM READY
 ========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    function () {
 
-        initOlymp();
+        log(
+            "DOM загружен"
+        );
+
+        initializePortal();
 
     }
 );
 
 
 /* =========================================================
-   INIT
+   ИНИЦИАЛИЗАЦИЯ
 ========================================================= */
 
-async function initOlymp() {
+function initializePortal() {
 
-    if (OLYMP.initialized) {
+    initializeMobileMenu();
 
-        return;
+    initializeServiceSearch();
 
-    }
+    initializeCategoryFilters();
 
-    OLYMP.initialized = true;
+    initializeApplicationForm();
 
+    initializeModalEvents();
 
-    /*
-     * Восстанавливаем гражданина
-     */
+    initializeClearSearch();
 
-    loadCitizen();
+    restoreApplicationDraft();
 
+    updateServiceCount();
 
-    /*
-     * Восстанавливаем администратора
-     */
-
-    loadAdmin();
-
-
-    /*
-     * Запускаем интерфейс
-     */
-
-    initNavigation();
-
-    initForms();
-
-    initButtons();
-
-    initAdminPanel();
-
-    updateInterface();
-
-
-    /*
-     * Проверяем API
-     */
-
-    if (
-        API_URL &&
-        !API_URL.includes(
-            "ВСТАВЬ_СЮДА"
-        )
-    ) {
-
-        checkAPI();
-
-    }
-
-}
-
-
-/* =========================================================
-   LOCAL STORAGE
-========================================================= */
-
-function loadCitizen() {
-
-    try {
-
-        const data =
-            localStorage.getItem(
-                STORAGE.citizen
-            );
-
-
-        if (data) {
-
-            OLYMP.citizen =
-                JSON.parse(data);
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Ошибка загрузки гражданина:",
-            error
-        );
-
-        OLYMP.citizen = null;
-
-    }
-
-}
-
-
-function saveCitizen(data) {
-
-    OLYMP.citizen = data;
-
-
-    localStorage.setItem(
-
-        STORAGE.citizen,
-
-        JSON.stringify(data)
-
-    );
-
-
-    updateInterface();
-
-}
-
-
-function logoutCitizen() {
-
-    OLYMP.citizen = null;
-
-
-    localStorage.removeItem(
-        STORAGE.citizen
-    );
-
-
-    OLYMP.applications = [];
-
-
-    updateInterface();
-
-
-    showToast(
-        "Ви вийшли з особистого кабінету.",
-        "success"
-    );
-
-}
-
-
-function loadAdmin() {
-
-    try {
-
-        const data =
-            localStorage.getItem(
-                STORAGE.admin
-            );
-
-
-        if (data) {
-
-            OLYMP.admin =
-                JSON.parse(data);
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Ошибка загрузки администратора:",
-            error
-        );
-
-        OLYMP.admin = null;
-
-    }
-
-}
-
-
-function saveAdmin(data) {
-
-    OLYMP.admin = data;
-
-
-    localStorage.setItem(
-
-        STORAGE.admin,
-
-        JSON.stringify(data)
-
-    );
-
-
-    updateInterface();
-
-}
-
-
-function logoutAdmin() {
-
-    OLYMP.admin = null;
-
-
-    localStorage.removeItem(
-        STORAGE.admin
-    );
-
-
-    updateInterface();
-
-
-    showToast(
-        "Сесію адміністратора завершено.",
-        "success"
+    log(
+        "Портал OLYMP Government инициализирован."
     );
 
 }
 
 
 /* =========================================================
-   API
+   МОБИЛЬНОЕ МЕНЮ
 ========================================================= */
 
-async function apiRequest(
-    method = "GET",
-    data = null
-) {
+function initializeMobileMenu() {
 
-    if (
-        !API_URL ||
-        API_URL.includes(
-            "ВСТАВЬ_СЮДА"
-        )
-    ) {
-
-        throw new Error(
-            "URL Google Apps Script не налаштовано."
+    const menuButton =
+        document.getElementById(
+            "menuButton"
         );
 
-    }
-
-
-    let response;
-
-
-    try {
-
-        if (method === "GET") {
-
-            let url =
-                API_URL;
-
-
-            if (data) {
-
-                const params =
-                    new URLSearchParams();
-
-
-                Object.keys(data)
-                    .forEach(
-                        key => {
-
-                            if (
-                                data[key] !==
-                                undefined &&
-                                data[key] !==
-                                null
-                            ) {
-
-                                params.append(
-                                    key,
-                                    data[key]
-                                );
-
-                            }
-
-                        }
-                    );
-
-
-                const query =
-                    params.toString();
-
-
-                if (query) {
-
-                    url +=
-                        "?" +
-                        query;
-
-                }
-
-            }
-
-
-            response =
-                await fetch(
-                    url,
-                    {
-
-                        method:
-                            "GET",
-
-                        cache:
-                            "no-store"
-
-                    }
-                );
-
-        } else {
-
-            const formData =
-                new URLSearchParams();
-
-
-            if (data) {
-
-                Object.keys(data)
-                    .forEach(
-                        key => {
-
-                            if (
-                                data[key] !==
-                                undefined &&
-                                data[key] !==
-                                null
-                            ) {
-
-                                formData.append(
-                                    key,
-                                    data[key]
-                                );
-
-                            }
-
-                        }
-                    );
-
-            }
-
-
-            response =
-                await fetch(
-                    API_URL,
-                    {
-
-                        method:
-                            "POST",
-
-                        body:
-                            formData,
-
-                        cache:
-                            "no-store"
-
-                    }
-                );
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "API connection error:",
-            error
+    const menu =
+        document.getElementById(
+            "mainMenu"
         );
-
-
-        throw new Error(
-            "Не вдалося підключитися до сервера."
-        );
-
-    }
-
-
-    const text =
-        await response.text();
-
-
-    let result;
-
-
-    try {
-
-        result =
-            JSON.parse(text);
-
-    } catch {
-
-        console.error(
-            "Некоректна відповідь API:",
-            text
-        );
-
-
-        throw new Error(
-            "Сервер повернув некоректну відповідь."
-        );
-
-    }
 
 
     if (
-        result &&
-        result.success === false
-    ) {
-
-        throw new Error(
-            result.message ||
-            "Помилка API."
-        );
-
-    }
-
-
-    return result;
-
-}
-
-
-/* =========================================================
-   ПРОВЕРКА API
-========================================================= */
-
-async function checkAPI() {
-
-    try {
-
-        const result =
-            await apiRequest(
-                "GET"
-            );
-
-
-        console.log(
-            "OLYMP API:",
-            result
-        );
-
-
-    } catch (error) {
-
-        console.warn(
-            "OLYMP API:",
-            error.message
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   НАВИГАЦИЯ
-========================================================= */
-
-function initNavigation() {
-
-    $$("[data-page]")
-        .forEach(
-            element => {
-
-                element.addEventListener(
-                    "click",
-                    event => {
-
-                        event.preventDefault();
-
-
-                        const page =
-                            element.dataset.page;
-
-
-                        showPage(page);
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ
-========================================================= */
-
-function showPage(page) {
-
-    $$(
-        ".page, .cabinet-page, .admin-page"
-    )
-        .forEach(
-            element => {
-
-                element.classList.remove(
-                    "active"
-                );
-
-            }
-        );
-
-
-    const target =
-        document.querySelector(
-            `[data-page-content="${page}"]`
-        );
-
-
-    if (target) {
-
-        target.classList.add(
-            "active"
-        );
-
-    }
-
-
-    /*
-     * Админская страница
-     */
-
-    if (
-        page === "admin"
-    ) {
-
-        if (
-            !OLYMP.admin
-        ) {
-
-            showAdminLogin();
-
-            return;
-
-        }
-
-
-        loadAdminApplications();
-
-    }
-
-
-    /*
-     * Кабинет
-     */
-
-    if (
-        page === "cabinet"
-    ) {
-
-        if (
-            !OLYMP.citizen
-        ) {
-
-            showLogin();
-
-            return;
-
-        }
-
-
-        loadCitizenApplications();
-
-    }
-
-
-    window.scrollTo({
-
-        top: 0,
-
-        behavior: "smooth"
-
-    });
-
-}
-
-
-/* =========================================================
-   ФОРМЫ
-========================================================= */
-
-function initForms() {
-
-    initCitizenLogin();
-
-    initRegister();
-
-    initApplicationForm();
-
-    initAdminLogin();
-
-}
-
-
-/* =========================================================
-   ГРАЖДАНСКАЯ АВТОРИЗАЦИЯ
-========================================================= */
-
-function initCitizenLogin() {
-
-    const form =
-        document.querySelector(
-            "#loginForm"
-        );
-
-
-    if (!form) {
-
-        return;
-
-    }
-
-
-    form.addEventListener(
-        "submit",
-        async event => {
-
-            event.preventDefault();
-
-
-            const formData =
-                new FormData(form);
-
-
-            const idNumber =
-                clean(
-                    formData.get(
-                        "idNumber"
-                    )
-                );
-
-
-            const password =
-                clean(
-                    formData.get(
-                        "password"
-                    )
-                );
-
-
-            if (!idNumber) {
-
-                showToast(
-                    "Введіть OLYMP-ID.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            if (!password) {
-
-                showToast(
-                    "Введіть пароль.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            setLoading(
-                form,
-                true
-            );
-
-
-            try {
-
-                /*
-                 * Поддержка API 6.x
-                 */
-
-                const result =
-                    await apiRequest(
-                        "POST",
-                        {
-
-                            action:
-                                "login",
-
-                            idNumber:
-                                idNumber,
-
-                            password:
-                                password
-
-                        }
-                    );
-
-
-                if (
-                    result &&
-                    result.user
-                ) {
-
-                    saveCitizen(
-                        result.user
-                    );
-
-                } else {
-
-                    saveCitizen({
-
-                        idNumber:
-                            idNumber,
-
-                        name:
-                            result.name ||
-                            result.fullName ||
-                            "",
-
-                        fullName:
-                            result.fullName ||
-                            result.name ||
-                            "",
-
-                        avatar:
-                            result.avatar ||
-                            "",
-
-                        applications:
-                            result.applications ||
-                            []
-
-                    });
-
-                }
-
-
-                showToast(
-                    "Авторизація успішна.",
-                    "success"
-                );
-
-
-                hideLogin();
-
-
-                loadCitizenApplications();
-
-
-            } catch (error) {
-
-                showToast(
-                    error.message,
-                    "error"
-                );
-
-            } finally {
-
-                setLoading(
-                    form,
-                    false
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   РЕЄСТРАЦІЯ
-========================================================= */
-
-function initRegister() {
-
-    const form =
-        document.querySelector(
-            "#registerForm"
-        );
-
-
-    if (!form) {
-
-        return;
-
-    }
-
-
-    form.addEventListener(
-        "submit",
-        async event => {
-
-            event.preventDefault();
-
-
-            const formData =
-                new FormData(form);
-
-
-            const data = {
-
-                action:
-                    "register",
-
-                fullName:
-                    clean(
-                        formData.get(
-                            "fullName"
-                        )
-                    ),
-
-                idNumber:
-                    clean(
-                        formData.get(
-                            "idNumber"
-                        )
-                    ),
-
-                password:
-                    clean(
-                        formData.get(
-                            "password"
-                        )
-                    ),
-
-                contact:
-                    clean(
-                        formData.get(
-                            "contact"
-                        )
-                    )
-
-            };
-
-
-            if (!data.fullName) {
-
-                showToast(
-                    "Вкажіть ПІБ.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            if (!data.idNumber) {
-
-                showToast(
-                    "Вкажіть OLYMP-ID.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            if (!data.password) {
-
-                showToast(
-                    "Вкажіть пароль.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            setLoading(
-                form,
-                true
-            );
-
-
-            try {
-
-                const result =
-                    await apiRequest(
-                        "POST",
-                        data
-                    );
-
-
-                if (
-                    result.user
-                ) {
-
-                    saveCitizen(
-                        result.user
-                    );
-
-                } else {
-
-                    saveCitizen({
-
-                        idNumber:
-                            data.idNumber,
-
-                        fullName:
-                            data.fullName,
-
-                        name:
-                            data.fullName,
-
-                        contact:
-                            data.contact || "",
-
-                        avatar:
-                            ""
-
-                    });
-
-                }
-
-
-                showToast(
-                    "Реєстрація успішна.",
-                    "success"
-                );
-
-
-                hideRegister();
-
-
-                showPage(
-                    "cabinet"
-                );
-
-
-            } catch (error) {
-
-                showToast(
-                    error.message,
-                    "error"
-                );
-
-            } finally {
-
-                setLoading(
-                    form,
-                    false
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   СОЗДАНИЕ ЗАЯВКИ
-========================================================= */
-
-function initApplicationForm() {
-
-    const form =
-        document.querySelector(
-            "#applicationForm"
-        );
-
-
-    if (!form) {
-
-        return;
-
-    }
-
-
-    form.addEventListener(
-        "submit",
-        async event => {
-
-            event.preventDefault();
-
-
-            if (
-                !OLYMP.citizen
-            ) {
-
-                showToast(
-                    "Спочатку увійдіть до особистого кабінету.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            const formData =
-                new FormData(form);
-
-
-            const data = {
-
-                action:
-                    "createApplication",
-
-                fullName:
-                    clean(
-                        formData.get(
-                            "fullName"
-                        ) ||
-                        OLYMP.citizen.fullName ||
-                        OLYMP.citizen.name
-                    ),
-
-                idNumber:
-                    clean(
-                        formData.get(
-                            "idNumber"
-                        ) ||
-                        OLYMP.citizen.idNumber
-                    ),
-
-                service:
-                    clean(
-                        formData.get(
-                            "service"
-                        )
-                    ),
-
-                contact:
-                    clean(
-                        formData.get(
-                            "contact"
-                        )
-                    ),
-
-                message:
-                    clean(
-                        formData.get(
-                            "message"
-                        )
-                    )
-
-            };
-
-
-            /*
-             * Совместимость с текущим Code.gs
-             *
-             * Он принимает POST:
-             * fullName
-             * idNumber
-             * service
-             * contact
-             * message
-             */
-
-            delete data.action;
-
-
-            if (!data.fullName) {
-
-                showToast(
-                    "Вкажіть ПІБ.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            if (!data.idNumber) {
-
-                showToast(
-                    "Вкажіть номер посвідчення.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            if (!data.service) {
-
-                showToast(
-                    "Оберіть державну послугу.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            if (!data.message) {
-
-                showToast(
-                    "Вкажіть опис звернення.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            setLoading(
-                form,
-                true
-            );
-
-
-            try {
-
-                const result =
-                    await apiRequest(
-                        "POST",
-                        data
-                    );
-
-
-                if (
-                    result.success
-                ) {
-
-                    form.reset();
-
-
-                    /*
-                     * Добавляем заявку
-                     * локально
-                     */
-
-                    const application = {
-
-                        number:
-                            result.number,
-
-                        date:
-                            result.date,
-
-                        fullName:
-                            data.fullName,
-
-                        idNumber:
-                            data.idNumber,
-
-                        service:
-                            data.service,
-
-                        contact:
-                            data.contact,
-
-                        message:
-                            data.message,
-
-                        status:
-                            result.status ||
-                            "🟡 На розгляді",
-
-                        responsible:
-                            "",
-
-                        comment:
-                            ""
-
-                    };
-
-
-                    OLYMP.applications
-                        .unshift(
-                            application
-                        );
-
-
-                    saveApplications();
-
-
-                    renderCitizenApplications();
-
-
-                    showToast(
-                        `Заявку ${result.number} успішно зареєстровано.`,
-                        "success"
-                    );
-
-
-                    closeApplicationModal();
-
-
-                } else {
-
-                    throw new Error(
-                        result.message ||
-                        "Не вдалося зареєструвати заявку."
-                    );
-
-                }
-
-
-            } catch (error) {
-
-                showToast(
-                    error.message,
-                    "error"
-                );
-
-            } finally {
-
-                setLoading(
-                    form,
-                    false
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   ЗАГРУЗКА ЗАЯВОК ГРАЖДАНИНА
-========================================================= */
-
-async function loadCitizenApplications() {
-
-    if (
-        !OLYMP.citizen
+        !menuButton ||
+        !menu
     ) {
 
         return;
@@ -1339,1001 +160,68 @@ async function loadCitizenApplications() {
     }
 
 
-    /*
-     * Сначала показываем локальные
-     */
+    menuButton.addEventListener(
+        "click",
+        function () {
 
-    loadApplications();
+            menu.classList.toggle(
+                "active"
+            );
+
+        }
+    );
 
 
-    renderCitizenApplications();
+    const links =
+        menu.querySelectorAll(
+            "a"
+        );
 
 
-    try {
+    links.forEach(
+        function (link) {
 
-        const result =
-            await apiRequest(
-                "GET",
-                {
+            link.addEventListener(
+                "click",
+                function () {
 
-                    action:
-                        "getMyApplications",
-
-                    idNumber:
-                        OLYMP.citizen.idNumber
+                    menu.classList.remove(
+                        "active"
+                    );
 
                 }
             );
 
-
-        if (
-            result &&
-            Array.isArray(
-                result.applications
-            )
-        ) {
-
-            OLYMP.applications =
-                result.applications;
-
-
-            saveApplications();
-
-
-            renderCitizenApplications();
-
         }
-
-    } catch (error) {
-
-        console.warn(
-            "Не вдалося оновити заявки:",
-            error.message
-        );
-
-    }
-
-
-    updateStatistics();
-
-}
-
-
-/* =========================================================
-   ЛОКАЛЬНЫЕ ЗАЯВКИ
-========================================================= */
-
-function loadApplications() {
-
-    try {
-
-        const data =
-            localStorage.getItem(
-                STORAGE.applications
-            );
-
-
-        if (data) {
-
-            OLYMP.applications =
-                JSON.parse(data);
-
-        }
-
-    } catch {
-
-        OLYMP.applications = [];
-
-    }
-
-}
-
-
-function saveApplications() {
-
-    localStorage.setItem(
-
-        STORAGE.applications,
-
-        JSON.stringify(
-            OLYMP.applications
-        )
-
     );
 
 }
 
 
 /* =========================================================
-   РЕНДЕР ЗАЯВОК
+   ПОИСК УСЛУГ
 ========================================================= */
 
-function renderCitizenApplications() {
-
-    const containers = [
-
-        "#applicationsList",
-
-        "#myApplications",
-
-        "#cabinetApplications",
-
-        "[data-applications]"
-
-    ];
-
-
-    let container = null;
-
-
-    for (
-        const selector of containers
-    ) {
-
-        container =
-            document.querySelector(
-                selector
-            );
-
-
-        if (container) {
-
-            break;
-
-        }
-
-    }
-
-
-    if (!container) {
-
-        return;
-
-    }
-
-
-    if (
-        !OLYMP.applications.length
-    ) {
-
-        container.innerHTML = `
-
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    📋
-                </div>
-
-                <h3>
-                    Заявок поки немає
-                </h3>
-
-                <p>
-                    Після подання звернення
-                    воно з'явиться тут.
-                </p>
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        OLYMP.applications
-            .map(
-                application =>
-                    renderApplicationCard(
-                        application
-                    )
-            )
-            .join("");
-
-
-    container
-        .querySelectorAll(
-            "[data-application-number]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        openApplication(
-                            button.dataset.applicationNumber
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   КАРТОЧКА ЗАЯВКИ
-========================================================= */
-
-function renderApplicationCard(
-    application
-) {
-
-    const number =
-        escapeHTML(
-            application.number ||
-            application.requestNumber ||
-            "—"
-        );
-
-
-    const service =
-        escapeHTML(
-            application.service ||
-            "Державна послуга"
-        );
-
-
-    const date =
-        escapeHTML(
-            application.date ||
-            "—"
-        );
-
-
-    const status =
-        application.status ||
-        "🟡 На розгляді";
-
-
-    return `
-
-        <article
-            class="application-card"
-        >
-
-            <div
-                class="application-card-header"
-            >
-
-                <div>
-
-                    <span
-                        class="application-number"
-                    >
-                        ${number}
-                    </span>
-
-                    <h3>
-                        ${service}
-                    </h3>
-
-                </div>
-
-                <span
-                    class="status-badge ${statusClass(status)}"
-                >
-                    ${escapeHTML(status)}
-                </span>
-
-            </div>
-
-
-            <div
-                class="application-card-body"
-            >
-
-                <div>
-                    <span>Дата</span>
-                    <strong>${date}</strong>
-                </div>
-
-                <div>
-                    <span>Статус</span>
-                    <strong>${escapeHTML(status)}</strong>
-                </div>
-
-            </div>
-
-
-            <div
-                class="application-card-footer"
-            >
-
-                <button
-                    type="button"
-                    class="btn"
-                    data-application-number="${number}"
-                >
-                    Переглянути заявку
-                </button>
-
-            </div>
-
-        </article>
-
-    `;
-
-}
-
-
-/* =========================================================
-   ОТКРЫТИЕ ЗАЯВКИ
-========================================================= */
-
-async function openApplication(
-    number
-) {
-
-    const local =
-        OLYMP.applications.find(
-            application =>
-                String(
-                    application.number ||
-                    application.requestNumber
-                ) ===
-                String(number)
-        );
-
-
-    OLYMP.currentApplication =
-        local || null;
-
-
-    /*
-     * Пробуем получить свежие данные
-     */
-
-    try {
-
-        const result =
-            await apiRequest(
-                "GET",
-                {
-
-                    action:
-                        "getApplication",
-
-                    number:
-                        number
-
-                }
-            );
-
-
-        if (
-            result &&
-            result.application
-        ) {
-
-            OLYMP.currentApplication =
-                result.application;
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "Не вдалося отримати актуальні дані заявки:",
-            error.message
-        );
-
-    }
-
-
-    renderApplicationModal();
-
-}
-
-
-/* =========================================================
-   МОДАЛКА ЗАЯВКИ
-========================================================= */
-
-function renderApplicationModal() {
-
-    const application =
-        OLYMP.currentApplication;
-
-
-    if (!application) {
-
-        showToast(
-            "Заявку не знайдено.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    const modal =
-        document.querySelector(
-            "#applicationModal"
-        );
-
-
-    if (!modal) {
-
-        return;
-
-    }
-
-
-    const number =
-        application.number ||
-        application.requestNumber ||
-        "—";
-
-
-    const html = `
-
-        <div class="modal-content">
-
-            <button
-                type="button"
-                class="modal-close"
-                data-close-modal
-            >
-                ×
-            </button>
-
-
-            <div class="modal-header">
-
-                <span class="application-number">
-                    ${escapeHTML(number)}
-                </span>
-
-                <h2>
-                    ${escapeHTML(
-                        application.service ||
-                        "Заявка"
-                    )}
-                </h2>
-
-            </div>
-
-
-            <div class="application-details">
-
-                <div class="detail-row">
-
-                    <span>Дата</span>
-
-                    <strong>
-                        ${escapeHTML(
-                            application.date ||
-                            "—"
-                        )}
-                    </strong>
-
-                </div>
-
-
-                <div class="detail-row">
-
-                    <span>ПІБ</span>
-
-                    <strong>
-                        ${escapeHTML(
-                            application.fullName ||
-                            "—"
-                        )}
-                    </strong>
-
-                </div>
-
-
-                <div class="detail-row">
-
-                    <span>Посвідчення</span>
-
-                    <strong>
-                        ${escapeHTML(
-                            application.idNumber ||
-                            "—"
-                        )}
-                    </strong>
-
-                </div>
-
-
-                <div class="detail-row">
-
-                    <span>Контакт</span>
-
-                    <strong>
-                        ${escapeHTML(
-                            application.contact ||
-                            "Не вказано"
-                        )}
-                    </strong>
-
-                </div>
-
-
-                <div class="detail-row">
-
-                    <span>Статус</span>
-
-                    <strong
-                        class="status-badge ${statusClass(
-                            application.status
-                        )}"
-                    >
-                        ${escapeHTML(
-                            application.status ||
-                            "🟡 На розгляді"
-                        )}
-                    </strong>
-
-                </div>
-
-
-                <div class="detail-block">
-
-                    <span>
-                        Опис звернення
-                    </span>
-
-                    <p>
-                        ${escapeHTML(
-                            application.message ||
-                            application.description ||
-                            "—"
-                        )}
-                    </p>
-
-                </div>
-
-
-                ${
-                    application.comment
-                    ?
-                    `
-                    <div class="detail-block">
-
-                        <span>
-                            Відповідь адміністрації
-                        </span>
-
-                        <p>
-                            ${escapeHTML(
-                                application.comment
-                            )}
-                        </p>
-
-                    </div>
-                    `
-                    :
-                    ""
-                }
-
-
-                ${
-                    application.responsible
-                    ?
-                    `
-                    <div class="detail-row">
-
-                        <span>
-                            Відповідальний
-                        </span>
-
-                        <strong>
-                            ${escapeHTML(
-                                application.responsible
-                            )}
-                        </strong>
-
-                    </div>
-                    `
-                    :
-                    ""
-                }
-
-            </div>
-
-
-            <div class="modal-actions">
-
-                <button
-                    type="button"
-                    class="btn"
-                    data-copy-number="${escapeHTML(number)}"
-                >
-                    📋 Копіювати номер
-                </button>
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    modal.innerHTML =
-        html;
-
-
-    modal.classList.add(
-        "active"
-    );
-
-
-    modal
-        .querySelector(
-            "[data-close-modal]"
-        )
-        ?.addEventListener(
-            "click",
-            closeApplicationModal
-        );
-
-
-    modal
-        .querySelector(
-            "[data-copy-number]"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                copyText(
-                    number
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   ЗАКРЫТИЕ МОДАЛКИ
-========================================================= */
-
-function closeApplicationModal() {
-
-    const modal =
-        document.querySelector(
-            "#applicationModal"
-        );
-
-
-    if (modal) {
-
-        modal.classList.remove(
-            "active"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   СТАТИСТИКА
-========================================================= */
-
-function updateStatistics() {
-
-    const applications =
-        OLYMP.applications;
-
-
-    const total =
-        applications.length;
-
-
-    const pending =
-        applications.filter(
-            item =>
-                item.status ===
-                "🟡 На розгляді"
-        ).length;
-
-
-    const approved =
-        applications.filter(
-            item =>
-                item.status ===
-                "🔵 Прийнято" ||
-                item.status ===
-                "🟢 Виконано"
-        ).length;
-
-
-    const rejected =
-        applications.filter(
-            item =>
-                item.status ===
-                "🔴 Відхилено"
-        ).length;
-
-
-    setText(
-        "#totalApplications",
-        total
-    );
-
-    setText(
-        "#pendingApplications",
-        pending
-    );
-
-    setText(
-        "#approvedApplications",
-        approved
-    );
-
-    setText(
-        "#rejectedApplications",
-        rejected
-    );
-
-
-    /*
-     * Дополнительные data-атрибуты
-     */
-
-    setText(
-        "[data-stat='total']",
-        total
-    );
-
-    setText(
-        "[data-stat='pending']",
-        pending
-    );
-
-    setText(
-        "[data-stat='approved']",
-        approved
-    );
-
-    setText(
-        "[data-stat='rejected']",
-        rejected
-    );
-
-}
-
-
-/* =========================================================
-   АДМИН
-========================================================= */
-
-function initAdminPanel() {
-
-    /*
-     * Если есть кнопка входа
-     */
-
-    $$(
-        "[data-admin-login]"
-    )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    showAdminLogin
-                );
-
-            }
-        );
-
-
-    /*
-     * Выход
-     */
-
-    $$(
-        "[data-admin-logout]"
-    )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    logoutAdmin
-                );
-
-            }
-        );
-
-
-    /*
-     * Фильтры
-     */
-
-    const statusFilter =
-        document.querySelector(
-            "#adminStatusFilter"
-        );
-
-
-    if (statusFilter) {
-
-        statusFilter.addEventListener(
-            "change",
-            renderAdminApplications
-        );
-
-    }
-
+function initializeServiceSearch() {
 
     const search =
-        document.querySelector(
-            "#adminSearch"
+        document.getElementById(
+            "serviceSearch"
         );
 
 
-    if (search) {
-
-        search.addEventListener(
-            "input",
-            debounce(
-                renderAdminApplications,
-                250
-            )
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   АДМИН ЛОГИН
-========================================================= */
-
-function initAdminLogin() {
-
-    const form =
-        document.querySelector(
-            "#adminLoginForm"
-        );
-
-
-    if (!form) {
+    if (!search) {
 
         return;
 
     }
 
 
-    form.addEventListener(
-        "submit",
-        async event => {
+    search.addEventListener(
+        "input",
+        function () {
 
-            event.preventDefault();
-
-
-            const formData =
-                new FormData(form);
-
-
-            const login =
-                clean(
-                    formData.get(
-                        "login"
-                    )
-                );
-
-
-            const password =
-                clean(
-                    formData.get(
-                        "password"
-                    )
-                );
-
-
-            if (!login || !password) {
-
-                showToast(
-                    "Вкажіть логін та пароль адміністратора.",
-                    "error"
-                );
-
-                return;
-
-            }
-
-
-            setLoading(
-                form,
-                true
-            );
-
-
-            try {
-
-                const result =
-                    await apiRequest(
-                        "POST",
-                        {
-
-                            action:
-                                "adminLogin",
-
-                            login:
-                                login,
-
-                            password:
-                                password
-
-                        }
-                    );
-
-
-                if (
-                    result.admin
-                ) {
-
-                    saveAdmin(
-                        result.admin
-                    );
-
-                } else {
-
-                    saveAdmin({
-
-                        login:
-                            login,
-
-                        name:
-                            result.name ||
-                            login,
-
-                        role:
-                            result.role ||
-                            "Адміністратор"
-
-                    });
-
-                }
-
-
-                showToast(
-                    "Вхід адміністратора успішний.",
-                    "success"
-                );
-
-
-                hideAdminLogin();
-
-
-                showPage(
-                    "admin"
-                );
-
-
-            } catch (error) {
-
-                showToast(
-                    error.message,
-                    "error"
-                );
-
-            } finally {
-
-                setLoading(
-                    form,
-                    false
-                );
-
-            }
+            filterServices();
 
         }
     );
@@ -2342,1555 +230,14 @@ function initAdminLogin() {
 
 
 /* =========================================================
-   АДМИН — ПОЛУЧИТЬ ВСЕ ЗАЯВКИ
+   ОЧИСТКА ПОИСКА
 ========================================================= */
 
-async function loadAdminApplications() {
-
-    if (
-        !OLYMP.admin
-    ) {
-
-        showAdminLogin();
-
-        return;
-
-    }
-
-
-    showAdminLoading();
-
-
-    try {
-
-        const result =
-            await apiRequest(
-                "GET",
-                {
-
-                    action:
-                        "getApplications"
-
-                }
-            );
-
-
-        if (
-            result &&
-            Array.isArray(
-                result.applications
-            )
-        ) {
-
-            OLYMP.applications =
-                result.applications;
-
-
-            renderAdminApplications();
-
-
-            updateAdminStatistics();
-
-        } else {
-
-            throw new Error(
-                "Сервер не повернув список заявок."
-            );
-
-        }
-
-    } catch (error) {
-
-        showToast(
-            error.message,
-            "error"
-        );
-
-
-        /*
-         * Не очищаем локальные данные
-         */
-
-        renderAdminApplications();
-
-    } finally {
-
-        hideAdminLoading();
-
-    }
-
-}
-
-
-/* =========================================================
-   АДМИН — РЕНДЕР
-========================================================= */
-
-function renderAdminApplications() {
-
-    const container =
-        document.querySelector(
-            "#adminApplications"
-        );
-
-
-    if (!container) {
-
-        return;
-
-    }
-
-
-    const search =
-        clean(
-            document.querySelector(
-                "#adminSearch"
-            )?.value
-        )
-        .toLowerCase();
-
-
-    const status =
-        document.querySelector(
-            "#adminStatusFilter"
-        )?.value || "";
-
-
-    const responsible =
-        clean(
-            document.querySelector(
-                "#adminResponsibleFilter"
-            )?.value
-        )
-        .toLowerCase();
-
-
-    let applications =
-        [...OLYMP.applications];
-
-
-    if (search) {
-
-        applications =
-            applications.filter(
-                application => {
-
-                    const text =
-                        [
-
-                            application.number,
-
-                            application.requestNumber,
-
-                            application.fullName,
-
-                            application.idNumber,
-
-                            application.service,
-
-                            application.contact,
-
-                            application.message
-
-                        ]
-                            .join(" ")
-                            .toLowerCase();
-
-
-                    return text.includes(
-                        search
-                    );
-
-                }
-            );
-
-    }
-
-
-    if (status) {
-
-        applications =
-            applications.filter(
-                application =>
-                    application.status ===
-                    status
-            );
-
-    }
-
-
-    if (responsible) {
-
-        applications =
-            applications.filter(
-                application =>
-                    String(
-                        application.responsible ||
-                        ""
-                    )
-                        .toLowerCase()
-                        .includes(
-                            responsible
-                        )
-            );
-
-    }
-
-
-    if (
-        !applications.length
-    ) {
-
-        container.innerHTML = `
-
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    📭
-                </div>
-
-                <h3>
-                    Заявок не знайдено
-                </h3>
-
-                <p>
-                    Спробуйте змінити параметри пошуку.
-                </p>
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        applications
-            .map(
-                application =>
-                    renderAdminApplication(
-                        application
-                    )
-            )
-            .join("");
-
-
-    container
-        .querySelectorAll(
-            "[data-admin-application]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        openAdminApplication(
-                            button.dataset.adminApplication
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   АДМИН — КАРТОЧКА
-========================================================= */
-
-function renderAdminApplication(
-    application
-) {
-
-    const number =
-        application.number ||
-        application.requestNumber ||
-        "—";
-
-
-    const status =
-        application.status ||
-        "🟡 На розгляді";
-
-
-    return `
-
-        <article
-            class="admin-application-card"
-        >
-
-            <div>
-
-                <span
-                    class="application-number"
-                >
-                    ${escapeHTML(number)}
-                </span>
-
-                <h3>
-                    ${escapeHTML(
-                        application.service ||
-                        "Заявка"
-                    )}
-                </h3>
-
-                <p>
-                    ${escapeHTML(
-                        application.fullName ||
-                        "Невідомий заявник"
-                    )}
-                </p>
-
-            </div>
-
-
-            <div>
-
-                <span
-                    class="status-badge ${statusClass(status)}"
-                >
-                    ${escapeHTML(status)}
-                </span>
-
-                <small>
-                    ${escapeHTML(
-                        application.date ||
-                        ""
-                    )}
-                </small>
-
-            </div>
-
-
-            <button
-                type="button"
-                class="btn"
-                data-admin-application="${escapeHTML(number)}"
-            >
-                Відкрити
-            </button>
-
-        </article>
-
-    `;
-
-}
-
-
-/* =========================================================
-   АДМИН — ОТКРЫТЬ ЗАЯВКУ
-========================================================= */
-
-async function openAdminApplication(
-    number
-) {
-
-    let application =
-        OLYMP.applications.find(
-            item =>
-                String(
-                    item.number ||
-                    item.requestNumber
-                ) ===
-                String(number)
-        );
-
-
-    OLYMP.currentApplication =
-        application || null;
-
-
-    /*
-     * Получаем актуальную версию
-     */
-
-    try {
-
-        const result =
-            await apiRequest(
-                "GET",
-                {
-
-                    action:
-                        "getApplication",
-
-                    number:
-                        number
-
-                }
-            );
-
-
-        if (
-            result &&
-            result.application
-        ) {
-
-            OLYMP.currentApplication =
-                result.application;
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "Деталі заявки:",
-            error.message
-        );
-
-    }
-
-
-    renderAdminApplicationModal();
-
-}
-
-
-/* =========================================================
-   АДМИН — МОДАЛКА
-========================================================= */
-
-function renderAdminApplicationModal() {
-
-    const application =
-        OLYMP.currentApplication;
-
-
-    if (!application) {
-
-        showToast(
-            "Заявку не знайдено.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    const modal =
-        document.querySelector(
-            "#adminApplicationModal"
-        );
-
-
-    if (!modal) {
-
-        /*
-         * Если отдельной админской
-         * модалки нет — используем
-         * гражданскую
-         */
-
-        renderApplicationModal();
-
-        return;
-
-    }
-
-
-    const number =
-        application.number ||
-        application.requestNumber ||
-        "—";
-
-
-    modal.innerHTML = `
-
-        <div class="modal-content admin-modal">
-
-            <button
-                type="button"
-                class="modal-close"
-                data-admin-close
-            >
-                ×
-            </button>
-
-
-            <div class="modal-header">
-
-                <span
-                    class="application-number"
-                >
-                    ${escapeHTML(number)}
-                </span>
-
-                <h2>
-                    ${escapeHTML(
-                        application.service ||
-                        "Заявка"
-                    )}
-                </h2>
-
-            </div>
-
-
-            <div class="application-details">
-
-                <div class="detail-row">
-                    <span>Дата</span>
-                    <strong>
-                        ${escapeHTML(
-                            application.date || "—"
-                        )}
-                    </strong>
-                </div>
-
-
-                <div class="detail-row">
-                    <span>ПІБ</span>
-                    <strong>
-                        ${escapeHTML(
-                            application.fullName || "—"
-                        )}
-                    </strong>
-                </div>
-
-
-                <div class="detail-row">
-                    <span>Посвідчення</span>
-                    <strong>
-                        ${escapeHTML(
-                            application.idNumber || "—"
-                        )}
-                    </strong>
-                </div>
-
-
-                <div class="detail-row">
-                    <span>Контакт</span>
-                    <strong>
-                        ${escapeHTML(
-                            application.contact ||
-                            "Не вказано"
-                        )}
-                    </strong>
-                </div>
-
-
-                <div class="detail-block">
-
-                    <span>
-                        Опис звернення
-                    </span>
-
-                    <p>
-                        ${escapeHTML(
-                            application.message ||
-                            application.description ||
-                            "—"
-                        )}
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <hr>
-
-
-            <div class="admin-actions">
-
-                <label>
-                    Статус заявки
-                </label>
-
-                <select
-                    id="adminApplicationStatus"
-                >
-
-                    ${STATUSES
-                        .map(
-                            status => `
-
-                                <option
-                                    value="${escapeHTML(status)}"
-                                    ${
-                                        application.status ===
-                                        status
-                                            ? "selected"
-                                            : ""
-                                    }
-                                >
-                                    ${escapeHTML(status)}
-                                </option>
-
-                            `
-                        )
-                        .join("")}
-
-                </select>
-
-
-                <label>
-                    Відповідальний співробітник
-                </label>
-
-                <input
-                    id="adminApplicationResponsible"
-                    type="text"
-                    value="${escapeHTML(
-                        application.responsible || ""
-                    )}"
-                    placeholder="ПІБ співробітника"
-                >
-
-
-                <label>
-                    Відповідь / коментар
-                </label>
-
-                <textarea
-                    id="adminApplicationComment"
-                    rows="5"
-                    placeholder="Введіть відповідь громадянину..."
-                >${escapeHTML(
-                    application.comment || ""
-                )}</textarea>
-
-
-                <div
-                    class="admin-action-buttons"
-                >
-
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        id="saveAdminApplication"
-                    >
-                        💾 Зберегти зміни
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="btn"
-                        id="closeAdminApplication"
-                    >
-                        🔒 Закрити заявку
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    modal.classList.add(
-        "active"
-    );
-
-
-    modal
-        .querySelector(
-            "[data-admin-close]"
-        )
-        ?.addEventListener(
-            "click",
-            closeAdminApplicationModal
-        );
-
-
-    modal
-        .querySelector(
-            "#saveAdminApplication"
-        )
-        ?.addEventListener(
-            "click",
-            saveAdminApplication
-        );
-
-
-    modal
-        .querySelector(
-            "#closeAdminApplication"
-        )
-        ?.addEventListener(
-            "click",
-            closeAdminApplication
-        );
-
-}
-
-
-/* =========================================================
-   АДМИН — СОХРАНИТЬ
-========================================================= */
-
-async function saveAdminApplication() {
-
-    if (
-        !OLYMP.admin ||
-        !OLYMP.currentApplication
-    ) {
-
-        return;
-
-    }
-
-
-    const application =
-        OLYMP.currentApplication;
-
-
-    const number =
-        application.number ||
-        application.requestNumber;
-
-
-    const status =
-        document.querySelector(
-            "#adminApplicationStatus"
-        )?.value;
-
-
-    const responsible =
-        clean(
-            document.querySelector(
-                "#adminApplicationResponsible"
-            )?.value
-        );
-
-
-    const comment =
-        clean(
-            document.querySelector(
-                "#adminApplicationComment"
-            )?.value
-        );
-
-
-    try {
-
-        const result =
-            await apiRequest(
-                "POST",
-                {
-
-                    action:
-                        "updateApplication",
-
-                    number:
-                        number,
-
-                    status:
-                        status,
-
-                    responsible:
-                        responsible,
-
-                    comment:
-                        comment,
-
-                    admin:
-                        OLYMP.admin.login ||
-                        OLYMP.admin.id ||
-                        ""
-
-                }
-            );
-
-
-        /*
-         * Обновляем локальную копию
-         */
-
-        const index =
-            OLYMP.applications.findIndex(
-                item =>
-                    String(
-                        item.number ||
-                        item.requestNumber
-                    ) ===
-                    String(number)
-            );
-
-
-        if (index !== -1) {
-
-            OLYMP.applications[index] = {
-
-                ...OLYMP.applications[index],
-
-                status:
-                    status,
-
-                responsible:
-                    responsible,
-
-                comment:
-                    comment
-
-            };
-
-        }
-
-
-        saveApplications();
-
-
-        showToast(
-            result.message ||
-            "Зміни збережено.",
-            "success"
-        );
-
-
-        closeAdminApplicationModal();
-
-
-        renderAdminApplications();
-
-
-    } catch (error) {
-
-        showToast(
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   АДМИН — ЗАКРЫТИЕ
-========================================================= */
-
-async function closeAdminApplication() {
-
-    if (
-        !OLYMP.currentApplication
-    ) {
-
-        return;
-
-    }
-
-
-    const number =
-        OLYMP.currentApplication.number ||
-        OLYMP.currentApplication.requestNumber;
-
-
-    try {
-
-        const result =
-            await apiRequest(
-                "POST",
-                {
-
-                    action:
-                        "closeApplication",
-
-                    number:
-                        number,
-
-                    admin:
-                        OLYMP.admin?.login ||
-                        ""
-
-                }
-            );
-
-
-        const index =
-            OLYMP.applications.findIndex(
-                item =>
-                    String(
-                        item.number ||
-                        item.requestNumber
-                    ) ===
-                    String(number)
-            );
-
-
-        if (index !== -1) {
-
-            OLYMP.applications[index].status =
-                "⚫ Закрито";
-
-        }
-
-
-        saveApplications();
-
-
-        showToast(
-            result.message ||
-            "Заявку закрито.",
-            "success"
-        );
-
-
-        closeAdminApplicationModal();
-
-
-        renderAdminApplications();
-
-
-    } catch (error) {
-
-        showToast(
-            error.message,
-            "error"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   ЗАКРЫТИЕ АДМИН МОДАЛКИ
-========================================================= */
-
-function closeAdminApplicationModal() {
-
-    const modal =
-        document.querySelector(
-            "#adminApplicationModal"
-        );
-
-
-    if (modal) {
-
-        modal.classList.remove(
-            "active"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   АДМИН СТАТИСТИКА
-========================================================= */
-
-function updateAdminStatistics() {
-
-    const applications =
-        OLYMP.applications;
-
-
-    const total =
-        applications.length;
-
-
-    const pending =
-        applications.filter(
-            item =>
-                item.status ===
-                "🟡 На розгляді"
-        ).length;
-
-
-    const accepted =
-        applications.filter(
-            item =>
-                item.status ===
-                "🔵 Прийнято"
-        ).length;
-
-
-    const completed =
-        applications.filter(
-            item =>
-                item.status ===
-                "🟢 Виконано"
-        ).length;
-
-
-    const rejected =
-        applications.filter(
-            item =>
-                item.status ===
-                "🔴 Відхилено"
-        ).length;
-
-
-    const closed =
-        applications.filter(
-            item =>
-                item.status ===
-                "⚫ Закрито"
-        ).length;
-
-
-    setText(
-        "#adminTotal",
-        total
-    );
-
-    setText(
-        "#adminPending",
-        pending
-    );
-
-    setText(
-        "#adminAccepted",
-        accepted
-    );
-
-    setText(
-        "#adminCompleted",
-        completed
-    );
-
-    setText(
-        "#adminRejected",
-        rejected
-    );
-
-    setText(
-        "#adminClosed",
-        closed
-    );
-
-}
-
-
-/* =========================================================
-   UI — АВТОРИЗАЦИЯ
-========================================================= */
-
-function showLogin() {
-
-    const element =
-        document.querySelector(
-            "#loginSection"
-        );
-
-
-    if (element) {
-
-        element.classList.add(
-            "active"
-        );
-
-    }
-
-}
-
-
-function hideLogin() {
-
-    const element =
-        document.querySelector(
-            "#loginSection"
-        );
-
-
-    if (element) {
-
-        element.classList.remove(
-            "active"
-        );
-
-    }
-
-}
-
-
-function showRegister() {
-
-    const element =
-        document.querySelector(
-            "#registerSection"
-        );
-
-
-    if (element) {
-
-        element.classList.add(
-            "active"
-        );
-
-    }
-
-}
-
-
-function hideRegister() {
-
-    const element =
-        document.querySelector(
-            "#registerSection"
-        );
-
-
-    if (element) {
-
-        element.classList.remove(
-            "active"
-        );
-
-    }
-
-}
-
-
-function showAdminLogin() {
-
-    const element =
-        document.querySelector(
-            "#adminLoginSection"
-        );
-
-
-    if (element) {
-
-        element.classList.add(
-            "active"
-        );
-
-    }
-
-}
-
-
-function hideAdminLogin() {
-
-    const element =
-        document.querySelector(
-            "#adminLoginSection"
-        );
-
-
-    if (element) {
-
-        element.classList.remove(
-            "active"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   UI — СОСТОЯНИЕ
-========================================================= */
-
-function updateInterface() {
-
-    /*
-     * Имя гражданина
-     */
-
-    const citizenName =
-        OLYMP.citizen?.fullName ||
-        OLYMP.citizen?.name ||
-        "";
-
-
-    setText(
-        "#userName",
-        citizenName
-    );
-
-
-    setText(
-        "#profileName",
-        citizenName
-    );
-
-
-    setText(
-        "#userId",
-        OLYMP.citizen?.idNumber || ""
-    );
-
-
-    setText(
-        "#profileId",
-        OLYMP.citizen?.idNumber || ""
-    );
-
-
-    /*
-     * Администратор
-     */
-
-    setText(
-        "#adminName",
-        OLYMP.admin?.name ||
-        OLYMP.admin?.login ||
-        ""
-    );
-
-
-    setText(
-        "#adminRole",
-        OLYMP.admin?.role ||
-        ""
-    );
-
-
-    /*
-     * Кнопки
-     */
-
-    $$(
-        "[data-auth-only]"
-    )
-        .forEach(
-            element => {
-
-                element.style.display =
-                    OLYMP.citizen
-                        ? ""
-                        : "none";
-
-            }
-        );
-
-
-    $$(
-        "[data-guest-only]"
-    )
-        .forEach(
-            element => {
-
-                element.style.display =
-                    OLYMP.citizen
-                        ? "none"
-                        : "";
-
-            }
-        );
-
-
-    $$(
-        "[data-admin-only]"
-    )
-        .forEach(
-            element => {
-
-                element.style.display =
-                    OLYMP.admin
-                        ? ""
-                        : "none";
-
-            }
-        );
-
-
-    updateStatistics();
-
-}
-
-
-/* =========================================================
-   КНОПКИ
-========================================================= */
-
-function initButtons() {
-
-    /*
-     * Logout гражданина
-     */
-
-    $$(
-        "[data-logout]"
-    )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    logoutCitizen
-                );
-
-            }
-        );
-
-
-    /*
-     * Переход в регистрацию
-     */
-
-    $$(
-        "[data-register]"
-    )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        hideLogin();
-
-                        showRegister();
-
-                    }
-                );
-
-            }
-        );
-
-
-    /*
-     * Переход во вход
-     */
-
-    $$(
-        "[data-login]"
-    )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        hideRegister();
-
-                        showLogin();
-
-                    }
-                );
-
-            }
-        );
-
-
-    /*
-     * Создание заявки
-     */
-
-    $$(
-        "[data-create-application]"
-    )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    openApplicationCreate
-                );
-
-            }
-        );
-
-
-    /*
-     * Закрытие модалок
-     */
-
-    $$(
-        "[data-close-modal]"
-    )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        closeApplicationModal();
-
-                        closeAdminApplicationModal();
-
-                    }
-                );
-
-            }
-        );
-
-
-    /*
-     * Копирование номера
-     */
-
-    $$(
-        "[data-copy-number]"
-    )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        copyText(
-                            button.dataset.copyNumber
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   СОЗДАНИЕ ЗАЯВКИ
-========================================================= */
-
-function openApplicationCreate() {
-
-    if (
-        !OLYMP.citizen
-    ) {
-
-        showLogin();
-
-        showToast(
-            "Для подання заявки необхідно увійти.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    const modal =
-        document.querySelector(
-            "#applicationCreateModal"
-        );
-
-
-    if (modal) {
-
-        /*
-         * Автоматически подставляем данные
-         */
-
-        const fullName =
-            modal.querySelector(
-                '[name="fullName"]'
-            );
-
-
-        const idNumber =
-            modal.querySelector(
-                '[name="idNumber"]'
-            );
-
-
-        const contact =
-            modal.querySelector(
-                '[name="contact"]'
-            );
-
-
-        if (fullName) {
-
-            fullName.value =
-                OLYMP.citizen.fullName ||
-                OLYMP.citizen.name ||
-                "";
-
-        }
-
-
-        if (idNumber) {
-
-            idNumber.value =
-                OLYMP.citizen.idNumber ||
-                "";
-
-        }
-
-
-        if (contact) {
-
-            contact.value =
-                OLYMP.citizen.contact ||
-                "";
-
-        }
-
-
-        modal.classList.add(
-            "active"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   ADMIN LOADING
-========================================================= */
-
-function showAdminLoading() {
-
-    const element =
-        document.querySelector(
-            "#adminLoading"
-        );
-
-
-    if (element) {
-
-        element.classList.add(
-            "active"
-        );
-
-    }
-
-}
-
-
-function hideAdminLoading() {
-
-    const element =
-        document.querySelector(
-            "#adminLoading"
-        );
-
-
-    if (element) {
-
-        element.classList.remove(
-            "active"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   ЗАГРУЗКА
-========================================================= */
-
-function setLoading(
-    form,
-    loading
-) {
-
-    if (!form) {
-
-        return;
-
-    }
-
+function initializeClearSearch() {
 
     const button =
-        form.querySelector(
-            'button[type="submit"]'
+        document.getElementById(
+            "clearSearch"
         );
 
 
@@ -3901,1127 +248,898 @@ function setLoading(
     }
 
 
-    if (loading) {
+    button.addEventListener(
+        "click",
+        function () {
 
-        button.dataset.originalText =
-            button.innerHTML;
-
-
-        button.disabled =
-            true;
-
-
-        button.innerHTML =
-            `
-
-                <span class="loading-spinner">
-                    ⏳
-                </span>
-
-                Зачекайте...
-
-            `;
-
-    } else {
-
-        button.disabled =
-            false;
+            const search =
+                document.getElementById(
+                    "serviceSearch"
+                );
 
 
-        button.innerHTML =
-            button.dataset.originalText ||
-            "Увійти";
+            if (search) {
 
-    }
+                search.value = "";
 
-}
+                search.focus();
 
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-function showToast(
-    message,
-    type = "info"
-) {
-
-    let container =
-        document.querySelector(
-            "#toastContainer"
-        );
+            }
 
 
-    if (!container) {
-
-        container =
-            document.createElement(
-                "div"
-            );
-
-
-        container.id =
-            "toastContainer";
-
-
-        document.body.appendChild(
-            container
-        );
-
-    }
-
-
-    const toast =
-        document.createElement(
-            "div"
-        );
-
-
-    toast.className =
-        `toast toast-${type}`;
-
-
-    toast.textContent =
-        message;
-
-
-    container.appendChild(
-        toast
-    );
-
-
-    requestAnimationFrame(
-        () => {
-
-            toast.classList.add(
-                "show"
-            );
+            filterServices();
 
         }
     );
 
-
-    setTimeout(
-        () => {
-
-            toast.classList.remove(
-                "show"
-            );
-
-
-            setTimeout(
-                () => {
-
-                    toast.remove();
-
-                },
-                300
-            );
-
-        },
-        4000
-    );
-
 }
 
 
 /* =========================================================
-   УТИЛИТЫ
+   ФИЛЬТР КАТЕГОРИЙ
 ========================================================= */
 
-function clean(value) {
+function initializeCategoryFilters() {
 
-    if (
-        value === undefined ||
-        value === null
-    ) {
-
-        return "";
-
-    }
-
-
-    return String(value)
-
-        .trim()
-
-        .replace(
-            /<[^>]*>/g,
-            ""
-        )
-
-        .replace(
-            /\s+/g,
-            " "
-        );
-
-}
-
-
-function escapeHTML(value) {
-
-    return String(
-        value ?? ""
-    )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-function setText(
-    selector,
-    value
-) {
-
-    const element =
-        document.querySelector(
-            selector
+    const buttons =
+        document.querySelectorAll(
+            ".category-btn"
         );
 
 
-    if (element) {
+    buttons.forEach(
+        function (button) {
 
-        element.textContent =
-            value ?? "";
+            button.addEventListener(
+                "click",
+                function () {
 
-    }
+                    buttons.forEach(
+                        function (item) {
 
-}
+                            item.classList.remove(
+                                "active"
+                            );
 
-
-function statusClass(
-    status
-) {
-
-    if (
-        status ===
-        "🟡 На розгляді"
-    ) {
-
-        return "status-pending";
-
-    }
-
-
-    if (
-        status ===
-        "🔵 Прийнято"
-    ) {
-
-        return "status-accepted";
-
-    }
-
-
-    if (
-        status ===
-        "🟢 Виконано"
-    ) {
-
-        return "status-completed";
-
-    }
-
-
-    if (
-        status ===
-        "🔴 Відхилено"
-    ) {
-
-        return "status-rejected";
-
-    }
-
-
-    if (
-        status ===
-        "⚫ Закрито"
-    ) {
-
-        return "status-closed";
-
-    }
-
-
-    return "";
-
-}
-
-
-async function copyText(
-    text
-) {
-
-    try {
-
-        await navigator.clipboard.writeText(
-            text
-        );
-
-
-        showToast(
-            "Номер заявки скопійовано.",
-            "success"
-        );
-
-    } catch {
-
-        showToast(
-            "Не вдалося скопіювати номер.",
-            "error"
-        );
-
-    }
-
-}
-
-
-function debounce(
-    callback,
-    delay
-) {
-
-    let timer;
-
-
-    return function (...args) {
-
-        clearTimeout(
-            timer
-        );
-
-
-        timer =
-            setTimeout(
-                () => {
-
-                    callback(
-                        ...args
+                        }
                     );
 
-                },
-                delay
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    filterServices();
+
+                }
             );
 
-    };
+        }
+    );
 
 }
 
 
 /* =========================================================
-   ESC
+   ФИЛЬТРАЦИЯ УСЛУГ
 ========================================================= */
 
-document.addEventListener(
-    "keydown",
-    event => {
+function filterServices() {
 
-        if (
-            event.key !==
-            "Escape"
-        ) {
+    const search =
+        document.getElementById(
+            "serviceSearch"
+        );
 
-            return;
+
+    const query =
+        search
+            ? search.value
+                .trim()
+                .toLowerCase()
+            : "";
+
+
+    const activeCategory =
+        document.querySelector(
+            ".category-btn.active"
+        );
+
+
+    const category =
+        activeCategory
+            ? activeCategory.dataset.category
+            : "all";
+
+
+    const services =
+        document.querySelectorAll(
+            ".service-item"
+        );
+
+
+    const noResults =
+        document.getElementById(
+            "noResults"
+        );
+
+
+    let visibleCount = 0;
+
+
+    services.forEach(
+        function (service) {
+
+            const title =
+                (
+                    service.dataset.title ||
+                    ""
+                ).toLowerCase();
+
+
+            const description =
+                (
+                    service.dataset.description ||
+                    ""
+                ).toLowerCase();
+
+
+            const requirements =
+                (
+                    service.dataset.requirements ||
+                    ""
+                ).toLowerCase();
+
+
+            const serviceCategory =
+                (
+                    service.dataset.category ||
+                    ""
+                ).toLowerCase();
+
+
+            const content =
+                title +
+                " " +
+                description +
+                " " +
+                requirements;
+
+
+            const matchesSearch =
+                !query ||
+                content.includes(
+                    query
+                );
+
+
+            const matchesCategory =
+                category === "all" ||
+                serviceCategory === category;
+
+
+            if (
+                matchesSearch &&
+                matchesCategory
+            ) {
+
+                service.style.display =
+                    "";
+
+                visibleCount++;
+
+            } else {
+
+                service.style.display =
+                    "none";
+
+            }
 
         }
+    );
 
 
-        closeApplicationModal();
-
-        closeAdminApplicationModal();
-
-    }
-);
-
-
-/* =========================================================
-   КЛИК ПО ФОНУ МОДАЛКИ
-========================================================= */
-
-document.addEventListener(
-    "click",
-    event => {
-
-        const target =
-            event.target;
-
+    if (noResults) {
 
         if (
-            target.classList.contains(
-                "modal"
-            )
+            visibleCount === 0
         ) {
 
-            target.classList.remove(
+            noResults.classList.add(
+                "active"
+            );
+
+        } else {
+
+            noResults.classList.remove(
                 "active"
             );
 
         }
 
     }
-);
+
+
+    log(
+        "Фильтрация:",
+        {
+            query,
+            category,
+            visibleCount
+        }
+    );
+
+}
 
 
 /* =========================================================
-   ЗАЩИТА ОТ СЛУЧАЙНОГО ОТПРАВЛЕНИЯ
+   КОЛИЧЕСТВО УСЛУГ
 ========================================================= */
 
-document.addEventListener(
-    "submit",
-    event => {
+function updateServiceCount() {
 
-        const form =
-            event.target;
-
-
-        if (
-            !form ||
-            !form.matches(
-                "form"
-            )
-        ) {
-
-            return;
-
-        }
+    const counter =
+        document.getElementById(
+            "serviceCount"
+        );
 
 
-        /*
-         * Не блокируем формы,
-         * обработанные выше.
-         */
+    if (!counter) {
+
+        return;
 
     }
-);
+
+
+    const services =
+        document.querySelectorAll(
+            ".service-item"
+        );
+
+
+    counter.textContent =
+        services.length;
+
+}
 
 
 /* =========================================================
-   ГЛОБАЛЬНЫЕ ФУНКЦИИ
+   ОТКРЫТИЕ УСЛУГИ
 ========================================================= */
 
-window.OLYMP =
-    OLYMP;
+/*
+ * ЭТА ФУНКЦИЯ НУЖНА HTML:
+ *
+ * onclick="openService(this)"
+ *
+ */
+
+function openService(button) {
+
+    if (!button) {
+
+        return;
+
+    }
 
 
-window.showPage =
-    showPage;
+    const card =
+        button.closest(
+            ".service-card"
+        );
 
 
-window.showLogin =
-    showLogin;
+    if (!card) {
+
+        log(
+            "Карточка услуги не найдена."
+        );
+
+        return;
+
+    }
 
 
-window.showRegister =
-    showRegister;
+    const title =
+        card.dataset.title ||
+        card.querySelector("h3")?.textContent.trim() ||
+        "Державна послуга";
 
 
-window.showAdminLogin =
-    showAdminLogin;
+    const description =
+        card.dataset.description ||
+        card.querySelector("p")?.textContent.trim() ||
+        "Інформація про державну послугу.";
 
 
-window.logoutCitizen =
-    logoutCitizen;
+    const requirements =
+        card.dataset.requirements ||
+        "Не вказано.";
 
 
-window.logoutAdmin =
-    logoutAdmin;
+    const category =
+        card.dataset.category ||
+        "government";
 
 
-window.openApplication =
-    openApplication;
+    const iconElement =
+        card.querySelector(
+            ".service-icon"
+        );
 
 
-window.closeApplicationModal =
-    closeApplicationModal;
+    const icon =
+        iconElement
+            ? iconElement.textContent.trim()
+            : "🏛️";
 
 
-window.closeAdminApplicationModal =
-    closeAdminApplicationModal;
+    currentService = {
+
+        title,
+        description,
+        requirements,
+        category,
+        icon
+
+    };
 
 
-window.loadCitizenApplications =
-    loadCitizenApplications;
+    setElementText(
+        "modalIcon",
+        icon
+    );
 
 
-window.loadAdminApplications =
-    loadAdminApplications;
+    setElementText(
+        "modalTitle",
+        title
+    );
 
 
-window.openApplicationCreate =
-    openApplicationCreate;
+    setElementText(
+        "modalDescription",
+        description
+    );
 
 
-window.copyText =
-    copyText;
+    setElementText(
+        "modalRequirements",
+        requirements
+    );
 
 
-console.log(
-    "%cOLYMP Government Script 6.2",
-    "font-weight:bold;font-size:16px"
-);
+    setElementText(
+        "modalCategory",
+        getCategoryName(category)
+    );
 
-console.log(
-    "Personal Cabinet + Admin Panel"
-);
+
+    const modal =
+        document.getElementById(
+            "serviceModal"
+        );
+
+
+    if (!modal) {
+
+        return;
+
+    }
+
+
+    modal.classList.add(
+        "active"
+    );
+
+
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+
+    log(
+        "Открыта услуга:",
+        title
+    );
+
+}
+
 
 /* =========================================================
-   OLYMP GOVERNMENT
-   SCRIPT.JS 6.2
-   FIX: APPLICATION MODAL + SERVICES
+   НАЗВАНИЕ КАТЕГОРИИ
 ========================================================= */
 
-(function () {
+function getCategoryName(category) {
 
-    "use strict";
+    const categories = {
 
-    console.log("OLYMP Government Script 6.2 — UI FIX loaded");
+        documents:
+            "ДЕРЖАВНІ ДОКУМЕНТИ",
+
+        transport:
+            "ТРАНСПОРТ",
+
+        business:
+            "БІЗНЕС",
+
+        legal:
+            "ЮРИДИЧНІ ПОСЛУГИ",
+
+        government:
+            "УРЯДОВІ ПОСЛУГИ"
+
+    };
 
 
-    /* =====================================================
-       ПОИСК ЭЛЕМЕНТА
-    ===================================================== */
+    return (
+        categories[category] ||
+        "ДЕРЖАВНА ПОСЛУГА"
+    );
 
-    function findElement(selectors) {
+}
 
-        if (!Array.isArray(selectors)) {
-            selectors = [selectors];
+
+/* =========================================================
+   ЗАКРЫТИЕ SERVICE MODAL
+========================================================= */
+
+function closeServiceModal() {
+
+    const modal =
+        document.getElementById(
+            "serviceModal"
+        );
+
+
+    if (!modal) {
+
+        return;
+
+    }
+
+
+    modal.classList.remove(
+        "active"
+    );
+
+
+    modal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   КНОПКА "ПОДАТИ ЗАЯВКУ" ИЗ SERVICE MODAL
+========================================================= */
+
+function initializeServiceApplicationButton() {
+
+    const button =
+        document.getElementById(
+            "applyFromService"
+        );
+
+
+    if (!button) {
+
+        return;
+
+    }
+
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            const selectedService =
+                currentService
+                    ? currentService.title
+                    : "Звернення громадянина";
+
+
+            closeServiceModal();
+
+
+            openApplicationModal(
+                selectedService
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ОТКРЫТИЕ APPLICATION MODAL
+========================================================= */
+
+/*
+ * ЭТА ФУНКЦИЯ ВЫЗЫВАЕТСЯ ИЗ HTML:
+ *
+ * onclick="openApplicationModal('Звернення громадянина')"
+ *
+ */
+
+function openApplicationModal(
+    serviceName
+) {
+
+    const modal =
+        document.getElementById(
+            "applicationModal"
+        );
+
+
+    if (!modal) {
+
+        log(
+            "applicationModal не найден."
+        );
+
+        return;
+
+    }
+
+
+    const form =
+        document.getElementById(
+            "applicationForm"
+        );
+
+
+    const success =
+        document.getElementById(
+            "successMessage"
+        );
+
+
+    /*
+     * Скрываем результат
+     */
+
+    if (success) {
+
+        success.classList.remove(
+            "active"
+        );
+
+        success.style.display =
+            "none";
+
+    }
+
+
+    /*
+     * Показываем форму
+     */
+
+    if (form) {
+
+        form.style.display =
+            "";
+
+    }
+
+
+    /*
+     * Устанавливаем выбранную услугу
+     */
+
+    if (
+        serviceName
+    ) {
+
+        const select =
+            document.getElementById(
+                "applicationService"
+            );
+
+
+        if (select) {
+
+            setServiceSelectValue(
+                select,
+                serviceName
+            );
+
         }
 
-        for (const selector of selectors) {
+    }
 
-            try {
 
-                const element =
-                    document.querySelector(selector);
+    modal.classList.add(
+        "active"
+    );
 
-                if (element) {
-                    return element;
-                }
 
-            } catch (error) {
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
 
-                console.warn(
-                    "Invalid selector:",
-                    selector
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+
+    /*
+     * Автофокус
+     */
+
+    setTimeout(
+        function () {
+
+            const firstInput =
+                document.getElementById(
+                    "fullName"
+                );
+
+
+            if (firstInput) {
+
+                firstInput.focus();
+
+            }
+
+        },
+        150
+    );
+
+
+    log(
+        "Открыта форма заявки:",
+        serviceName
+    );
+
+}
+
+
+/* =========================================================
+   УСТАНОВКА ЗНАЧЕНИЯ SELECT
+========================================================= */
+
+function setServiceSelectValue(
+    select,
+    serviceName
+) {
+
+    const options =
+        Array.from(
+            select.options
+        );
+
+
+    /*
+     * Сначала точное совпадение
+     */
+
+    const exact =
+        options.find(
+            function (option) {
+
+                return (
+                    option.value.trim() ===
+                    serviceName.trim()
                 );
 
             }
+        );
 
-        }
 
-        return null;
+    if (exact) {
+
+        select.value =
+            exact.value;
+
+        return;
 
     }
 
 
-    /* =====================================================
-       ОТКРЫТИЕ ФОРМЫ ЗАЯВКИ
-    ===================================================== */
+    /*
+     * Затем совпадение по тексту
+     */
 
-    window.openApplicationModal = function (service) {
+    const textMatch =
+        options.find(
+            function (option) {
 
-        console.log(
-            "openApplicationModal:",
-            service
-        );
-
-
-        /*
-         * Возможные ID модального окна
-         */
-
-        const modal = findElement([
-
-            "#applicationModal",
-            "#application-modal",
-            "#requestModal",
-            "#request-modal",
-            ".application-modal",
-            ".request-modal"
-
-        ]);
-
-
-        /*
-         * Если модальное окно уже есть
-         */
-
-        if (modal) {
-
-            modal.classList.add("active");
-
-            modal.classList.add("show");
-
-            modal.style.display = "flex";
-
-            modal.removeAttribute("hidden");
-
-
-            /*
-             * Если передали услугу —
-             * автоматически устанавливаем её
-             */
-
-            if (service) {
-
-                setServiceValue(service);
+                return (
+                    option.textContent
+                        .trim()
+                        .toLowerCase() ===
+                    serviceName
+                        .trim()
+                        .toLowerCase()
+                );
 
             }
-
-
-            /*
-             * Заполняем профиль пользователя
-             */
-
-            fillApplicationProfile();
-
-
-            document.body.classList.add(
-                "modal-open"
-            );
-
-
-            return;
-
-        }
-
-
-        /*
-         * Если модального окна нет —
-         * создаём его автоматически.
-         */
-
-        createApplicationModal(
-            service
         );
 
-    };
 
+    if (textMatch) {
 
-    /* =====================================================
-       УСТАНОВКА УСЛУГИ
-    ===================================================== */
+        select.value =
+            textMatch.value;
 
-    function setServiceValue(service) {
-
-        const select = findElement([
-
-            "#service",
-            "#applicationService",
-            "#requestService",
-            "select[name='service']"
-
-        ]);
-
-
-        if (!select) {
-            return;
-        }
-
-
-        /*
-         * Ищем option
-         */
-
-        const options =
-            Array.from(
-                select.options
-            );
-
-
-        const option =
-            options.find(
-                item =>
-                    item.value === service ||
-                    item.textContent.trim() === service
-            );
-
-
-        if (option) {
-
-            select.value =
-                option.value;
-
-        }
+        return;
 
     }
 
 
-    /* =====================================================
-       ЗАПОЛНЕНИЕ ПРОФИЛЯ
-    ===================================================== */
+    /*
+     * Если такой услуги нет —
+     * оставляем "Оберіть послугу"
+     */
 
-    function fillApplicationProfile() {
+    select.value = "";
 
-        let user = null;
+}
 
 
-        /*
-         * Пытаемся получить пользователя
-         * из существующих переменных
-         */
+/* =========================================================
+   ЗАКРЫТИЕ APPLICATION MODAL
+========================================================= */
 
-        try {
+function closeApplicationModal() {
+
+    const modal =
+        document.getElementById(
+            "applicationModal"
+        );
+
+
+    if (!modal) {
+
+        return;
+
+    }
+
+
+    modal.classList.remove(
+        "active"
+    );
+
+
+    modal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+
+    /*
+     * Разрешаем новую отправку
+     */
+
+    applicationSending =
+        false;
+
+
+    const submitButton =
+        document.querySelector(
+            "#applicationForm button[type='submit']"
+        );
+
+
+    if (submitButton) {
+
+        submitButton.disabled =
+            false;
+
+        submitButton.dataset.originalText =
+            "Надіслати заявку";
+
+        submitButton.textContent =
+            "Надіслати заявку";
+
+    }
+
+}
+
+
+/* =========================================================
+   MODAL EVENTS
+========================================================= */
+
+function initializeModalEvents() {
+
+    initializeServiceApplicationButton();
+
+
+    /*
+     * Закрытие по ESC
+     */
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
 
             if (
-                window.currentUser
+                event.key !== "Escape"
             ) {
 
-                user =
-                    window.currentUser;
+                return;
 
             }
 
-            else if (
-                window.currentCitizen
-            ) {
 
-                user =
-                    window.currentCitizen;
+            closeServiceModal();
 
-            }
+            closeApplicationModal();
 
-            else {
+        }
+    );
 
-                const saved =
-                    localStorage.getItem(
-                        "olymp_user"
-                    );
 
-                if (saved) {
+    /*
+     * Закрытие при клике по затемнению
+     */
 
-                    user =
-                        JSON.parse(saved);
+    const serviceModal =
+        document.getElementById(
+            "serviceModal"
+        );
+
+
+    if (serviceModal) {
+
+        serviceModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target ===
+                    serviceModal
+                ) {
+
+                    closeServiceModal();
 
                 }
 
             }
-
-        } catch (error) {
-
-            console.warn(
-                "Не удалось получить профиль:",
-                error
-            );
-
-        }
-
-
-        if (!user) {
-            return;
-        }
-
-
-        /*
-         * ПІБ
-         */
-
-        const fullNameInput =
-            findElement([
-
-                "#fullName",
-                "#applicationFullName",
-                "#requestFullName",
-                "input[name='fullName']"
-
-            ]);
-
-
-        if (
-            fullNameInput &&
-            user.fullName
-        ) {
-
-            fullNameInput.value =
-                user.fullName;
-
-        }
-
-
-        /*
-         * Посвідчення
-         */
-
-        const idInput =
-            findElement([
-
-                "#idNumber",
-                "#applicationIdNumber",
-                "#requestIdNumber",
-                "input[name='idNumber']"
-
-            ]);
-
-
-        if (
-            idInput &&
-            (
-                user.idNumber ||
-                user.id
-            )
-        ) {
-
-            idInput.value =
-                user.idNumber ||
-                user.id;
-
-        }
-
-
-        /*
-         * Контакт
-         */
-
-        const contactInput =
-            findElement([
-
-                "#contact",
-                "#applicationContact",
-                "#requestContact",
-                "input[name='contact']"
-
-            ]);
-
-
-        if (
-            contactInput &&
-            user.contact
-        ) {
-
-            contactInput.value =
-                user.contact;
-
-        }
+        );
 
     }
 
 
-    /* =====================================================
-       СОЗДАНИЕ МОДАЛЬНОГО ОКНА
-    ===================================================== */
-
-    function createApplicationModal(
-        service
-    ) {
-
-        /*
-         * Если уже существует —
-         * повторно не создаём
-         */
-
-        let modal =
-            document.getElementById(
-                "applicationModal"
-            );
-
-
-        if (modal) {
-
-            modal.style.display =
-                "flex";
-
-            modal.classList.add(
-                "active"
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * HTML модального окна
-         */
-
-        modal =
-            document.createElement(
-                "div"
-            );
-
-
-        modal.id =
-            "applicationModal";
-
-
-        modal.className =
-            "application-modal active";
-
-
-        modal.innerHTML = `
-
-            <div
-                class="application-modal-overlay"
-                data-close-modal
-            ></div>
-
-            <div
-                class="application-modal-content"
-            >
-
-                <div
-                    class="application-modal-header"
-                >
-
-                    <div>
-
-                        <span
-                            class="application-modal-label"
-                        >
-                            OLYMP GOVERNMENT
-                        </span>
-
-                        <h2>
-                            Подати заяву
-                        </h2>
-
-                        <p>
-                            Заповніть форму звернення
-                        </p>
-
-                    </div>
-
-                    <button
-                        type="button"
-                        class="application-modal-close"
-                        id="closeApplicationModal"
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-
-                <form
-                    id="applicationForm"
-                    class="application-form"
-                >
-
-                    <div class="form-group">
-
-                        <label>
-                            ПІБ
-                        </label>
-
-                        <input
-                            type="text"
-                            name="fullName"
-                            id="fullName"
-                            placeholder="Ваше ПІБ"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Номер посвідчення
-                        </label>
-
-                        <input
-                            type="text"
-                            name="idNumber"
-                            id="idNumber"
-                            placeholder="OLYMP-000001"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Державна послуга
-                        </label>
-
-                        <select
-                            name="service"
-                            id="service"
-                            required
-                        >
-
-                            <option value="">
-                                Оберіть послугу
-                            </option>
-
-                            <option value="Державна юридична консультація">
-                                Державна юридична консультація
-                            </option>
-
-                            <option value="Звернення до Уряду">
-                                Звернення до Уряду
-                            </option>
-
-                            <option value="Житлове питання">
-                                Житлове питання
-                            </option>
-
-                            <option value="Соціальна допомога">
-                                Соціальна допомога
-                            </option>
-
-                            <option value="Питання документів">
-                                Питання документів
-                            </option>
-
-                            <option value="Інше">
-                                Інше
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Контакт
-                        </label>
-
-                        <input
-                            type="text"
-                            name="contact"
-                            id="contact"
-                            placeholder="Discord / телефон"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Опис звернення
-                        </label>
-
-                        <textarea
-                            name="message"
-                            id="message"
-                            rows="6"
-                            placeholder="Опишіть ваше питання..."
-                            required
-                        ></textarea>
-
-                    </div>
-
-
-                    <div
-                        id="applicationFormMessage"
-                        class="application-form-message"
-                    ></div>
-
-
-                    <button
-                        type="submit"
-                        class="application-submit"
-                    >
-
-                        <span>
-                            Подати заяву
-                        </span>
-
-                    </button>
-
-                </form>
-
-            </div>
-
-        `;
-
-
-        document.body.appendChild(
-            modal
+    const applicationModal =
+        document.getElementById(
+            "applicationModal"
         );
 
 
-        /*
-         * Устанавливаем услугу
-         */
+    if (applicationModal) {
 
-        if (service) {
-
-            setServiceValue(
-                service
-            );
-
-        }
-
-
-        /*
-         * Заполняем данные
-         */
-
-        fillApplicationProfile();
-
-
-        /*
-         * Закрытие
-         */
-
-        const closeButton =
-            document.getElementById(
-                "closeApplicationModal"
-            );
-
-
-        if (closeButton) {
-
-            closeButton.addEventListener(
-                "click",
-                closeApplicationModal
-            );
-
-        }
-
-
-        const overlay =
-            modal.querySelector(
-                "[data-close-modal]"
-            );
-
-
-        if (overlay) {
-
-            overlay.addEventListener(
-                "click",
-                closeApplicationModal
-            );
-
-        }
-
-
-        /*
-         * ESC
-         */
-
-        document.addEventListener(
-            "keydown",
+        applicationModal.addEventListener(
+            "click",
             function (event) {
 
                 if (
-                    event.key === "Escape"
+                    event.target ===
+                    applicationModal
                 ) {
 
                     closeApplicationModal();
@@ -5031,468 +1149,1212 @@ console.log(
             }
         );
 
+    }
 
-        /*
-         * Отправка формы
-         */
+}
 
-        const form =
-            document.getElementById(
-                "applicationForm"
+
+/* =========================================================
+   APPLICATION FORM
+========================================================= */
+
+function initializeApplicationForm() {
+
+    const form =
+        document.getElementById(
+            "applicationForm"
+        );
+
+
+    if (!form) {
+
+        log(
+            "applicationForm не найден."
+        );
+
+        return;
+
+    }
+
+
+    form.addEventListener(
+        "submit",
+        submitApplication
+    );
+
+
+    /*
+     * Сохраняем черновик при вводе
+     */
+
+    const fields =
+        form.querySelectorAll(
+            "input, select, textarea"
+        );
+
+
+    fields.forEach(
+        function (field) {
+
+            field.addEventListener(
+                "input",
+                saveApplicationDraft
             );
 
 
-        if (form) {
-
-            form.addEventListener(
-                "submit",
-                submitApplication
+            field.addEventListener(
+                "change",
+                saveApplicationDraft
             );
 
         }
+    );
 
+}
+
+
+/* =========================================================
+   ОТПРАВКА ЗАЯВКИ
+========================================================= */
+
+async function submitApplication(
+    event
+) {
+
+    event.preventDefault();
+
+
+    if (
+        applicationSending
+    ) {
+
+        return;
+
+    }
+
+
+    const form =
+        document.getElementById(
+            "applicationForm"
+        );
+
+
+    if (!form) {
+
+        return;
+
+    }
+
+
+    /*
+     * Получаем поля
+     */
+
+    const fullName =
+        getInputValue(
+            "fullName"
+        );
+
+
+    const idNumber =
+        getInputValue(
+            "idNumber"
+        );
+
+
+    const service =
+        getInputValue(
+            "applicationService"
+        );
+
+
+    const contact =
+        getInputValue(
+            "contact"
+        );
+
+
+    const message =
+        getInputValue(
+            "message"
+        );
+
+
+    /*
+     * Проверка
+     */
+
+    if (!fullName) {
+
+        showFormError(
+            "Вкажіть ПІБ."
+        );
+
+        focusElement(
+            "fullName"
+        );
+
+        return;
+
+    }
+
+
+    if (!idNumber) {
+
+        showFormError(
+            "Вкажіть номер посвідчення."
+        );
+
+        focusElement(
+            "idNumber"
+        );
+
+        return;
+
+    }
+
+
+    if (!service) {
+
+        showFormError(
+            "Оберіть державну послугу."
+        );
+
+        focusElement(
+            "applicationService"
+        );
+
+        return;
+
+    }
+
+
+    if (!message) {
+
+        showFormError(
+            "Вкажіть опис звернення."
+        );
+
+        focusElement(
+            "message"
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Проверка API
+     */
+
+    if (
+        !OLYMP_CONFIG.API_URL ||
+        OLYMP_CONFIG.API_URL.includes(
+            "ВСТАВЬ_СЮДА"
+        )
+    ) {
+
+        showFormError(
+            "Система заявок ще не налаштована. Адміністратору необхідно додати URL Google Apps Script."
+        );
+
+        console.error(
+            "OLYMP_CONFIG.API_URL не настроен."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Включаем состояние отправки
+     */
+
+    applicationSending =
+        true;
+
+
+    const submitButton =
+        form.querySelector(
+            "button[type='submit']"
+        );
+
+
+    if (submitButton) {
+
+        submitButton.disabled =
+            true;
+
+        submitButton.dataset.originalText =
+            submitButton.textContent;
+
+        submitButton.textContent =
+            "Відправлення...";
+
+    }
+
+
+    /*
+     * Данные для Code.gs
+     *
+     * Code.gs ожидает:
+     *
+     * fullName
+     * idNumber
+     * service
+     * contact
+     * message
+     */
+
+    const formData =
+        new URLSearchParams();
+
+
+    formData.append(
+        "fullName",
+        fullName
+    );
+
+
+    formData.append(
+        "idNumber",
+        idNumber
+    );
+
+
+    formData.append(
+        "service",
+        service
+    );
+
+
+    formData.append(
+        "contact",
+        contact
+    );
+
+
+    formData.append(
+        "message",
+        message
+    );
+
+
+    log(
+        "Отправка заявки..."
+    );
+
+
+    try {
 
         /*
-         * Анимация
+         * ВАЖНО:
+         *
+         * Google Apps Script может делать
+         * redirect при POST.
+         *
+         * Поэтому используем no-cors.
+         *
+         * Заявка при этом отправляется
+         * в Code.gs.
          */
 
-        requestAnimationFrame(
-            () => {
+        await fetch(
+            OLYMP_CONFIG.API_URL,
+            {
 
-                modal.classList.add(
-                    "visible"
-                );
+                method:
+                    "POST",
+
+                mode:
+                    "no-cors",
+
+                body:
+                    formData
 
             }
         );
 
+
+        /*
+         * При no-cors браузер не позволяет
+         * прочитать JSON-ответ Apps Script.
+         *
+         * Поэтому показываем пользователю
+         * подтверждение после успешной
+         * отправки HTTP-запроса.
+         */
+
+        showApplicationSuccess(
+            null,
+            service
+        );
+
+
+        /*
+         * Очищаем черновик
+         */
+
+        clearApplicationDraft();
+
+
+    } catch (error) {
+
+        console.error(
+            "Ошибка отправки:",
+            error
+        );
+
+
+        showFormError(
+            "Не вдалося відправити заявку. Перевірте підключення до системи."
+        );
+
+
+        applicationSending =
+            false;
+
+
+        if (submitButton) {
+
+            submitButton.disabled =
+                false;
+
+            submitButton.textContent =
+                submitButton.dataset.originalText ||
+                "Надіслати заявку";
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   УСПЕШНАЯ ОТПРАВКА
+========================================================= */
+
+function showApplicationSuccess(
+    response,
+    service
+) {
+
+    const form =
+        document.getElementById(
+            "applicationForm"
+        );
+
+
+    const success =
+        document.getElementById(
+            "successMessage"
+        );
+
+
+    if (!success) {
+
+        return;
+
     }
 
 
-    /* =====================================================
-       ЗАКРЫТИЕ ФОРМЫ
-    ===================================================== */
+    /*
+     * Скрываем форму
+     */
 
-    window.closeApplicationModal =
-        function () {
+    if (form) {
 
-            const modal =
-                findElement([
+        form.style.display =
+            "none";
 
-                    "#applicationModal",
-                    "#application-modal",
-                    "#requestModal",
-                    "#request-modal"
-
-                ]);
+    }
 
 
-            if (!modal) {
-                return;
-            }
+    /*
+     * Показываем success
+     */
+
+    success.style.display =
+        "block";
 
 
-            modal.classList.remove(
-                "active"
-            );
-
-            modal.classList.remove(
-                "show"
-            );
-
-            modal.classList.remove(
-                "visible"
-            );
+    success.classList.add(
+        "active"
+    );
 
 
-            setTimeout(
-                () => {
+    /*
+     * Номер заявки
+     */
 
-                    if (
-                        modal.id ===
-                        "applicationModal"
-                    ) {
-
-                        modal.style.display =
-                            "none";
-
-                    }
-
-                },
-                200
-            );
+    const number =
+        response &&
+        response.number
+            ? response.number
+            : generateTemporaryApplicationNumber();
 
 
-            document.body.classList.remove(
-                "modal-open"
-            );
-
-        };
-
-
-    /* =====================================================
-       OPEN SERVICE
-    ===================================================== */
-
-    window.openService =
-        function (service) {
-
-            console.log(
-                "openService:",
-                service
-            );
+    setElementText(
+        "applicationNumber",
+        "№ " + number
+    );
 
 
-            /*
-             * Если функция вызвана
-             * из карточки услуги,
-             * открываем форму.
-             */
+    /*
+     * Статус
+     */
 
-            openApplicationModal(
-                service
-            );
+    setApplicationStatus(
+        response &&
+        response.status
+            ? response.status
+            : "🟡 На розгляді"
+    );
 
-        };
+
+    /*
+     * Сообщение
+     */
+
+    const successText =
+        success.querySelector(
+            "p"
+        );
 
 
-    /* =====================================================
-       ОТПРАВКА ЗАЯВКИ
-    ===================================================== */
+    if (successText) {
 
-    async function submitApplication(
-        event
+        successText.textContent =
+            "Ваше звернення успішно сформовано та передано до Уряду штату Olymp.";
+
+    }
+
+
+    log(
+        "Заявка отправлена:",
+        {
+            number,
+            service
+        }
+    );
+
+}
+
+
+/* =========================================================
+   СТАТУС ЗАЯВКИ
+========================================================= */
+
+function setApplicationStatus(
+    status
+) {
+
+    const container =
+        document.getElementById(
+            "applicationStatus"
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    const badge =
+        container.querySelector(
+            ".status-badge"
+        );
+
+
+    if (!badge) {
+
+        return;
+
+    }
+
+
+    badge.textContent =
+        status;
+
+
+    badge.classList.remove(
+        "pending",
+        "accepted",
+        "completed",
+        "rejected",
+        "closed"
+    );
+
+
+    if (
+        status.includes(
+            "На розгляді"
+        )
     ) {
 
-        event.preventDefault();
+        badge.classList.add(
+            "pending"
+        );
+
+    } else if (
+        status.includes(
+            "Прийнято"
+        )
+    ) {
+
+        badge.classList.add(
+            "accepted"
+        );
+
+    } else if (
+        status.includes(
+            "Виконано"
+        )
+    ) {
+
+        badge.classList.add(
+            "completed"
+        );
+
+    } else if (
+        status.includes(
+            "Відхилено"
+        )
+    ) {
+
+        badge.classList.add(
+            "rejected"
+        );
+
+    } else if (
+        status.includes(
+            "Закрито"
+        )
+    ) {
+
+        badge.classList.add(
+            "closed"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ВРЕМЕННЫЙ НОМЕР
+========================================================= */
+
+/*
+ * В текущем Code.gs настоящий номер
+ * генерируется на сервере.
+ *
+ * Из-за no-cors браузер не может
+ * прочитать ответ.
+ *
+ * Поэтому здесь показываем
+ * временный номер только на экране.
+ *
+ * В Google Sheets настоящий номер
+ * будет вида:
+ *
+ * OLYMP-000001
+ *
+ */
+
+function generateTemporaryApplicationNumber() {
+
+    const timestamp =
+        Date.now()
+            .toString()
+            .slice(-6);
+
+
+    return (
+        "OLYMP-" +
+        timestamp
+    );
+
+}
+
+
+/* =========================================================
+   ОШИБКА ФОРМЫ
+========================================================= */
+
+function showFormError(
+    message
+) {
+
+    /*
+     * Сначала удаляем старое сообщение
+     */
+
+    const old =
+        document.querySelector(
+            ".olymp-form-error"
+        );
 
 
-        const form =
-            event.target;
+    if (old) {
 
-
-        const button =
-            form.querySelector(
-                "button[type='submit']"
-            );
-
-
-        const messageBox =
-            document.getElementById(
-                "applicationFormMessage"
-            );
-
-
-        if (button) {
-
-            button.disabled =
-                true;
-
-        }
-
-
-        if (messageBox) {
-
-            messageBox.textContent =
-                "Надсилання заявки...";
-
-            messageBox.className =
-                "application-form-message loading";
-
-        }
-
-
-        try {
-
-            /*
-             * Получаем URL Google Apps Script
-             */
-
-            const scriptUrl =
-                getGoogleScriptUrl();
-
-
-            if (!scriptUrl) {
-
-                throw new Error(
-                    "URL Google Apps Script не налаштований."
-                );
-
-            }
-
-
-            /*
-             * Формируем данные
-             */
-
-            const formData =
-                new FormData(form);
-
-
-            /*
-             * Отправляем
-             */
-
-            const response =
-                await fetch(
-                    scriptUrl,
-                    {
-
-                        method:
-                            "POST",
-
-                        body:
-                            formData
-
-                    }
-                );
-
-
-            const result =
-                await response.json();
-
-
-            if (
-                !result ||
-                result.success !== true
-            ) {
-
-                throw new Error(
-                    result?.message ||
-                    "Не вдалося зареєструвати заявку."
-                );
-
-            }
-
-
-            /*
-             * Успешно
-             */
-
-            if (messageBox) {
-
-                messageBox.textContent =
-                    `Заявку успішно зареєстровано. Номер: ${result.number}`;
-
-                messageBox.className =
-                    "application-form-message success";
-
-            }
-
-
-            /*
-             * Очищаем форму
-             */
-
-            form.reset();
-
-
-            /*
-             * Сохраняем номер заявки
-             */
-
-            try {
-
-                localStorage.setItem(
-                    "lastApplicationNumber",
-                    result.number
-                );
-
-            } catch (error) {}
-
-
-
-            /*
-             * Обновляем кабинет,
-             * если такая функция существует.
-             */
-
-            setTimeout(
-                () => {
-
-                    if (
-                        typeof window.loadApplications ===
-                        "function"
-                    ) {
-
-                        window.loadApplications();
-
-                    }
-
-                    if (
-                        typeof window.loadUserApplications ===
-                        "function"
-                    ) {
-
-                        window.loadUserApplications();
-
-                    }
-
-                },
-                500
-            );
-
-
-        } catch (error) {
-
-            console.error(
-                "Application error:",
-                error
-            );
-
-
-            if (messageBox) {
-
-                messageBox.textContent =
-                    error.message ||
-                    "Помилка надсилання заявки.";
-
-                messageBox.className =
-                    "application-form-message error";
-
-            }
-
-        } finally {
-
-            if (button) {
-
-                button.disabled =
-                    false;
-
-            }
-
-        }
+        old.remove();
 
     }
 
 
-    /* =====================================================
-       GOOGLE APPS SCRIPT URL
-    ===================================================== */
-
-    function getGoogleScriptUrl() {
-
-        /*
-         * Проверяем несколько вариантов,
-         * чтобы не ломать существующий script.js.
-         */
-
-        const possibleKeys = [
-
-            "OLYMP_SCRIPT_URL",
-            "GOOGLE_SCRIPT_URL",
-            "googleScriptUrl",
-            "scriptUrl"
-
-        ];
+    const form =
+        document.getElementById(
+            "applicationForm"
+        );
 
 
-        for (
-            const key of possibleKeys
-        ) {
+    if (!form) {
 
-            try {
+        alert(
+            message
+        );
 
-                const value =
-                    localStorage.getItem(
-                        key
-                    );
+        return;
 
-
-                if (value) {
-
-                    return value.trim();
-
-                }
-
-            } catch (error) {}
-
-        }
+    }
 
 
-        /*
-         * Глобальные переменные
-         */
-
-        if (
-            window.GOOGLE_SCRIPT_URL
-        ) {
-
-            return
-                window.GOOGLE_SCRIPT_URL;
-
-        }
+    const error =
+        document.createElement(
+            "div"
+        );
 
 
-        if (
-            window.OLYMP_SCRIPT_URL
-        ) {
-
-            return
-                window.OLYMP_SCRIPT_URL;
-
-        }
+    error.className =
+        "olymp-form-error";
 
 
-        /*
-         * Meta tag
-         */
-
-        const meta =
-            document.querySelector(
-                'meta[name="google-script-url"]'
-            );
+    error.textContent =
+        message;
 
 
-        if (
-            meta &&
-            meta.content
-        ) {
-
-            return meta.content.trim();
-
-        }
+    error.style.marginBottom =
+        "15px";
 
 
-        /*
-         * data-атрибут body
-         */
-
-        const bodyUrl =
-            document.body.dataset
-                ?.googleScriptUrl;
+    error.style.padding =
+        "12px 15px";
 
 
-        if (bodyUrl) {
+    error.style.borderRadius =
+        "8px";
 
-            return bodyUrl.trim();
 
-        }
+    error.style.background =
+        "#ffe6e6";
 
+
+    error.style.color =
+        "#9b1c1c";
+
+
+    error.style.fontSize =
+        "14px";
+
+
+    error.style.fontWeight =
+        "600";
+
+
+    form.prepend(
+        error
+    );
+
+
+    setTimeout(
+        function () {
+
+            if (
+                error.parentNode
+            ) {
+
+                error.remove();
+
+            }
+
+        },
+        5000
+    );
+
+}
+
+
+/* =========================================================
+   ПОЛУЧЕНИЕ VALUE
+========================================================= */
+
+function getInputValue(
+    id
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
 
         return "";
 
     }
 
 
-    /* =====================================================
-       GLOBAL HELPERS
-    ===================================================== */
+    return String(
+        element.value || ""
+    ).trim();
 
-    window.OLYMP =
-        window.OLYMP || {};
-
-
-    window.OLYMP.openApplication =
-        window.openApplicationModal;
+}
 
 
-    window.OLYMP.openService =
-        window.openService;
+/* =========================================================
+   УСТАНОВКА TEXT
+========================================================= */
+
+function setElementText(
+    id,
+    text
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
 
 
-    window.OLYMP.closeApplication =
-        window.closeApplicationModal;
+    if (!element) {
+
+        return;
+
+    }
 
 
-})();
+    element.textContent =
+        text;
+
+}
+
+
+/* =========================================================
+   FOCUS
+========================================================= */
+
+function focusElement(
+    id
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    setTimeout(
+        function () {
+
+            element.focus();
+
+        },
+        50
+    );
+
+}
+
+
+/* =========================================================
+   ЧЕРНОВИК ЗАЯВКИ
+========================================================= */
+
+const APPLICATION_DRAFT_KEY =
+    "olymp_application_draft_6_2";
+
+
+function saveApplicationDraft() {
+
+    try {
+
+        const data = {
+
+            fullName:
+                getInputValue(
+                    "fullName"
+                ),
+
+            idNumber:
+                getInputValue(
+                    "idNumber"
+                ),
+
+            service:
+                getInputValue(
+                    "applicationService"
+                ),
+
+            contact:
+                getInputValue(
+                    "contact"
+                ),
+
+            message:
+                getInputValue(
+                    "message"
+                )
+
+        };
+
+
+        localStorage.setItem(
+            APPLICATION_DRAFT_KEY,
+            JSON.stringify(data)
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Не удалось сохранить черновик.",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ВОССТАНОВЛЕНИЕ ЧЕРНОВИКА
+========================================================= */
+
+function restoreApplicationDraft() {
+
+    try {
+
+        const saved =
+            localStorage.getItem(
+                APPLICATION_DRAFT_KEY
+            );
+
+
+        if (!saved) {
+
+            return;
+
+        }
+
+
+        const data =
+            JSON.parse(
+                saved
+            );
+
+
+        if (
+            data.fullName
+        ) {
+
+            setInputValue(
+                "fullName",
+                data.fullName
+            );
+
+        }
+
+
+        if (
+            data.idNumber
+        ) {
+
+            setInputValue(
+                "idNumber",
+                data.idNumber
+            );
+
+        }
+
+
+        if (
+            data.service
+        ) {
+
+            setInputValue(
+                "applicationService",
+                data.service
+            );
+
+        }
+
+
+        if (
+            data.contact
+        ) {
+
+            setInputValue(
+                "contact",
+                data.contact
+            );
+
+        }
+
+
+        if (
+            data.message
+        ) {
+
+            setInputValue(
+                "message",
+                data.message
+            );
+
+        }
+
+
+        log(
+            "Черновик заявки восстановлен."
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Не удалось восстановить черновик.",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SET INPUT VALUE
+========================================================= */
+
+function setInputValue(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    element.value =
+        value;
+
+}
+
+
+/* =========================================================
+   ОЧИСТКА ЧЕРНОВИКА
+========================================================= */
+
+function clearApplicationDraft() {
+
+    try {
+
+        localStorage.removeItem(
+            APPLICATION_DRAFT_KEY
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Не удалось удалить черновик.",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   ЗАКРЫТИЕ ПО ССЫЛКАМ
+========================================================= */
+
+document.addEventListener(
+    "click",
+    function (event) {
+
+        const link =
+            event.target.closest(
+                "a[href='#']"
+            );
+
+
+        if (!link) {
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+    }
+);
+
+
+/* =========================================================
+   ПЛАВНАЯ НАВИГАЦИЯ
+========================================================= */
+
+document.addEventListener(
+    "click",
+    function (event) {
+
+        const link =
+            event.target.closest(
+                'a[href^="#"]'
+            );
+
+
+        if (!link) {
+
+            return;
+
+        }
+
+
+        const targetId =
+            link.getAttribute(
+                "href"
+            );
+
+
+        if (
+            !targetId ||
+            targetId === "#"
+        ) {
+
+            return;
+
+        }
+
+
+        const target =
+            document.querySelector(
+                targetId
+            );
+
+
+        if (!target) {
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+
+        target.scrollIntoView({
+
+            behavior:
+                "smooth",
+
+            block:
+                "start"
+
+        });
+
+    }
+);
+
+
+/* =========================================================
+   HEADER SCROLL
+========================================================= */
+
+window.addEventListener(
+    "scroll",
+    function () {
+
+        const header =
+            document.getElementById(
+                "header"
+            );
+
+
+        if (!header) {
+
+            return;
+
+        }
+
+
+        if (
+            window.scrollY > 30
+        ) {
+
+            header.classList.add(
+                "scrolled"
+            );
+
+        } else {
+
+            header.classList.remove(
+                "scrolled"
+            );
+
+        }
+
+    },
+    {
+        passive: true
+    }
+);
+
+
+/* =========================================================
+   АВТОМАТИЧЕСКАЯ ГЛОБАЛЬНАЯ ИНИЦИАЛИЗАЦИЯ
+========================================================= */
+
+window.openService =
+    openService;
+
+
+window.openApplicationModal =
+    openApplicationModal;
+
+
+window.closeServiceModal =
+    closeServiceModal;
+
+
+window.closeApplicationModal =
+    closeApplicationModal;
+
+
+/* =========================================================
+   FINISH
+========================================================= */
+
+log(
+    "OLYMP Government Script 6.2 готов."
+);
