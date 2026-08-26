@@ -1344,28 +1344,48 @@ async function submitApplication(
     }
 
 
-    /*
-     * Проверка API
-     */
+/*
+ * =========================================================
+ * ПРОВЕРКА API
+ * =========================================================
+ */
 
-    if (
-        !OLYMP_CONFIG.API_URL ||
-        OLYMP_CONFIG.API_URL.includes(
-            "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec"
-        )
-    ) {
+const apiUrl =
+    String(
+        OLYMP_CONFIG.API_URL || ""
+    ).trim();
 
-        showFormError(
-            "Система заявок ще не налаштована. Адміністратору необхідно додати URL Google Apps Script."
-        );
 
-        console.error(
-            "OLYMP_CONFIG.API_URL не настроен."
-        );
+if (
+    !apiUrl ||
+    !apiUrl.startsWith(
+        "https://script.google.com/macros/s/"
+    ) ||
+    !apiUrl.endsWith(
+        "/exec"
+    )
+) {
 
-        return;
+    showFormError(
+        "Система заявок ще не налаштована. Адміністратору необхідно додати правильний URL Google Apps Script."
+    );
 
-    }
+    console.error(
+        "[OLYMP 6.2] Неправильний API URL:",
+        apiUrl
+    );
+
+    applicationSending = false;
+
+    return;
+
+}
+
+
+log(
+    "[OLYMP 6.2] API:",
+    apiUrl
+);
 
 
     /*
