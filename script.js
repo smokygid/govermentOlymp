@@ -1,37 +1,35 @@
 /* =========================================================
    OLYMP GOVERNMENT
    PERSONAL CABINET
-   SCRIPT.JS 6.4
+   SCRIPT.JS 6.5
    =========================================================
 
-   Совместим с:
-   - Code.gs 6.1
-   - Google Apps Script Web App
-   - OLYMP-ID
-   - Регистрация
-   - Авторизация
-   - Session Token
-   - Личный кабинет
-   - Профиль
-   - Заявки
-   - Статусы
-   - Аватар URL
-   - Logout
+   • OLYMP-ID
+   • Регистрация
+   • Авторизация
+   • Session Token
+   • Автоматическое восстановление сессии
+   • Личный кабинет
+   • Профиль
+   • Заявки / звернення
+   • Статусы
+   • Аватар
+   • Logout
+   • Google Apps Script Web App
+   • GET API без CORS preflight
 
-   ГЛАВНОЕ ИСПРАВЛЕНИЕ 6.4:
+   ИСПРАВЛЕНИЯ 6.5:
 
-   1. sessionToken сохраняется в localStorage
-   2. OLYMP-ID сохраняется в localStorage
-   3. После обновления страницы сессия восстанавливается
-   4. Все запросы profile/applications/createapplication
-      отправляют sessionToken
-   5. Заявка невозможна без действующей сессии
-   6. После регистрации пользователь автоматически считается
-      авторизованным
-   7. После login пользователь автоматически считается
-      авторизованным
-   8. Используется GET для Google Apps Script,
-      чтобы избежать CORS/preflight проблем
+   1. Исправлена кнопка «Звернення»
+   2. Исправлена отправка формы обращения
+   3. Форма обращения определяется универсально
+   4. Кнопка submit больше не конфликтует с submit формы
+   5. Проверка авторизации перед отправкой
+   6. Session Token передаётся в createapplication
+   7. После отправки заявка появляется в кабинете
+   8. После регистрации автоматически создаётся сессия
+   9. После login автоматически создаётся сессия
+   10. Сессия сохраняется в localStorage
    ========================================================= */
 
 
@@ -41,17 +39,8 @@
 
 const OLYMP_CONFIG = {
 
-    /*
-     * ВСТАВЬ СЮДА URL GOOGLE APPS SCRIPT WEB APP
-     *
-     * Пример:
-     *
-     * https://script.google.com/macros/s/AKfycbxxxxxxxxxxxx/exec
-     */
-
     API_URL:
         "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec",
-
 
     STORAGE: {
 
@@ -69,10 +58,8 @@ const OLYMP_CONFIG = {
 
     },
 
-
     SESSION_CHECK_INTERVAL:
         5 * 60 * 1000,
-
 
     REQUEST_TIMEOUT:
         20000
@@ -141,24 +128,15 @@ async function initializeOlympGovernment() {
 
     }
 
-
     OlympState.initialized =
         true;
 
-
     loadStoredSession();
-
-
-    /*
-     * Сразу обновляем интерфейс.
-     */
 
     updateAuthUI();
 
-
     /*
-     * Если есть токен —
-     * проверяем его на сервере.
+     * Восстановление сессии
      */
 
     if (
@@ -168,36 +146,34 @@ async function initializeOlympGovernment() {
 
         await restoreSession();
 
-    } else {
-
-        updateAuthUI();
-
     }
 
-
     /*
-     * Обработчики форм.
+     * Настройка форм
      */
 
     setupForms();
 
-
     /*
-     * Проверяем ссылки/кнопки кабинета.
+     * Ссылки кабинета
      */
 
     setupCabinetLinks();
 
-
     /*
-     * Проверяем кнопки заявки.
+     * Кнопки обращения
      */
 
     setupApplicationButtons();
 
+    /*
+     * Повторно обновляем UI
+     */
+
+    updateAuthUI();
 
     /*
-     * Периодическая проверка сессии.
+     * Периодическая проверка сессии
      */
 
     setInterval(
@@ -232,36 +208,32 @@ function loadStoredSession() {
                 OLYMP_CONFIG.STORAGE.TOKEN
             ) || "";
 
-
         const olympId =
             localStorage.getItem(
                 OLYMP_CONFIG.STORAGE.OLYMP_ID
             ) || "";
-
 
         const citizenRaw =
             localStorage.getItem(
                 OLYMP_CONFIG.STORAGE.CITIZEN
             );
 
-
         const profileRaw =
             localStorage.getItem(
                 OLYMP_CONFIG.STORAGE.PROFILE
             );
 
-
         OlympState.sessionToken =
             String(token).trim();
-
 
         OlympState.olympId =
             normalizeOlympId(
                 olympId
             );
 
-
-        if (citizenRaw) {
+        if (
+            citizenRaw
+        ) {
 
             try {
 
@@ -279,8 +251,9 @@ function loadStoredSession() {
 
         }
 
-
-        if (profileRaw) {
+        if (
+            profileRaw
+        ) {
 
             try {
 
@@ -298,7 +271,6 @@ function loadStoredSession() {
 
         }
 
-
         OlympState.authenticated =
             Boolean(
                 OlympState.sessionToken &&
@@ -306,6 +278,11 @@ function loadStoredSession() {
             );
 
     } catch (error) {
+
+        console.error(
+            "loadStoredSession:",
+            error
+        );
 
         clearSession();
 
@@ -318,14 +295,17 @@ function loadStoredSession() {
    SAVE SESSION
 ========================================================= */
 
-function saveSession(data) {
+function saveSession(
+    data
+) {
 
-    if (!data) {
+    if (
+        !data
+    ) {
 
         return false;
 
     }
-
 
     const token =
         String(
@@ -334,13 +314,11 @@ function saveSession(data) {
             ""
         ).trim();
 
-
     const citizen =
         data.citizen ||
         data.profile ||
         data.user ||
         null;
-
 
     const olympId =
         normalizeOlympId(
@@ -358,12 +336,6 @@ function saveSession(data) {
             )
         );
 
-
-    /*
-     * Без токена и ID нельзя считать пользователя
-     * авторизованным.
-     */
-
     if (
         !token ||
         !olympId
@@ -378,30 +350,29 @@ function saveSession(data) {
 
     }
 
-
     OlympState.sessionToken =
         token;
-
 
     OlympState.olympId =
         olympId;
 
-
     OlympState.authenticated =
         true;
 
-
-    if (citizen) {
+    if (
+        citizen
+    ) {
 
         OlympState.citizen =
             citizen;
 
+        OlympState.profile =
+            citizen;
 
         localStorage.setItem(
             OLYMP_CONFIG.STORAGE.CITIZEN,
             JSON.stringify(citizen)
         );
-
 
         localStorage.setItem(
             OLYMP_CONFIG.STORAGE.PROFILE,
@@ -410,21 +381,17 @@ function saveSession(data) {
 
     }
 
-
     localStorage.setItem(
         OLYMP_CONFIG.STORAGE.TOKEN,
         token
     );
-
 
     localStorage.setItem(
         OLYMP_CONFIG.STORAGE.OLYMP_ID,
         olympId
     );
 
-
     updateAuthUI();
-
 
     return true;
 
@@ -455,7 +422,6 @@ function clearSession() {
     OlympState.applications =
         [];
 
-
     try {
 
         localStorage.removeItem(
@@ -476,10 +442,12 @@ function clearSession() {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "clearSession:",
+            error
+        );
 
     }
-
 
     updateAuthUI();
 
@@ -508,23 +476,19 @@ async function apiRequest(
 
     }
 
-
     const query =
         new URLSearchParams();
-
 
     query.set(
         "action",
         action
     );
 
-
     Object.keys(params).forEach(
         function (key) {
 
             const value =
                 params[key];
-
 
             if (
                 value !== undefined &&
@@ -542,7 +506,6 @@ async function apiRequest(
         }
     );
 
-
     const url =
         OLYMP_CONFIG.API_URL +
         (
@@ -552,10 +515,8 @@ async function apiRequest(
         ) +
         query.toString();
 
-
     const controller =
         new AbortController();
-
 
     const timeout =
         setTimeout(
@@ -566,7 +527,6 @@ async function apiRequest(
             },
             OLYMP_CONFIG.REQUEST_TIMEOUT
         );
-
 
     try {
 
@@ -588,7 +548,6 @@ async function apiRequest(
                 }
             );
 
-
         if (
             !response.ok
         ) {
@@ -600,12 +559,12 @@ async function apiRequest(
 
         }
 
-
         const text =
             await response.text();
 
-
-        if (!text) {
+        if (
+            !text
+        ) {
 
             throw new Error(
                 "Сервер повернув порожню відповідь."
@@ -613,14 +572,14 @@ async function apiRequest(
 
         }
 
-
         let data;
-
 
         try {
 
             data =
-                JSON.parse(text);
+                JSON.parse(
+                    text
+                );
 
         } catch (error) {
 
@@ -634,7 +593,6 @@ async function apiRequest(
             );
 
         }
-
 
         return data;
 
@@ -651,12 +609,13 @@ async function apiRequest(
 
         }
 
-
         throw error;
 
     } finally {
 
-        clearTimeout(timeout);
+        clearTimeout(
+            timeout
+        );
 
     }
 
@@ -680,7 +639,6 @@ async function restoreSession() {
 
     }
 
-
     try {
 
         const result =
@@ -697,7 +655,6 @@ async function restoreSession() {
                 }
             );
 
-
         if (
             !result ||
             !result.success
@@ -709,12 +666,12 @@ async function restoreSession() {
 
         }
 
-
         const serverOlympId =
             normalizeOlympId(
-                result.olympId
+                result.olympId ||
+                result.citizenId ||
+                result.idNumber
             );
-
 
         if (
             serverOlympId &&
@@ -728,27 +685,14 @@ async function restoreSession() {
 
         }
 
-
         OlympState.authenticated =
             true;
 
-
-        /*
-         * Получаем актуальный профиль.
-         */
-
         await loadProfile();
-
-
-        /*
-         * Загружаем заявки.
-         */
 
         await loadApplications();
 
-
         updateAuthUI();
-
 
         return true;
 
@@ -759,14 +703,7 @@ async function restoreSession() {
             error
         );
 
-
-        /*
-         * Не удаляем локальную сессию сразу,
-         * если сервер временно недоступен.
-         */
-
         updateAuthUI();
-
 
         return false;
 
@@ -782,13 +719,13 @@ async function restoreSession() {
 async function validateSession() {
 
     if (
-        !OlympState.sessionToken
+        !OlympState.sessionToken ||
+        !OlympState.olympId
     ) {
 
         return false;
 
     }
-
 
     try {
 
@@ -801,11 +738,19 @@ async function validateSession() {
                         OlympState.sessionToken,
 
                     token:
-                        OlympState.sessionToken
+                        OlympState.sessionToken,
+
+                    olympId:
+                        OlympState.olympId,
+
+                    citizenId:
+                        OlympState.olympId,
+
+                    idNumber:
+                        OlympState.olympId
 
                 }
             );
-
 
         if (
             result &&
@@ -815,19 +760,11 @@ async function validateSession() {
             OlympState.authenticated =
                 true;
 
-
             return true;
 
         }
 
-
-        /*
-         * Сервер сообщил,
-         * что сессия недействительна.
-         */
-
         clearSession();
-
 
         return false;
 
@@ -837,7 +774,6 @@ async function validateSession() {
             "Ошибка проверки сессии:",
             error
         );
-
 
         return false;
 
@@ -850,21 +786,16 @@ async function validateSession() {
    REGISTER
 ========================================================= */
 
-async function registerCitizen(data) {
+async function registerCitizen(
+    data
+) {
 
-    if (
-        !data
-    ) {
-
-        data = {};
-
-    }
-
+    data =
+        data || {};
 
     setLoading(
         true
     );
-
 
     try {
 
@@ -907,7 +838,6 @@ async function registerCitizen(data) {
                 }
             );
 
-
         if (
             !result ||
             !result.success
@@ -921,26 +851,14 @@ async function registerCitizen(data) {
                 "error"
             );
 
-
             return result;
 
         }
-
-
-        /*
-         * КРИТИЧНО:
-         *
-         * Code.gs после регистрации уже создаёт
-         * sessionToken.
-         *
-         * Мы сохраняем его сразу.
-         */
 
         const saved =
             saveSession(
                 result
             );
-
 
         if (
             !saved
@@ -950,7 +868,6 @@ async function registerCitizen(data) {
                 "Реєстрацію завершено, але не вдалося зберегти сесію. Увійдіть повторно.",
                 "error"
             );
-
 
             return {
 
@@ -967,12 +884,6 @@ async function registerCitizen(data) {
 
         }
 
-
-        /*
-         * Сохраняем заявки,
-         * если сервер их вернул.
-         */
-
         if (
             Array.isArray(
                 result.applications
@@ -984,28 +895,14 @@ async function registerCitizen(data) {
 
         }
 
-
         updateAuthUI();
-
 
         showMessage(
             "Реєстрацію успішно завершено. Ви увійшли до особистого кабінету.",
             "success"
         );
 
-
-        /*
-         * Если есть форма регистрации —
-         * закрываем её.
-         */
-
         closeAuthForms();
-
-
-        /*
-         * Переходим в кабинет,
-         * если он есть на странице.
-         */
 
         setTimeout(
             function () {
@@ -1016,7 +913,6 @@ async function registerCitizen(data) {
             500
         );
 
-
         return result;
 
     } catch (error) {
@@ -1026,13 +922,11 @@ async function registerCitizen(data) {
             error
         );
 
-
         showMessage(
             error.message ||
             "Помилка під час реєстрації.",
             "error"
         );
-
 
         return {
 
@@ -1069,13 +963,11 @@ async function loginCitizen(
             olympId
         );
 
-
     password =
         String(
             password ||
             ""
         ).trim();
-
 
     if (
         !olympId
@@ -1086,7 +978,6 @@ async function loginCitizen(
             "error"
         );
 
-
         return {
 
             success:
@@ -1095,7 +986,6 @@ async function loginCitizen(
         };
 
     }
-
 
     if (
         !password
@@ -1106,7 +996,6 @@ async function loginCitizen(
             "error"
         );
 
-
         return {
 
             success:
@@ -1116,11 +1005,9 @@ async function loginCitizen(
 
     }
 
-
     setLoading(
         true
     );
-
 
     try {
 
@@ -1147,7 +1034,6 @@ async function loginCitizen(
                 }
             );
 
-
         if (
             !result ||
             !result.success
@@ -1161,23 +1047,14 @@ async function loginCitizen(
                 "error"
             );
 
-
             return result;
 
         }
-
-
-        /*
-         * КРИТИЧЕСКИЙ МОМЕНТ 6.4
-         *
-         * Сохраняем sessionToken.
-         */
 
         const saved =
             saveSession(
                 result
             );
-
 
         if (
             !saved
@@ -1187,7 +1064,6 @@ async function loginCitizen(
                 "Вхід виконано, але сесію не вдалося зберегти.",
                 "error"
             );
-
 
             return {
 
@@ -1201,7 +1077,6 @@ async function loginCitizen(
 
         }
 
-
         if (
             Array.isArray(
                 result.applications
@@ -1213,28 +1088,18 @@ async function loginCitizen(
 
         }
 
-
         updateAuthUI();
-
 
         showMessage(
             "Вхід успішно виконано.",
             "success"
         );
 
-
         closeAuthForms();
-
-
-        /*
-         * Загружаем актуальные данные.
-         */
 
         await loadProfile();
 
-
         await loadApplications();
-
 
         setTimeout(
             function () {
@@ -1245,7 +1110,6 @@ async function loginCitizen(
             300
         );
 
-
         return result;
 
     } catch (error) {
@@ -1255,13 +1119,11 @@ async function loginCitizen(
             error
         );
 
-
         showMessage(
             error.message ||
             "Помилка входу.",
             "error"
         );
-
 
         return {
 
@@ -1298,7 +1160,6 @@ async function loadProfile() {
 
     }
 
-
     try {
 
         const result =
@@ -1324,7 +1185,6 @@ async function loadProfile() {
                 }
             );
 
-
         if (
             !result ||
             !result.success
@@ -1340,17 +1200,14 @@ async function loadProfile() {
 
             }
 
-
             return result;
 
         }
-
 
         const citizen =
             result.citizen ||
             result.profile ||
             result.user;
-
 
         if (
             citizen
@@ -1362,12 +1219,10 @@ async function loadProfile() {
             OlympState.profile =
                 citizen;
 
-
             localStorage.setItem(
                 OLYMP_CONFIG.STORAGE.CITIZEN,
                 JSON.stringify(citizen)
             );
-
 
             localStorage.setItem(
                 OLYMP_CONFIG.STORAGE.PROFILE,
@@ -1375,7 +1230,6 @@ async function loadProfile() {
             );
 
         }
-
 
         if (
             Array.isArray(
@@ -1388,23 +1242,18 @@ async function loadProfile() {
 
         }
 
-
         OlympState.authenticated =
             true;
 
-
         updateAuthUI();
-
 
         renderProfile(
             citizen
         );
 
-
         renderApplications(
             OlympState.applications
         );
-
 
         return result;
 
@@ -1414,7 +1263,6 @@ async function loadProfile() {
             "loadProfile:",
             error
         );
-
 
         return {
 
@@ -1444,16 +1292,13 @@ async function loadApplications() {
         OlympState.applications =
             [];
 
-
         renderApplications(
             []
         );
 
-
         return [];
 
     }
-
 
     try {
 
@@ -1480,7 +1325,6 @@ async function loadApplications() {
                 }
             );
 
-
         if (
             !result ||
             !result.success
@@ -1496,11 +1340,9 @@ async function loadApplications() {
 
             }
 
-
             return [];
 
         }
-
 
         OlympState.applications =
             Array.isArray(
@@ -1509,16 +1351,13 @@ async function loadApplications() {
                 ? result.applications
                 : [];
 
-
         renderApplications(
             OlympState.applications
         );
 
-
         updateStatistics(
             OlympState.applications
         );
-
 
         return OlympState.applications;
 
@@ -1528,7 +1367,6 @@ async function loadApplications() {
             "loadApplications:",
             error
         );
-
 
         return [];
 
@@ -1546,10 +1384,7 @@ async function createApplication(
 ) {
 
     /*
-     * САМАЯ ВАЖНАЯ ПРОВЕРКА.
-     *
-     * Нельзя отправлять заявку,
-     * если пользователь не авторизован.
+     * Проверяем авторизацию
      */
 
     if (
@@ -1557,7 +1392,6 @@ async function createApplication(
     ) {
 
         showLoginRequired();
-
 
         return {
 
@@ -1574,21 +1408,18 @@ async function createApplication(
 
     }
 
-
     /*
-     * Дополнительная серверная проверка.
+     * Проверяем сессию
      */
 
     const sessionValid =
         await validateSession();
-
 
     if (
         !sessionValid
     ) {
 
         showLoginRequired();
-
 
         return {
 
@@ -1602,10 +1433,12 @@ async function createApplication(
 
     }
 
-
     data =
         data || {};
 
+    /*
+     * Получаем услугу
+     */
 
     const service =
         String(
@@ -1615,6 +1448,9 @@ async function createApplication(
             ""
         ).trim();
 
+    /*
+     * Получаем текст обращения
+     */
 
     const message =
         String(
@@ -1624,6 +1460,9 @@ async function createApplication(
             ""
         ).trim();
 
+    /*
+     * Контакт
+     */
 
     const contact =
         String(
@@ -1641,7 +1480,6 @@ async function createApplication(
             ""
         ).trim();
 
-
     if (
         !service
     ) {
@@ -1651,7 +1489,6 @@ async function createApplication(
             "error"
         );
 
-
         return {
 
             success:
@@ -1660,7 +1497,6 @@ async function createApplication(
         };
 
     }
-
 
     if (
         !message
@@ -1671,7 +1507,6 @@ async function createApplication(
             "error"
         );
 
-
         return {
 
             success:
@@ -1681,13 +1516,28 @@ async function createApplication(
 
     }
 
-
     setLoading(
         true
     );
 
-
     try {
+
+        console.log(
+            "OLYMP: отправка заявки",
+            {
+                olympId:
+                    OlympState.olympId,
+
+                service:
+                    service,
+
+                message:
+                    message,
+
+                contact:
+                    contact
+            }
+        );
 
         const result =
             await apiRequest(
@@ -1736,6 +1586,10 @@ async function createApplication(
                 }
             );
 
+        console.log(
+            "OLYMP: ответ createapplication",
+            result
+        );
 
         if (
             !result ||
@@ -1750,31 +1604,26 @@ async function createApplication(
 
                 clearSession();
 
-
                 showLoginRequired();
-
 
                 return result;
 
             }
 
-
             showMessage(
                 result &&
                 result.message
                     ? result.message
-                    : "Не вдалося подати заявку.",
+                    : "Не вдалося подати звернення.",
                 "error"
             );
-
 
             return result;
 
         }
 
-
         /*
-         * Заявка успешно создана.
+         * Добавляем новую заявку
          */
 
         if (
@@ -1787,20 +1636,28 @@ async function createApplication(
 
         }
 
-
         /*
-         * Получаем актуальный список
-         * с сервера.
+         * Загружаем актуальный список
          */
 
         await loadApplications();
 
+        /*
+         * Обновляем интерфейс
+         */
 
-        showMessage(
-            "Заявку успішно подано.",
-            "success"
+        renderApplications(
+            OlympState.applications
         );
 
+        updateStatistics(
+            OlympState.applications
+        );
+
+        showMessage(
+            "Звернення успішно подано.",
+            "success"
+        );
 
         return result;
 
@@ -1811,13 +1668,11 @@ async function createApplication(
             error
         );
 
-
         showMessage(
             error.message ||
-            "Помилка подання заявки.",
+            "Помилка подання звернення.",
             "error"
         );
-
 
         return {
 
@@ -1854,7 +1709,6 @@ async function saveAvatar(
 
         showLoginRequired();
 
-
         return {
 
             success:
@@ -1864,13 +1718,11 @@ async function saveAvatar(
 
     }
 
-
     avatarUrl =
         String(
             avatarUrl ||
             ""
         ).trim();
-
 
     if (
         !avatarUrl
@@ -1881,7 +1733,6 @@ async function saveAvatar(
             "error"
         );
 
-
         return {
 
             success:
@@ -1890,7 +1741,6 @@ async function saveAvatar(
         };
 
     }
-
 
     try {
 
@@ -1923,28 +1773,26 @@ async function saveAvatar(
                 }
             );
 
-
         if (
             !result ||
             !result.success
         ) {
 
             showMessage(
-                result.message ||
-                "Не вдалося зберегти аватар.",
+                result &&
+                result.message
+                    ? result.message
+                    : "Не вдалося зберегти аватар.",
                 "error"
             );
-
 
             return result;
 
         }
 
-
         const citizen =
             result.citizen ||
             result.profile;
-
 
         if (
             citizen
@@ -1956,12 +1804,10 @@ async function saveAvatar(
             OlympState.profile =
                 citizen;
 
-
             localStorage.setItem(
                 OLYMP_CONFIG.STORAGE.CITIZEN,
                 JSON.stringify(citizen)
             );
-
 
             localStorage.setItem(
                 OLYMP_CONFIG.STORAGE.PROFILE,
@@ -1970,33 +1816,29 @@ async function saveAvatar(
 
         }
 
-
         renderProfile(
             citizen
         );
-
 
         showMessage(
             "Аватар успішно збережено.",
             "success"
         );
 
-
         return result;
 
     } catch (error) {
 
         console.error(
+            "saveAvatar:",
             error
         );
-
 
         showMessage(
             error.message ||
             "Помилка збереження аватара.",
             "error"
         );
-
 
         return {
 
@@ -2022,7 +1864,6 @@ async function removeAvatar() {
 
         showLoginRequired();
 
-
         return {
 
             success:
@@ -2031,7 +1872,6 @@ async function removeAvatar() {
         };
 
     }
-
 
     try {
 
@@ -2052,23 +1892,22 @@ async function removeAvatar() {
                 }
             );
 
-
         if (
             !result ||
             !result.success
         ) {
 
             showMessage(
-                result.message ||
-                "Не вдалося видалити аватар.",
+                result &&
+                result.message
+                    ? result.message
+                    : "Не вдалося видалити аватар.",
                 "error"
             );
-
 
             return result;
 
         }
-
 
         if (
             OlympState.citizen
@@ -2083,7 +1922,6 @@ async function removeAvatar() {
             OlympState.citizen.photo =
                 "";
 
-
             localStorage.setItem(
                 OLYMP_CONFIG.STORAGE.CITIZEN,
                 JSON.stringify(
@@ -2093,26 +1931,23 @@ async function removeAvatar() {
 
         }
 
-
         renderProfile(
             OlympState.citizen
         );
-
 
         showMessage(
             "Аватар видалено.",
             "success"
         );
 
-
         return result;
 
     } catch (error) {
 
         console.error(
+            "removeAvatar:",
             error
         );
-
 
         return {
 
@@ -2134,7 +1969,6 @@ async function logoutCitizen() {
 
     const token =
         OlympState.sessionToken;
-
 
     try {
 
@@ -2166,27 +2000,18 @@ async function logoutCitizen() {
 
     }
 
-
     clearSession();
-
 
     showMessage(
         "Ви вийшли з особистого кабінету.",
         "success"
     );
 
-
-    /*
-     * Если есть отдельная страница входа —
-     * переходим туда.
-     */
-
     setTimeout(
         function () {
 
             const loginUrl =
                 findLoginPage();
-
 
             if (
                 loginUrl
@@ -2261,14 +2086,11 @@ function updateAuthUI() {
     const loggedIn =
         isLoggedIn();
 
-
     const citizen =
         getCurrentUser();
 
-
     /*
-     * Показываем/скрываем элементы
-     * по data-атрибутам.
+     * Авторизованные элементы
      */
 
     document
@@ -2286,6 +2108,9 @@ function updateAuthUI() {
             }
         );
 
+    /*
+     * Элементы для гостя
+     */
 
     document
         .querySelectorAll(
@@ -2302,10 +2127,8 @@ function updateAuthUI() {
             }
         );
 
-
     /*
-     * Элементы, которые должны показываться
-     * только авторизованным пользователям.
+     * auth-required
      */
 
     document
@@ -2343,7 +2166,6 @@ function updateAuthUI() {
             }
         );
 
-
     /*
      * OLYMP-ID
      */
@@ -2353,24 +2175,20 @@ function updateAuthUI() {
         OlympState.olympId
     );
 
-
     setText(
         "#userOlympId",
         OlympState.olympId
     );
-
 
     setText(
         "#olympId",
         OlympState.olympId
     );
 
-
     setText(
         "#profileOlympId",
         OlympState.olympId
     );
-
 
     /*
      * Имя
@@ -2386,30 +2204,25 @@ function updateAuthUI() {
             citizen.fio ||
             "";
 
-
         setText(
             "[data-user-name]",
             name
         );
-
 
         setText(
             "#userName",
             name
         );
 
-
         setText(
             "#profileName",
             name
         );
 
-
         setText(
             "#citizenName",
             name
         );
-
 
         /*
          * Email
@@ -2420,12 +2233,10 @@ function updateAuthUI() {
             citizen.email || ""
         );
 
-
         setText(
             "#profileEmail",
             citizen.email || ""
         );
-
 
         /*
          * Телефон
@@ -2436,12 +2247,10 @@ function updateAuthUI() {
             citizen.phone || ""
         );
 
-
         setText(
             "#profilePhone",
             citizen.phone || ""
         );
-
 
         /*
          * Discord
@@ -2452,12 +2261,10 @@ function updateAuthUI() {
             citizen.discord || ""
         );
 
-
         setText(
             "#profileDiscord",
             citizen.discord || ""
         );
-
 
         /*
          * Дата рождения
@@ -2468,12 +2275,10 @@ function updateAuthUI() {
             citizen.birthDate || ""
         );
 
-
         setText(
             "#profileBirthDate",
             citizen.birthDate || ""
         );
-
 
         /*
          * Статус
@@ -2481,24 +2286,15 @@ function updateAuthUI() {
 
         setText(
             "[data-user-status]",
-            citizen.status || "Активний"
+            citizen.status ||
+            "Активний"
         );
 
     }
 
-
-    /*
-     * Аватар
-     */
-
     updateAvatarUI(
         citizen
     );
-
-
-    /*
-     * Кнопки заявки.
-     */
 
     updateApplicationButtons();
 
@@ -2514,22 +2310,17 @@ function updateApplicationButtons() {
     const loggedIn =
         isLoggedIn();
 
-
     document
         .querySelectorAll(
             "[data-submit-application], " +
             "[data-application-submit], " +
             "#submitApplication, " +
-            "#sendApplication"
+            "#sendApplication, " +
+            "#submitRequest, " +
+            "#sendRequest"
         )
         .forEach(
             function (button) {
-
-                /*
-                 * НЕ блокируем кнопку полностью,
-                 * иначе пользователь не сможет увидеть
-                 * сообщение о необходимости входа.
-                 */
 
                 if (
                     loggedIn
@@ -2539,10 +2330,24 @@ function updateApplicationButtons() {
                         "login-required"
                     );
 
+                    button.removeAttribute(
+                        "aria-disabled"
+                    );
+
                 } else {
 
                     button.classList.add(
                         "login-required"
+                    );
+
+                    /*
+                     * Не ставим disabled=true,
+                     * иначе click не сработает.
+                     */
+
+                    button.setAttribute(
+                        "aria-disabled",
+                        "true"
                     );
 
                 }
@@ -2569,13 +2374,11 @@ function updateAvatarUI(
 
     }
 
-
     const avatar =
         citizen.avatarUrl ||
         citizen.avatar ||
         citizen.photo ||
         "";
-
 
     document
         .querySelectorAll(
@@ -2598,7 +2401,6 @@ function updateAvatarUI(
 
             }
         );
-
 
     document
         .querySelectorAll(
@@ -2638,61 +2440,54 @@ function renderProfile(
 
     }
 
-
     updateAuthUI();
-
-
-    /*
-     * Дополнительный универсальный вывод
-     * через data-profile.
-     */
 
     const map = {
 
-        "fullName":
+        fullName:
             citizen.fullName ||
             citizen.name ||
             citizen.fio ||
             "",
 
-        "olympId":
+        olympId:
             citizen.olympId ||
             citizen.citizenId ||
             citizen.idNumber ||
+            OlympState.olympId ||
             "",
 
-        "birthDate":
+        birthDate:
             citizen.birthDate ||
             "",
 
-        "phone":
+        phone:
             citizen.phone ||
             "",
 
-        "email":
+        email:
             citizen.email ||
             "",
 
-        "discord":
+        discord:
             citizen.discord ||
             "",
 
-        "contact":
+        contact:
             citizen.contact ||
             citizen.preferredContact ||
             "",
 
-        "status":
+        status:
             citizen.status ||
             "Активний",
 
-        "registrationDate":
+        registrationDate:
             citizen.registrationDate ||
             citizen.createdAt ||
             ""
 
     };
-
 
     document
         .querySelectorAll(
@@ -2703,7 +2498,6 @@ function renderProfile(
 
                 const key =
                     element.dataset.profile;
-
 
                 if (
                     Object.prototype.hasOwnProperty.call(
@@ -2738,18 +2532,12 @@ function renderApplications(
             ? applications
             : [];
 
-
-    /*
-     * Универсальный контейнер.
-     */
-
     const containers =
         document.querySelectorAll(
             "[data-applications-list], " +
             "#applicationsList, " +
             "#applicationsContainer"
         );
-
 
     containers.forEach(
         function (container) {
@@ -2761,22 +2549,25 @@ function renderApplications(
                 container.innerHTML =
                     `
                     <div class="applications-empty">
+
                         <div class="applications-empty-icon">
                             📄
                         </div>
+
                         <div class="applications-empty-title">
                             Заявок поки немає
                         </div>
+
                         <div class="applications-empty-text">
                             Ви ще не подавали заявок.
                         </div>
+
                     </div>
                     `;
 
                 return;
 
             }
-
 
             container.innerHTML =
                 applications
@@ -2794,7 +2585,6 @@ function renderApplications(
         }
     );
 
-
     updateStatistics(
         applications
     );
@@ -2810,6 +2600,9 @@ function createApplicationHTML(
     application
 ) {
 
+    application =
+        application || {};
+
     const number =
         escapeHTML(
             application.number ||
@@ -2818,33 +2611,33 @@ function createApplicationHTML(
             "—"
         );
 
-
     const service =
         escapeHTML(
             application.service ||
+            application.serviceName ||
+            application.type ||
             "—"
         );
-
 
     const status =
         application.status ||
         "🟡 На розгляді";
 
-
     const message =
         escapeHTML(
             application.message ||
+            application.description ||
+            application.text ||
             ""
         );
-
 
     const date =
         formatDate(
             application.date ||
             application.createdAt ||
+            application.timestamp ||
             ""
         );
-
 
     const responsible =
         escapeHTML(
@@ -2852,19 +2645,17 @@ function createApplicationHTML(
             "Не призначено"
         );
 
-
     const comment =
         escapeHTML(
             application.comment ||
+            application.response ||
             ""
         );
-
 
     const statusClass =
         getStatusClass(
             status
         );
-
 
     return `
         <div
@@ -2905,6 +2696,7 @@ function createApplicationHTML(
                 }
 
                 ${
+                    responsible &&
                     responsible !== "Не призначено"
                         ? `
                             <div class="application-responsible">
@@ -2949,10 +2741,8 @@ function updateStatistics(
             ? applications
             : [];
 
-
     const total =
         applications.length;
-
 
     let pending =
         0;
@@ -2969,7 +2759,6 @@ function updateStatistics(
     let closed =
         0;
 
-
     applications.forEach(
         function (application) {
 
@@ -2978,7 +2767,6 @@ function updateStatistics(
                     application.status ||
                     ""
                 ).toLowerCase();
-
 
             if (
                 status.indexOf(
@@ -2990,7 +2778,6 @@ function updateStatistics(
 
             }
 
-
             if (
                 status.indexOf(
                     "прийнято"
@@ -3000,7 +2787,6 @@ function updateStatistics(
                 approved++;
 
             }
-
 
             if (
                 status.indexOf(
@@ -3012,7 +2798,6 @@ function updateStatistics(
 
             }
 
-
             if (
                 status.indexOf(
                     "відхилено"
@@ -3022,7 +2807,6 @@ function updateStatistics(
                 rejected++;
 
             }
-
 
             if (
                 status.indexOf(
@@ -3036,7 +2820,6 @@ function updateStatistics(
 
         }
     );
-
 
     const values = {
 
@@ -3060,7 +2843,6 @@ function updateStatistics(
 
     };
 
-
     Object.keys(values).forEach(
         function (key) {
 
@@ -3069,12 +2851,10 @@ function updateStatistics(
                 values[key]
             );
 
-
             setText(
                 `#stat-${key}`,
                 values[key]
             );
-
 
             setText(
                 `#${key}Applications`,
@@ -3093,19 +2873,31 @@ function updateStatistics(
 
 function setupForms() {
 
-    /*
-     * Login form
-     */
+    setupLoginForms();
 
-    const loginForms =
+    setupRegisterForms();
+
+    setupApplicationForms();
+
+    setupLogoutButtons();
+
+}
+
+
+/* =========================================================
+   LOGIN FORMS
+========================================================= */
+
+function setupLoginForms() {
+
+    const forms =
         document.querySelectorAll(
             "form[data-login-form], " +
             "#loginForm, " +
             ".login-form"
         );
 
-
-    loginForms.forEach(
+    forms.forEach(
         function (form) {
 
             if (
@@ -3117,10 +2909,8 @@ function setupForms() {
 
             }
 
-
             form.dataset.olympBound =
                 "true";
-
 
             form.addEventListener(
                 "submit",
@@ -3128,6 +2918,7 @@ function setupForms() {
 
                     event.preventDefault();
 
+                    event.stopPropagation();
 
                     const olympId =
                         getFormValue(
@@ -3140,7 +2931,6 @@ function setupForms() {
                             ]
                         );
 
-
                     const password =
                         getFormValue(
                             form,
@@ -3149,7 +2939,6 @@ function setupForms() {
                                 "pass"
                             ]
                         );
-
 
                     await loginCitizen(
                         olympId,
@@ -3162,20 +2951,23 @@ function setupForms() {
         }
     );
 
+}
 
-    /*
-     * Registration form
-     */
 
-    const registerForms =
+/* =========================================================
+   REGISTER FORMS
+========================================================= */
+
+function setupRegisterForms() {
+
+    const forms =
         document.querySelectorAll(
             "form[data-register-form], " +
             "#registerForm, " +
             ".register-form"
         );
 
-
-    registerForms.forEach(
+    forms.forEach(
         function (form) {
 
             if (
@@ -3187,10 +2979,8 @@ function setupForms() {
 
             }
 
-
             form.dataset.olympBound =
                 "true";
-
 
             form.addEventListener(
                 "submit",
@@ -3198,6 +2988,7 @@ function setupForms() {
 
                     event.preventDefault();
 
+                    event.stopPropagation();
 
                     const data = {
 
@@ -3267,7 +3058,6 @@ function setupForms() {
 
                     };
 
-
                     await registerCitizen(
                         data
                     );
@@ -3278,110 +3068,246 @@ function setupForms() {
         }
     );
 
+}
+
+
+/* =========================================================
+   APPLICATION FORMS
+========================================================= */
+
+function setupApplicationForms() {
 
     /*
-     * Application forms
+     * Ищем максимально много вариантов формы.
      */
 
-    const applicationForms =
+    const forms =
         document.querySelectorAll(
             "form[data-application-form], " +
+            "form[data-application], " +
             "#applicationForm, " +
-            ".application-form"
+            "#requestForm, " +
+            "#appealForm, " +
+            ".application-form, " +
+            ".request-form, " +
+            ".appeal-form"
         );
 
-
-    applicationForms.forEach(
+    forms.forEach(
         function (form) {
 
-            if (
-                form.dataset.olympBound ===
-                "true"
-            ) {
-
-                return;
-
-            }
-
-
-            form.dataset.olympBound =
-                "true";
-
-
-            form.addEventListener(
-                "submit",
-                async function (event) {
-
-                    event.preventDefault();
-
-
-                    /*
-                     * Здесь НЕ надо брать OLYMP-ID
-                     * из формы.
-                     *
-                     * ID берётся только из текущей
-                     * авторизованной сессии.
-                     */
-
-                    const data = {
-
-                        service:
-                            getFormValue(
-                                form,
-                                [
-                                    "service",
-                                    "serviceName",
-                                    "type"
-                                ]
-                            ),
-
-                        message:
-                            getFormValue(
-                                form,
-                                [
-                                    "message",
-                                    "description",
-                                    "text"
-                                ]
-                            ),
-
-                        contact:
-                            getFormValue(
-                                form,
-                                [
-                                    "contact",
-                                    "preferredContact"
-                                ]
-                            )
-
-                    };
-
-
-                    const result =
-                        await createApplication(
-                            data
-                        );
-
-
-                    if (
-                        result &&
-                        result.success
-                    ) {
-
-                        form.reset();
-
-                    }
-
-                }
+            bindApplicationForm(
+                form
             );
 
         }
     );
 
-
     /*
-     * Logout
+     * Дополнительный поиск:
+     * если форма не имеет class/id,
+     * ищем форму с полями обращения.
      */
+
+    document
+        .querySelectorAll(
+            "form"
+        )
+        .forEach(
+            function (form) {
+
+                if (
+                    form.dataset.olympBound ===
+                    "true"
+                ) {
+
+                    return;
+
+                }
+
+                const serviceField =
+                    form.querySelector(
+                        "[name='service'], " +
+                        "[name='serviceName'], " +
+                        "[name='type']"
+                    );
+
+                const messageField =
+                    form.querySelector(
+                        "[name='message'], " +
+                        "[name='description'], " +
+                        "[name='text']"
+                    );
+
+                if (
+                    serviceField &&
+                    messageField
+                ) {
+
+                    bindApplicationForm(
+                        form
+                    );
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   BIND APPLICATION FORM
+========================================================= */
+
+function bindApplicationForm(
+    form
+) {
+
+    if (
+        !form
+    ) {
+
+        return;
+
+    }
+
+    if (
+        form.dataset.olympBound ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+    form.dataset.olympBound =
+        "true";
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            /*
+             * Если пользователь не вошёл,
+             * показываем login.
+             */
+
+            if (
+                !isLoggedIn()
+            ) {
+
+                showLoginRequired();
+
+                return;
+
+            }
+
+            const data = {
+
+                service:
+                    getFormValue(
+                        form,
+                        [
+                            "service",
+                            "serviceName",
+                            "type"
+                        ]
+                    ),
+
+                message:
+                    getFormValue(
+                        form,
+                        [
+                            "message",
+                            "description",
+                            "text"
+                        ]
+                    ),
+
+                contact:
+                    getFormValue(
+                        form,
+                        [
+                            "contact",
+                            "preferredContact"
+                        ]
+                    )
+
+            };
+
+            console.log(
+                "OLYMP application form data:",
+                data
+            );
+
+            const result =
+                await createApplication(
+                    data
+                );
+
+            if (
+                result &&
+                result.success
+            ) {
+
+                /*
+                 * Очищаем форму
+                 */
+
+                try {
+
+                    form.reset();
+
+                } catch (error) {
+
+                    console.warn(
+                        "Не удалось очистить форму:",
+                        error
+                    );
+
+                }
+
+                /*
+                 * Закрываем модальное окно,
+                 * если форма находится внутри него.
+                 */
+
+                const modal =
+                    form.closest(
+                        ".modal, " +
+                        ".modal-overlay, " +
+                        "[role='dialog'], " +
+                        "[data-modal]"
+                    );
+
+                if (
+                    modal
+                ) {
+
+                    modal.classList.remove(
+                        "active"
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LOGOUT BUTTONS
+========================================================= */
+
+function setupLogoutButtons() {
 
     document
         .querySelectorAll(
@@ -3401,17 +3327,14 @@ function setupForms() {
 
                 }
 
-
                 button.dataset.olympBound =
                     "true";
-
 
                 button.addEventListener(
                     "click",
                     function (event) {
 
                         event.preventDefault();
-
 
                         logoutCitizen();
 
@@ -3430,18 +3353,52 @@ function setupForms() {
 
 function setupApplicationButtons() {
 
-    document
-        .querySelectorAll(
+    /*
+     * Все возможные кнопки отправки.
+     */
+
+    const buttons =
+        document.querySelectorAll(
             "[data-submit-application], " +
             "[data-application-submit], " +
             "#submitApplication, " +
-            "#sendApplication"
+            "#sendApplication, " +
+            "#submitRequest, " +
+            "#sendRequest, " +
+            "#submitAppeal, " +
+            "#sendAppeal"
+        );
+
+    buttons.forEach(
+        function (button) {
+
+            bindApplicationButton(
+                button
+            );
+
+        }
+    );
+
+
+    /*
+     * Дополнительный поиск кнопок.
+     *
+     * Если HTML имеет просто:
+     *
+     * <button>Подати звернення</button>
+     *
+     * JS тоже сможет её найти.
+     */
+
+    document
+        .querySelectorAll(
+            "button, input[type='submit'], input[type='button'], a"
         )
         .forEach(
             function (button) {
 
                 if (
-                    button.dataset.olympBound ===
+                    button.dataset.olympApplicationBound ===
                     "true"
                 ) {
 
@@ -3449,61 +3406,373 @@ function setupApplicationButtons() {
 
                 }
 
+                const text =
+                    String(
+                        button.innerText ||
+                        button.value ||
+                        button.textContent ||
+                        ""
+                    )
+                        .trim()
+                        .toLowerCase();
 
-                button.dataset.olympBound =
-                    "true";
+                if (
+                    text.indexOf(
+                        "звернення"
+                    ) !== -1 ||
+                    text.indexOf(
+                        "подати звернення"
+                    ) !== -1 ||
+                    text.indexOf(
+                        "відправити звернення"
+                    ) !== -1 ||
+                    text.indexOf(
+                        "подать обращение"
+                    ) !== -1 ||
+                    text.indexOf(
+                        "отправить обращение"
+                    ) !== -1
+                ) {
 
+                    bindApplicationButton(
+                        button
+                    );
 
-                button.addEventListener(
-                    "click",
-                    function (event) {
+                }
 
-                        /*
-                         * Если это submit внутри формы —
-                         * форму обработает submit handler.
-                         */
+            }
+        );
 
-                        if (
-                            button.type ===
-                            "submit"
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        event.preventDefault();
-
-
-                        if (
-                            !isLoggedIn()
-                        ) {
-
-                            showLoginRequired();
-
-
-                            return;
-
-                        }
-
-
-                        const form =
-                            button.closest(
-                                "form"
-                            );
+}
 
 
-                        if (
-                            form
-                        ) {
+/* =========================================================
+   BIND APPLICATION BUTTON
+========================================================= */
 
-                            form.requestSubmit();
+function bindApplicationButton(
+    button
+) {
 
-                        }
+    if (
+        !button
+    ) {
+
+        return;
+
+    }
+
+    if (
+        button.dataset.olympApplicationBound ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+    button.dataset.olympApplicationBound =
+        "true";
+
+    /*
+     * Если это submit кнопка,
+     * НЕ перехватываем click.
+     *
+     * Её обработает submit формы.
+     */
+
+    const type =
+        String(
+            button.type ||
+            ""
+        ).toLowerCase();
+
+    if (
+        type ===
+        "submit"
+    ) {
+
+        return;
+
+    }
+
+    button.addEventListener(
+        "click",
+        async function (event) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            /*
+             * Авторизация
+             */
+
+            if (
+                !isLoggedIn()
+            ) {
+
+                showLoginRequired();
+
+                return;
+
+            }
+
+            /*
+             * Ищем форму
+             */
+
+            const form =
+                button.closest(
+                    "form"
+                );
+
+            if (
+                form
+            ) {
+
+                /*
+                 * Используем requestSubmit,
+                 * чтобы сработал основной submit handler.
+                 */
+
+                if (
+                    typeof form.requestSubmit ===
+                    "function"
+                ) {
+
+                    form.requestSubmit();
+
+                } else {
+
+                    form.dispatchEvent(
+                        new Event(
+                            "submit",
+                            {
+                                bubbles:
+                                    true,
+
+                                cancelable:
+                                    true
+                            }
+                        )
+                    );
+
+                }
+
+                return;
+
+            }
+
+            /*
+             * Если формы нет,
+             * пробуем найти ближайший блок
+             * с полями.
+             */
+
+            const container =
+                button.closest(
+                    "[data-application], " +
+                    ".application, " +
+                    ".application-modal, " +
+                    ".request, " +
+                    ".appeal, " +
+                    ".modal, " +
+                    "[role='dialog']"
+                ) ||
+                document;
+
+            const data = {
+
+                service:
+                    getElementValue(
+                        container,
+                        [
+                            "service",
+                            "serviceName",
+                            "type"
+                        ]
+                    ),
+
+                message:
+                    getElementValue(
+                        container,
+                        [
+                            "message",
+                            "description",
+                            "text"
+                        ]
+                    ),
+
+                contact:
+                    getElementValue(
+                        container,
+                        [
+                            "contact",
+                            "preferredContact"
+                        ]
+                    )
+
+            };
+
+            const result =
+                await createApplication(
+                    data
+                );
+
+            if (
+                result &&
+                result.success
+            ) {
+
+                clearApplicationFields(
+                    container
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   GET ELEMENT VALUE
+========================================================= */
+
+function getElementValue(
+    container,
+    names
+) {
+
+    if (
+        !container
+    ) {
+
+        return "";
+
+    }
+
+    for (
+        let i = 0;
+        i < names.length;
+        i++
+    ) {
+
+        const name =
+            names[i];
+
+        const element =
+            container.querySelector(
+                `[name="${name}"], #${name}, [data-field="${name}"]`
+            );
+
+        if (
+            element
+        ) {
+
+            if (
+                element.value !== undefined
+            ) {
+
+                const value =
+                    String(
+                        element.value
+                    ).trim();
+
+                if (
+                    value
+                ) {
+
+                    return value;
+
+                }
+
+            }
+
+            if (
+                element.textContent
+            ) {
+
+                const value =
+                    String(
+                        element.textContent
+                    ).trim();
+
+                if (
+                    value
+                ) {
+
+                    return value;
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return "";
+
+}
+
+
+/* =========================================================
+   CLEAR APPLICATION FIELDS
+========================================================= */
+
+function clearApplicationFields(
+    container
+) {
+
+    if (
+        !container
+    ) {
+
+        return;
+
+    }
+
+    container
+        .querySelectorAll(
+            "input, textarea, select"
+        )
+        .forEach(
+            function (element) {
+
+                const name =
+                    String(
+                        element.name ||
+                        ""
+                    ).toLowerCase();
+
+                if (
+                    name === "service" ||
+                    name === "servicename" ||
+                    name === "type" ||
+                    name === "message" ||
+                    name === "description" ||
+                    name === "text"
+                ) {
+
+                    if (
+                        element.tagName ===
+                        "SELECT"
+                    ) {
+
+                        element.selectedIndex =
+                            0;
+
+                    } else {
+
+                        element.value =
+                            "";
 
                     }
-                );
+
+                }
 
             }
         );
@@ -3534,27 +3803,16 @@ function setupCabinetLinks() {
 
                 }
 
-
                 link.dataset.olympBound =
                     "true";
 
-
                 link.addEventListener(
                     "click",
-                    function (event) {
+                    function () {
 
                         /*
-                         * Если пользователь авторизован —
-                         * просто разрешаем переход.
+                         * Переход разрешён.
                          */
-
-                        if (
-                            isLoggedIn()
-                        ) {
-
-                            return;
-
-                        }
 
                     }
                 );
@@ -3574,15 +3832,13 @@ function showLoginRequired() {
     const message =
         "Для подання заявки необхідно увійти до особистого кабінету.";
 
-
     showMessage(
         message,
         "error"
     );
 
-
     /*
-     * Ищем кнопку входа.
+     * Кнопка входа
      */
 
     const loginButton =
@@ -3592,21 +3848,18 @@ function showLoginRequired() {
             "#loginBtn"
         );
 
-
     if (
         loginButton
     ) {
 
         loginButton.click();
 
-
         return;
 
     }
 
-
     /*
-     * Если на странице есть login modal.
+     * Login modal
      */
 
     const modal =
@@ -3615,7 +3868,6 @@ function showLoginRequired() {
             ".login-modal, " +
             "[data-login-modal]"
         );
-
 
     if (
         modal
@@ -3628,6 +3880,8 @@ function showLoginRequired() {
         modal.style.display =
             "";
 
+        return;
+
     }
 
 }
@@ -3639,17 +3893,11 @@ function showLoginRequired() {
 
 function redirectToCabinet() {
 
-    /*
-     * Если мы уже на cabinet.html,
-     * ничего не делаем.
-     */
-
     const current =
         window.location.pathname
             .split("/")
             .pop()
             .toLowerCase();
-
 
     if (
         current ===
@@ -3660,17 +3908,11 @@ function redirectToCabinet() {
 
     }
 
-
-    /*
-     * Сначала ищем ссылку на кабинет.
-     */
-
     const cabinetLink =
         document.querySelector(
             "a[href*='cabinet.html'], " +
             "a[href*='cabinet']"
         );
-
 
     if (
         cabinetLink &&
@@ -3680,16 +3922,9 @@ function redirectToCabinet() {
         window.location.href =
             cabinetLink.href;
 
-
         return;
 
     }
-
-
-    /*
-     * Если ссылка не найдена,
-     * пробуем cabinet.html.
-     */
 
     window.location.href =
         "cabinet.html";
@@ -3708,7 +3943,6 @@ function findLoginPage() {
             "a[href*='login']"
         );
 
-
     if (
         link &&
         link.href
@@ -3717,7 +3951,6 @@ function findLoginPage() {
         return link.href;
 
     }
-
 
     return "";
 
@@ -3746,11 +3979,6 @@ function closeAuthForms() {
                     "active"
                 );
 
-                /*
-                 * Не ставим display:none насильно,
-                 * если CSS управляет модальным окном.
-                 */
-
             }
         );
 
@@ -3775,12 +4003,10 @@ function getFormValue(
         const name =
             names[i];
 
-
         const element =
             form.querySelector(
                 `[name="${name}"], #${name}`
             );
-
 
         if (
             element &&
@@ -3791,7 +4017,6 @@ function getFormValue(
                 String(
                     element.value
                 ).trim();
-
 
             if (
                 value
@@ -3804,7 +4029,6 @@ function getFormValue(
         }
 
     }
-
 
     return "";
 
@@ -3820,8 +4044,9 @@ function setLoading(
 ) {
 
     OlympState.loading =
-        Boolean(state);
-
+        Boolean(
+            state
+        );
 
     document
         .querySelectorAll(
@@ -3838,18 +4063,12 @@ function setLoading(
             }
         );
 
-
     document
         .querySelectorAll(
             "button[type='submit']"
         )
         .forEach(
             function (button) {
-
-                /*
-                 * Не отключаем кнопку полностью,
-                 * чтобы login-required продолжал работать.
-                 */
 
                 if (
                     state
@@ -3890,16 +4109,10 @@ function showMessage(
 
     }
 
-
-    /*
-     * Существующий контейнер.
-     */
-
     let container =
         document.querySelector(
             "[data-message]"
         );
-
 
     if (
         !container
@@ -3912,7 +4125,6 @@ function showMessage(
 
     }
 
-
     if (
         !container
     ) {
@@ -3924,12 +4136,6 @@ function showMessage(
 
     }
 
-
-    /*
-     * Если контейнера нет —
-     * создаём временный.
-     */
-
     if (
         !container
     ) {
@@ -3939,10 +4145,8 @@ function showMessage(
                 "div"
             );
 
-
         container.className =
             "olymp-message";
-
 
         document.body.appendChild(
             container
@@ -3950,10 +4154,8 @@ function showMessage(
 
     }
 
-
     container.textContent =
         message;
-
 
     container.classList.remove(
         "success",
@@ -3962,24 +4164,16 @@ function showMessage(
         "warning"
     );
 
-
     container.classList.add(
         type
     );
 
-
     container.style.display =
         "";
-
-
-    /*
-     * Автоматически скрываем.
-     */
 
     clearTimeout(
         container._olympTimeout
     );
-
 
     container._olympTimeout =
         setTimeout(
@@ -4043,7 +4237,6 @@ function normalizeOlympId(
                 ""
             );
 
-
     /*
      * OLYMP000001
      * ->
@@ -4064,7 +4257,6 @@ function normalizeOlympId(
 
     }
 
-
     return result;
 
 }
@@ -4084,7 +4276,6 @@ function getStatusClass(
             ""
         ).toLowerCase();
 
-
     if (
         value.indexOf(
             "прийнято"
@@ -4094,7 +4285,6 @@ function getStatusClass(
         return "status-approved";
 
     }
-
 
     if (
         value.indexOf(
@@ -4106,7 +4296,6 @@ function getStatusClass(
 
     }
 
-
     if (
         value.indexOf(
             "відхилено"
@@ -4117,7 +4306,6 @@ function getStatusClass(
 
     }
 
-
     if (
         value.indexOf(
             "закрито"
@@ -4127,7 +4315,6 @@ function getStatusClass(
         return "status-closed";
 
     }
-
 
     return "status-pending";
 
@@ -4150,12 +4337,10 @@ function formatDate(
 
     }
 
-
     const date =
         new Date(
             value
         );
-
 
     if (
         isNaN(
@@ -4168,7 +4353,6 @@ function formatDate(
         );
 
     }
-
 
     try {
 
@@ -4223,30 +4407,38 @@ function isSessionError(
 
     }
 
-
     const message =
         String(
             result.message ||
             ""
         ).toLowerCase();
 
-
     return (
+
         message.indexOf(
             "сесія"
         ) !== -1 ||
+
         message.indexOf(
             "сесс"
         ) !== -1 ||
+
         message.indexOf(
             "увійдіть"
         ) !== -1 ||
+
         message.indexOf(
             "войд"
         ) !== -1 ||
+
         message.indexOf(
             "olymp-id"
+        ) !== -1 ||
+
+        message.indexOf(
+            "token"
         ) !== -1
+
     );
 
 }
@@ -4294,14 +4486,6 @@ function escapeHTML(
    GLOBAL API
 ========================================================= */
 
-/*
- * Делаем функции доступными из HTML:
- *
- * onclick="loginCitizen(...)"
- * onclick="logoutCitizen()"
- * etc.
- */
-
 window.OlympGovernment =
     {
 
@@ -4347,41 +4531,33 @@ window.OlympGovernment =
     };
 
 
-/*
- * Совместимость со старым HTML.
- */
+/* =========================================================
+   LEGACY GLOBAL FUNCTIONS
+========================================================= */
 
 window.registerCitizen =
     registerCitizen;
 
-
 window.loginCitizen =
     loginCitizen;
-
 
 window.logoutCitizen =
     logoutCitizen;
 
-
 window.createApplication =
     createApplication;
-
 
 window.saveAvatar =
     saveAvatar;
 
-
 window.removeAvatar =
     removeAvatar;
-
 
 window.loadProfile =
     loadProfile;
 
-
 window.loadApplications =
     loadApplications;
-
 
 window.isLoggedIn =
     isLoggedIn;
@@ -4427,12 +4603,24 @@ window.OLYMP_DEBUG =
             validateSession,
 
         restore:
-            restoreSession
+            restoreSession,
+
+        createApplication:
+            createApplication
 
     };
 
 
+/* =========================================================
+   CONSOLE
+========================================================= */
+
 console.log(
-    "%cOLYMP Government 6.4 loaded",
+    "%cOLYMP Government 6.5 loaded",
     "font-weight:bold"
+);
+
+console.log(
+    "OLYMP API:",
+    OLYMP_CONFIG.API_URL
 );
