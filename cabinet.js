@@ -1,10 +1,10 @@
 /* =========================================================
    OLYMP GOVERNMENT
-   PERSONAL CABINET 6.0
+   PERSONAL CABINET 6.1
 
    • OLYMP-ID + пароль
-   • Авторизация
-   • Автоматическое восстановление сессии
+   • Авторизація
+   • Автоматичне відновлення сесії
    • Профіль громадянина
    • Аватар
    • Заявки
@@ -13,6 +13,7 @@
    • Перегляд заявки
    • Копіювання номера
    • Вихід
+   • POST для великих даних аватара
 ========================================================= */
 
 
@@ -27,7 +28,7 @@ const STORAGE_KEY =
     "olympCitizenSession";
 
 const CABINET_VERSION =
-    "6.0";
+    "6.1";
 
 const SESSION_MAX_AGE =
     30 * 24 * 60 * 60 * 1000;
@@ -372,12 +373,6 @@ async function handleLogin(event) {
         }
 
 
-        /*
-         * Зберігаємо сесію.
-         * Після цього повторний ввід
-         * ID + пароля не потрібен.
-         */
-
         saveSession(
             olympId,
             password
@@ -394,16 +389,12 @@ async function handleLogin(event) {
         );
 
 
-        /*
-         * Очищаємо поля входу,
-         * але НЕ видаляємо сесію.
-         */
-
         if (citizenIdInput) {
 
             citizenIdInput.value = "";
 
         }
+
 
         if (passwordInput) {
 
@@ -421,6 +412,7 @@ async function handleLogin(event) {
 
 
         hideLoading();
+
 
         showLoginError(
             error.message ||
@@ -446,10 +438,6 @@ async function restoreSession() {
         loadSession();
 
 
-    /*
-     * Немає збереженої сесії.
-     */
-
     if (!session) {
 
         showLogin();
@@ -458,10 +446,6 @@ async function restoreSession() {
 
     }
 
-
-    /*
-     * Перевірка терміну сесії.
-     */
 
     if (
         session.savedAt &&
@@ -564,10 +548,6 @@ async function restoreSession() {
             null;
 
 
-        /*
-         * Оновлюємо час сесії.
-         */
-
         saveSession(
             session.olympId,
             session.password
@@ -589,11 +569,6 @@ async function restoreSession() {
 
         hideLoading();
 
-
-        /*
-         * Якщо проблема саме в авторизації —
-         * видаляємо сесію.
-         */
 
         const message =
             String(
@@ -630,11 +605,6 @@ async function restoreSession() {
 
         }
 
-
-        /*
-         * Якщо сервер тимчасово недоступний,
-         * НЕ викидаємо користувача.
-         */
 
         showCabinet();
 
@@ -677,6 +647,41 @@ async function apiRequest(
 
     }
 
+
+    /*
+     * Великі дані аватара НЕ відправляємо через GET.
+     */
+
+    const usePost =
+        action === "saveAvatar";
+
+
+    if (usePost) {
+
+        return apiPostRequest(
+            action,
+            params
+        );
+
+    }
+
+
+    return apiGetRequest(
+        action,
+        params
+    );
+
+}
+
+
+/* =========================================================
+   GET REQUEST
+========================================================= */
+
+async function apiGetRequest(
+    action,
+    params = {}
+) {
 
     const query =
         new URLSearchParams();
@@ -735,7 +740,7 @@ async function apiRequest(
     } catch (error) {
 
         console.error(
-            "FETCH ERROR:",
+            "GET FETCH ERROR:",
             error
         );
 
@@ -755,6 +760,100 @@ async function apiRequest(
 
     }
 
+
+    return parseApiResponse(
+        response
+    );
+
+}
+
+
+/* =========================================================
+   POST REQUEST
+========================================================= */
+
+async function apiPostRequest(
+    action,
+    params = {}
+) {
+
+    const payload = {
+
+        action:
+            action,
+
+        ...params
+
+    };
+
+
+    let response;
+
+
+    try {
+
+        response =
+            await fetch(
+                API_URL,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "text/plain;charset=utf-8"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            payload
+                        ),
+
+                    cache: "no-store",
+
+                    redirect: "follow"
+
+                }
+            );
+
+    } catch (error) {
+
+        console.error(
+            "POST FETCH ERROR:",
+            error
+        );
+
+
+        throw new Error(
+            "Не вдалося підключитися до сервера."
+        );
+
+    }
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Сервер повернув помилку HTTP " +
+            response.status
+        );
+
+    }
+
+
+    return parseApiResponse(
+        response
+    );
+
+}
+
+
+/* =========================================================
+   PARSE API RESPONSE
+========================================================= */
+
+async function parseApiResponse(
+    response
+) {
 
     const text =
         await response.text();
@@ -781,6 +880,7 @@ async function apiRequest(
             "INVALID JSON:",
             text
         );
+
 
         throw new Error(
             "Сервер повернув некоректну відповідь."
@@ -1154,6 +1254,16 @@ async function handleAvatarSelect(
         }
 
 
+        console.log(
+            "AVATAR SIZE:",
+            Math.round(
+                selectedAvatarData.length /
+                1024
+            ),
+            "KB"
+        );
+
+
         if (avatarPreview) {
 
             avatarPreview.src =
@@ -1314,6 +1424,19 @@ function compressImage(
                                 );
 
 
+                            if (!context) {
+
+                                reject(
+                                    new Error(
+                                        "Canvas недоступний."
+                                    )
+                                );
+
+                                return;
+
+                            }
+
+
                             context.drawImage(
                                 image,
                                 0,
@@ -1323,18 +1446,55 @@ function compressImage(
                             );
 
 
-                            resolve(
+                            const result =
                                 canvas.toDataURL(
                                     "image/jpeg",
                                     0.72
-                                )
+                                );
+
+
+                            /*
+                             * Захист від надто великого Base64.
+                             */
+
+                            if (
+                                result.length >
+                                900000
+                            ) {
+
+                                const smallerResult =
+                                    canvas.toDataURL(
+                                        "image/jpeg",
+                                        0.55
+                                    );
+
+
+                                resolve(
+                                    smallerResult
+                                );
+
+                                return;
+
+                            }
+
+
+                            resolve(
+                                result
                             );
 
                         };
 
 
                     image.onerror =
-                        reject;
+                        function () {
+
+                            reject(
+                                new Error(
+                                    "Не вдалося завантажити зображення."
+                                )
+                            );
+
+                        };
 
 
                     image.src =
@@ -1344,7 +1504,15 @@ function compressImage(
 
 
             reader.onerror =
-                reject;
+                function () {
+
+                    reject(
+                        new Error(
+                            "Не вдалося прочитати файл."
+                        )
+                    );
+
+                };
 
 
             reader.readAsDataURL(
@@ -1364,6 +1532,11 @@ function compressImage(
 async function saveAvatar() {
 
     if (!currentCitizen) {
+
+        showToast(
+            "Профіль громадянина не завантажено.",
+            "error"
+        );
 
         return;
 
@@ -1415,6 +1588,12 @@ async function saveAvatar() {
 
     try {
 
+        /*
+         * ВАЖЛИВО:
+         * image передається через POST,
+         * а не через GET URL.
+         */
+
         const response =
             await apiRequest(
                 "saveAvatar",
@@ -1425,6 +1604,9 @@ async function saveAvatar() {
                     citizenId:
                         session.olympId,
 
+                    idNumber:
+                        session.olympId,
+
                     password:
                         session.password,
 
@@ -1432,6 +1614,12 @@ async function saveAvatar() {
                         selectedAvatarData
                 }
             );
+
+
+        console.log(
+            "SAVE AVATAR RESPONSE:",
+            response
+        );
 
 
         if (
@@ -1449,6 +1637,11 @@ async function saveAvatar() {
         }
 
 
+        /*
+         * Отримуємо нову URL-адресу
+         * від Google Apps Script.
+         */
+
         if (response.avatarUrl) {
 
             currentCitizen.avatarUrl =
@@ -1457,7 +1650,25 @@ async function saveAvatar() {
         }
 
 
-        selectedAvatarData = "";
+        /*
+         * Якщо сервер повернув
+         * оновлений профіль.
+         */
+
+        if (
+            response.citizen
+        ) {
+
+            currentCitizen =
+                normalizeCitizen(
+                    response.citizen
+                );
+
+        }
+
+
+        selectedAvatarData =
+            "";
 
 
         if (avatarInput) {
@@ -1574,6 +1785,11 @@ async function removeAvatar() {
 
     try {
 
+        /*
+         * Видалення аватара залишаємо GET,
+         * оскільки тут немає великого файлу.
+         */
+
         const response =
             await apiRequest(
                 "removeAvatar",
@@ -1584,10 +1800,19 @@ async function removeAvatar() {
                     citizenId:
                         session.olympId,
 
+                    idNumber:
+                        session.olympId,
+
                     password:
                         session.password
                 }
             );
+
+
+        console.log(
+            "REMOVE AVATAR RESPONSE:",
+            response
+        );
 
 
         if (
@@ -1628,6 +1853,12 @@ async function removeAvatar() {
 
 
     } catch (error) {
+
+        console.error(
+            "REMOVE AVATAR ERROR:",
+            error
+        );
+
 
         hideLoading();
 
@@ -3311,12 +3542,6 @@ function normalizeOlympId(
         );
 
 
-    /*
-     * OLYMP000001
-     * →
-     * OLYMP-000001
-     */
-
     if (
         /^OLYMP\d{6}$/.test(
             result
@@ -3329,12 +3554,6 @@ function normalizeOlympId(
 
     }
 
-
-    /*
-     * OLYMP-1
-     * →
-     * OLYMP-000001
-     */
 
     const shortMatch =
         result.match(
