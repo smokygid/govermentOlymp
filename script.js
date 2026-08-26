@@ -8,17 +8,17 @@
    • Регистрация
    • Авторизация
    • Session Token
-   • Восстановление сессии
+   • Автоматическое восстановление сессии
    • Личный кабинет
    • Профиль
    • Заявки / звернення
-   • Просмотр заявки
-   • Модальное окно заявки
    • Статусы
+   • Просмотр заявки
    • Аватар
    • Logout
    • Google Apps Script Web App
    • GET API
+   • Глобальная openApplicationModal()
    ========================================================= */
 
 
@@ -139,7 +139,7 @@ async function initializeOlympGovernment() {
 
     setupApplicationButtons();
 
-    setupApplicationModal();
+    setupApplicationModalEvents();
 
     updateAuthUI();
 
@@ -194,9 +194,7 @@ function loadStoredSession() {
             String(token).trim();
 
         OlympState.olympId =
-            normalizeOlympId(
-                olympId
-            );
+            normalizeOlympId(olympId);
 
         if (
             citizenRaw
@@ -205,9 +203,7 @@ function loadStoredSession() {
             try {
 
                 OlympState.citizen =
-                    JSON.parse(
-                        citizenRaw
-                    );
+                    JSON.parse(citizenRaw);
 
             } catch (error) {
 
@@ -225,9 +221,7 @@ function loadStoredSession() {
             try {
 
                 OlympState.profile =
-                    JSON.parse(
-                        profileRaw
-                    );
+                    JSON.parse(profileRaw);
 
             } catch (error) {
 
@@ -247,7 +241,7 @@ function loadStoredSession() {
     } catch (error) {
 
         console.error(
-            "loadStoredSession:",
+            "OLYMP loadStoredSession:",
             error
         );
 
@@ -262,13 +256,9 @@ function loadStoredSession() {
    SAVE SESSION
 ========================================================= */
 
-function saveSession(
-    data
-) {
+function saveSession(data) {
 
-    if (
-        !data
-    ) {
+    if (!data) {
 
         return false;
 
@@ -297,7 +287,8 @@ function saveSession(
                     ? (
                         citizen.olympId ||
                         citizen.citizenId ||
-                        citizen.idNumber
+                        citizen.idNumber ||
+                        ""
                     )
                     : ""
             )
@@ -309,7 +300,7 @@ function saveSession(
     ) {
 
         console.error(
-            "Не удалось сохранить сессию:",
+            "OLYMP: невозможно сохранить сессию",
             data
         );
 
@@ -410,7 +401,7 @@ function clearSession() {
     } catch (error) {
 
         console.error(
-            "clearSession:",
+            "OLYMP clearSession:",
             error
         );
 
@@ -536,19 +527,16 @@ async function apiRequest(
 
         }
 
-        let data;
-
         try {
 
-            data =
-                JSON.parse(
-                    text
-                );
+            return JSON.parse(
+                text
+            );
 
         } catch (error) {
 
             console.error(
-                "Невірна відповідь API:",
+                "OLYMP API returned:",
                 text
             );
 
@@ -557,8 +545,6 @@ async function apiRequest(
             );
 
         }
-
-        return data;
 
     } catch (error) {
 
@@ -653,7 +639,7 @@ async function restoreSession() {
     } catch (error) {
 
         console.warn(
-            "Не удалось восстановить сессию:",
+            "OLYMP restoreSession:",
             error
         );
 
@@ -725,7 +711,7 @@ async function validateSession() {
     } catch (error) {
 
         console.warn(
-            "Ошибка проверки сессии:",
+            "OLYMP validateSession:",
             error
         );
 
@@ -740,16 +726,12 @@ async function validateSession() {
    REGISTER
 ========================================================= */
 
-async function registerCitizen(
-    data
-) {
+async function registerCitizen(data) {
 
     data =
         data || {};
 
-    setLoading(
-        true
-    );
+    setLoading(true);
 
     try {
 
@@ -810,22 +792,23 @@ async function registerCitizen(
         }
 
         const saved =
-            saveSession(
-                result
-            );
+            saveSession(result);
 
         if (
             !saved
         ) {
 
             showMessage(
-                "Реєстрацію завершено, але сесію не вдалося зберегти.",
+                "Реєстрацію завершено, але сесію не збережено.",
                 "error"
             );
 
             return {
                 success:
-                    false
+                    false,
+
+                message:
+                    "Сесію не збережено."
             };
 
         }
@@ -851,11 +834,7 @@ async function registerCitizen(
         closeAuthForms();
 
         setTimeout(
-            function () {
-
-                redirectToCabinet();
-
-            },
+            redirectToCabinet,
             500
         );
 
@@ -864,13 +843,13 @@ async function registerCitizen(
     } catch (error) {
 
         console.error(
-            "registerCitizen:",
+            "OLYMP register:",
             error
         );
 
         showMessage(
             error.message ||
-            "Помилка під час реєстрації.",
+            "Помилка реєстрації.",
             "error"
         );
 
@@ -884,9 +863,7 @@ async function registerCitizen(
 
     } finally {
 
-        setLoading(
-            false
-        );
+        setLoading(false);
 
     }
 
@@ -913,9 +890,7 @@ async function loginCitizen(
             ""
         ).trim();
 
-    if (
-        !olympId
-    ) {
+    if (!olympId) {
 
         showMessage(
             "Вкажіть OLYMP-ID.",
@@ -929,9 +904,7 @@ async function loginCitizen(
 
     }
 
-    if (
-        !password
-    ) {
+    if (!password) {
 
         showMessage(
             "Вкажіть пароль.",
@@ -945,9 +918,7 @@ async function loginCitizen(
 
     }
 
-    setLoading(
-        true
-    );
+    setLoading(true);
 
     try {
 
@@ -992,9 +963,7 @@ async function loginCitizen(
         }
 
         const saved =
-            saveSession(
-                result
-            );
+            saveSession(result);
 
         if (
             !saved
@@ -1037,11 +1006,7 @@ async function loginCitizen(
         await loadApplications();
 
         setTimeout(
-            function () {
-
-                redirectToCabinet();
-
-            },
+            redirectToCabinet,
             300
         );
 
@@ -1050,7 +1015,7 @@ async function loginCitizen(
     } catch (error) {
 
         console.error(
-            "loginCitizen:",
+            "OLYMP login:",
             error
         );
 
@@ -1070,9 +1035,7 @@ async function loginCitizen(
 
     } finally {
 
-        setLoading(
-            false
-        );
+        setLoading(false);
 
     }
 
@@ -1124,9 +1087,7 @@ async function loadProfile() {
         ) {
 
             if (
-                isSessionError(
-                    result
-                )
+                isSessionError(result)
             ) {
 
                 clearSession();
@@ -1193,7 +1154,7 @@ async function loadProfile() {
     } catch (error) {
 
         console.error(
-            "loadProfile:",
+            "OLYMP loadProfile:",
             error
         );
 
@@ -1223,9 +1184,7 @@ async function loadApplications() {
         OlympState.applications =
             [];
 
-        renderApplications(
-            []
-        );
+        renderApplications([]);
 
         return [];
 
@@ -1262,9 +1221,7 @@ async function loadApplications() {
         ) {
 
             if (
-                isSessionError(
-                    result
-                )
+                isSessionError(result)
             ) {
 
                 clearSession();
@@ -1295,7 +1252,7 @@ async function loadApplications() {
     } catch (error) {
 
         console.error(
-            "loadApplications:",
+            "OLYMP loadApplications:",
             error
         );
 
@@ -1310,9 +1267,7 @@ async function loadApplications() {
    CREATE APPLICATION
 ========================================================= */
 
-async function createApplication(
-    data
-) {
+async function createApplication(data) {
 
     if (
         !isLoggedIn()
@@ -1330,11 +1285,11 @@ async function createApplication(
 
     }
 
-    const sessionValid =
+    const valid =
         await validateSession();
 
     if (
-        !sessionValid
+        !valid
     ) {
 
         showLoginRequired();
@@ -1383,9 +1338,7 @@ async function createApplication(
             )
         ).trim();
 
-    if (
-        !service
-    ) {
+    if (!service) {
 
         showMessage(
             "Оберіть державну послугу.",
@@ -1399,9 +1352,7 @@ async function createApplication(
 
     }
 
-    if (
-        !message
-    ) {
+    if (!message) {
 
         showMessage(
             "Вкажіть опис звернення.",
@@ -1415,9 +1366,7 @@ async function createApplication(
 
     }
 
-    setLoading(
-        true
-    );
+    setLoading(true);
 
     try {
 
@@ -1479,9 +1428,7 @@ async function createApplication(
         ) {
 
             if (
-                isSessionError(
-                    result
-                )
+                isSessionError(result)
             ) {
 
                 clearSession();
@@ -1534,7 +1481,7 @@ async function createApplication(
     } catch (error) {
 
         console.error(
-            "createApplication:",
+            "OLYMP createApplication:",
             error
         );
 
@@ -1554,11 +1501,627 @@ async function createApplication(
 
     } finally {
 
-        setLoading(
-            false
+        setLoading(false);
+
+    }
+
+}
+
+
+/* =========================================================
+   SAVE AVATAR
+========================================================= */
+
+async function saveAvatar(
+    avatarUrl
+) {
+
+    if (
+        !isLoggedIn()
+    ) {
+
+        showLoginRequired();
+
+        return {
+            success:
+                false
+        };
+
+    }
+
+    avatarUrl =
+        String(
+            avatarUrl ||
+            ""
+        ).trim();
+
+    if (!avatarUrl) {
+
+        showMessage(
+            "Вкажіть посилання на аватар.",
+            "error"
+        );
+
+        return {
+            success:
+                false
+        };
+
+    }
+
+    try {
+
+        const result =
+            await apiRequest(
+                "saveavatar",
+                {
+
+                    olympId:
+                        OlympState.olympId,
+
+                    sessionToken:
+                        OlympState.sessionToken,
+
+                    token:
+                        OlympState.sessionToken,
+
+                    avatarUrl:
+                        avatarUrl,
+
+                    avatar:
+                        avatarUrl,
+
+                    image:
+                        avatarUrl,
+
+                    url:
+                        avatarUrl
+
+                }
+            );
+
+        if (
+            !result ||
+            !result.success
+        ) {
+
+            showMessage(
+                result &&
+                result.message
+                    ? result.message
+                    : "Не вдалося зберегти аватар.",
+                "error"
+            );
+
+            return result;
+
+        }
+
+        const citizen =
+            result.citizen ||
+            result.profile;
+
+        if (
+            citizen
+        ) {
+
+            OlympState.citizen =
+                citizen;
+
+            OlympState.profile =
+                citizen;
+
+            localStorage.setItem(
+                OLYMP_CONFIG.STORAGE.CITIZEN,
+                JSON.stringify(citizen)
+            );
+
+            localStorage.setItem(
+                OLYMP_CONFIG.STORAGE.PROFILE,
+                JSON.stringify(citizen)
+            );
+
+        }
+
+        renderProfile(
+            citizen
+        );
+
+        showMessage(
+            "Аватар успішно збережено.",
+            "success"
+        );
+
+        return result;
+
+    } catch (error) {
+
+        console.error(
+            "OLYMP saveAvatar:",
+            error
+        );
+
+        showMessage(
+            error.message ||
+            "Помилка збереження аватара.",
+            "error"
+        );
+
+        return {
+            success:
+                false
+        };
+
+    }
+
+}
+
+
+/* =========================================================
+   REMOVE AVATAR
+========================================================= */
+
+async function removeAvatar() {
+
+    if (
+        !isLoggedIn()
+    ) {
+
+        showLoginRequired();
+
+        return {
+            success:
+                false
+        };
+
+    }
+
+    try {
+
+        const result =
+            await apiRequest(
+                "removeavatar",
+                {
+
+                    olympId:
+                        OlympState.olympId,
+
+                    sessionToken:
+                        OlympState.sessionToken,
+
+                    token:
+                        OlympState.sessionToken
+
+                }
+            );
+
+        if (
+            !result ||
+            !result.success
+        ) {
+
+            showMessage(
+                result &&
+                result.message
+                    ? result.message
+                    : "Не вдалося видалити аватар.",
+                "error"
+            );
+
+            return result;
+
+        }
+
+        if (
+            OlympState.citizen
+        ) {
+
+            OlympState.citizen.avatarUrl =
+                "";
+
+            OlympState.citizen.avatar =
+                "";
+
+            OlympState.citizen.photo =
+                "";
+
+            localStorage.setItem(
+                OLYMP_CONFIG.STORAGE.CITIZEN,
+                JSON.stringify(
+                    OlympState.citizen
+                )
+            );
+
+        }
+
+        renderProfile(
+            OlympState.citizen
+        );
+
+        showMessage(
+            "Аватар видалено.",
+            "success"
+        );
+
+        return result;
+
+    } catch (error) {
+
+        console.error(
+            "OLYMP removeAvatar:",
+            error
+        );
+
+        return {
+            success:
+                false
+        };
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+async function logoutCitizen() {
+
+    const token =
+        OlympState.sessionToken;
+
+    try {
+
+        if (token) {
+
+            await apiRequest(
+                "logout",
+                {
+
+                    sessionToken:
+                        token,
+
+                    token:
+                        token
+
+                }
+            );
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "OLYMP logout API:",
+            error
         );
 
     }
+
+    clearSession();
+
+    showMessage(
+        "Ви вийшли з особистого кабінету.",
+        "success"
+    );
+
+    setTimeout(
+        function () {
+
+            const loginUrl =
+                findLoginPage();
+
+            if (
+                loginUrl
+            ) {
+
+                window.location.href =
+                    loginUrl;
+
+            }
+
+        },
+        300
+    );
+
+}
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+function isLoggedIn() {
+
+    return Boolean(
+        OlympState.authenticated &&
+        OlympState.sessionToken &&
+        OlympState.olympId
+    );
+
+}
+
+
+function getCurrentUser() {
+
+    return (
+        OlympState.citizen ||
+        OlympState.profile ||
+        null
+    );
+
+}
+
+
+function getCurrentOlympId() {
+
+    return OlympState.olympId || "";
+
+}
+
+
+/* =========================================================
+   AUTH UI
+========================================================= */
+
+function updateAuthUI() {
+
+    const loggedIn =
+        isLoggedIn();
+
+    const citizen =
+        getCurrentUser();
+
+    document
+        .querySelectorAll(
+            "[data-auth-only]"
+        )
+        .forEach(
+            function (element) {
+
+                element.style.display =
+                    loggedIn
+                        ? ""
+                        : "none";
+
+            }
+        );
+
+    document
+        .querySelectorAll(
+            "[data-guest-only]"
+        )
+        .forEach(
+            function (element) {
+
+                element.style.display =
+                    loggedIn
+                        ? "none"
+                        : "";
+
+            }
+        );
+
+    setText(
+        "[data-user-olymp-id]",
+        OlympState.olympId
+    );
+
+    setText(
+        "#userOlympId",
+        OlympState.olympId
+    );
+
+    setText(
+        "#olympId",
+        OlympState.olympId
+    );
+
+    setText(
+        "#profileOlympId",
+        OlympState.olympId
+    );
+
+    if (
+        citizen
+    ) {
+
+        const name =
+            citizen.fullName ||
+            citizen.name ||
+            citizen.fio ||
+            "";
+
+        setText(
+            "[data-user-name]",
+            name
+        );
+
+        setText(
+            "#userName",
+            name
+        );
+
+        setText(
+            "#profileName",
+            name
+        );
+
+        setText(
+            "#citizenName",
+            name
+        );
+
+        setText(
+            "[data-user-email]",
+            citizen.email || ""
+        );
+
+        setText(
+            "#profileEmail",
+            citizen.email || ""
+        );
+
+        setText(
+            "[data-user-phone]",
+            citizen.phone || ""
+        );
+
+        setText(
+            "#profilePhone",
+            citizen.phone || ""
+        );
+
+        setText(
+            "[data-user-discord]",
+            citizen.discord || ""
+        );
+
+        setText(
+            "#profileDiscord",
+            citizen.discord || ""
+        );
+
+        setText(
+            "[data-user-birth-date]",
+            citizen.birthDate || ""
+        );
+
+        setText(
+            "#profileBirthDate",
+            citizen.birthDate || ""
+        );
+
+        setText(
+            "[data-user-status]",
+            citizen.status ||
+            "Активний"
+        );
+
+    }
+
+    updateAvatarUI(
+        citizen
+    );
+
+    updateApplicationButtons();
+
+}
+
+
+/* =========================================================
+   APPLICATION BUTTONS
+========================================================= */
+
+function updateApplicationButtons() {
+
+    const loggedIn =
+        isLoggedIn();
+
+    document
+        .querySelectorAll(
+            "[data-submit-application], " +
+            "[data-application-submit], " +
+            "#submitApplication, " +
+            "#sendApplication, " +
+            "#submitRequest, " +
+            "#sendRequest, " +
+            "#submitAppeal, " +
+            "#sendAppeal"
+        )
+        .forEach(
+            function (button) {
+
+                if (
+                    loggedIn
+                ) {
+
+                    button.classList.remove(
+                        "login-required"
+                    );
+
+                    button.removeAttribute(
+                        "aria-disabled"
+                    );
+
+                } else {
+
+                    button.classList.add(
+                        "login-required"
+                    );
+
+                    button.setAttribute(
+                        "aria-disabled",
+                        "true"
+                    );
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   AVATAR UI
+========================================================= */
+
+function updateAvatarUI(
+    citizen
+) {
+
+    if (
+        !citizen
+    ) {
+
+        return;
+
+    }
+
+    const avatar =
+        citizen.avatarUrl ||
+        citizen.avatar ||
+        citizen.photo ||
+        "";
+
+    document
+        .querySelectorAll(
+            "[data-user-avatar]"
+        )
+        .forEach(
+            function (img) {
+
+                if (avatar) {
+
+                    img.src =
+                        avatar;
+
+                    img.style.display =
+                        "";
+
+                }
+
+            }
+        );
+
+    document
+        .querySelectorAll(
+            "#userAvatar, #profileAvatar, #avatarPreview"
+        )
+        .forEach(
+            function (img) {
+
+                if (avatar) {
+
+                    img.src =
+                        avatar;
+
+                }
+
+            }
+        );
 
 }
 
@@ -1683,8 +2246,8 @@ function renderApplications(
                 !applications.length
             ) {
 
-                container.innerHTML =
-                    `
+                container.innerHTML = `
+
                     <div class="applications-empty">
 
                         <div class="applications-empty-icon">
@@ -1700,7 +2263,8 @@ function renderApplications(
                         </div>
 
                     </div>
-                    `;
+
+                `;
 
                 return;
 
@@ -1709,11 +2273,10 @@ function renderApplications(
             container.innerHTML =
                 applications
                     .map(
-                        function (application, index) {
+                        function (application) {
 
                             return createApplicationHTML(
-                                application,
-                                index
+                                application
                             );
 
                         }
@@ -1735,20 +2298,36 @@ function renderApplications(
 ========================================================= */
 
 function createApplicationHTML(
-    application,
-    index
+    application
 ) {
 
     application =
         application || {};
 
+    const rawNumber =
+        application.number ||
+        application.applicationNumber ||
+        application.requestNumber ||
+        "";
+
     const number =
         escapeHTML(
-            application.number ||
-            application.applicationNumber ||
-            application.requestNumber ||
+            rawNumber ||
             "—"
         );
+
+    const safeNumber =
+        String(
+            rawNumber || ""
+        )
+            .replace(
+                /\\/g,
+                "\\\\"
+            )
+            .replace(
+                /'/g,
+                "\\'"
+            );
 
     const service =
         escapeHTML(
@@ -1796,16 +2375,15 @@ function createApplicationHTML(
             status
         );
 
-    /*
-     * ВАЖНО:
-     * Теперь HTML вызывает глобальную
-     * openApplicationModal().
-     */
-
     return `
+
         <div
             class="application-card"
             data-application-number="${number}"
+            role="button"
+            tabindex="0"
+            onclick="openApplicationModal('${safeNumber}')"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openApplicationModal('${safeNumber}');}"
         >
 
             <div class="application-card-header">
@@ -1863,21 +2441,14 @@ function createApplicationHTML(
                         : ""
                 }
 
-            </div>
-
-            <div class="application-card-footer">
-
-                <button
-                    type="button"
-                    class="application-view-button"
-                    onclick="openApplicationModal(${index})"
-                >
-                    Переглянути звернення
-                </button>
+                <div class="application-open-hint">
+                    Переглянути звернення →
+                </div>
 
             </div>
 
         </div>
+
     `;
 
 }
@@ -1885,440 +2456,91 @@ function createApplicationHTML(
 
 /* =========================================================
    OPEN APPLICATION MODAL
-   ГЛАВНАЯ ИСПРАВЛЕННАЯ ФУНКЦИЯ
 ========================================================= */
 
 function openApplicationModal(
-    applicationOrIndex
+    applicationNumber
 ) {
 
     console.log(
-        "OLYMP: openApplicationModal()",
-        applicationOrIndex
+        "OLYMP: opening application",
+        applicationNumber
     );
 
-    let application =
-        null;
+    const number =
+        String(
+            applicationNumber ||
+            ""
+        ).trim();
 
-    /*
-     * Если передали число:
-     *
-     * openApplicationModal(0)
-     */
+    const applications =
+        Array.isArray(
+            OlympState.applications
+        )
+            ? OlympState.applications
+            : [];
 
-    if (
-        typeof applicationOrIndex ===
-        "number"
-    ) {
+    const application =
+        applications.find(
+            function (item) {
 
-        application =
-            OlympState.applications[
-                applicationOrIndex
-            ];
+                if (!item) {
 
-    }
+                    return false;
 
-    /*
-     * Если передали строку:
-     *
-     * openApplicationModal("OLYMP-APP-0001")
-     */
+                }
 
-    else if (
-        typeof applicationOrIndex ===
-        "string"
-    ) {
-
-        const value =
-            applicationOrIndex.trim();
-
-        application =
-            OlympState.applications.find(
-                function (item) {
-
-                    return String(
+                const itemNumber =
+                    String(
                         item.number ||
                         item.applicationNumber ||
                         item.requestNumber ||
                         ""
-                    ).trim() === value;
+                    ).trim();
 
-                }
-            );
+                return (
+                    itemNumber ===
+                    number
+                );
 
-    }
-
-    /*
-     * Если передали сам объект
-     */
-
-    else if (
-        applicationOrIndex &&
-        typeof applicationOrIndex ===
-        "object"
-    ) {
-
-        application =
-            applicationOrIndex;
-
-    }
+            }
+        );
 
     if (
         !application
     ) {
+
+        console.warn(
+            "OLYMP: application not found",
+            number
+        );
 
         showMessage(
             "Звернення не знайдено.",
             "error"
         );
 
-        console.warn(
-            "OLYMP: application not found",
-            applicationOrIndex,
-            OlympState.applications
-        );
-
-        return false;
+        return;
 
     }
 
-    const modal =
-        getApplicationModal();
+    let modal =
+        document.querySelector(
+            "#applicationModal"
+        );
 
     if (
         !modal
     ) {
 
-        /*
-         * Если в HTML нет готового modal,
-         * создаём его автоматически.
-         */
+        modal =
+            createApplicationModal();
 
-        createApplicationModal();
-
-    }
-
-    const actualModal =
-        getApplicationModal();
-
-    if (
-        !actualModal
-    ) {
-
-        console.error(
-            "OLYMP: не удалось создать модальное окно."
+        document.body.appendChild(
+            modal
         );
 
-        return false;
-
     }
-
-    fillApplicationModal(
-        actualModal,
-        application
-    );
-
-    actualModal.classList.add(
-        "active"
-    );
-
-    actualModal.style.display =
-        "flex";
-
-    actualModal.setAttribute(
-        "aria-hidden",
-        "false"
-    );
-
-    document.body.classList.add(
-        "modal-open"
-    );
-
-    return true;
-
-}
-
-
-/* =========================================================
-   GLOBAL OPEN APPLICATION MODAL
-========================================================= */
-
-window.openApplicationModal =
-    openApplicationModal;
-
-
-/* =========================================================
-   GET APPLICATION MODAL
-========================================================= */
-
-function getApplicationModal() {
-
-    return document.querySelector(
-        "#applicationModal, " +
-        "#applicationViewModal, " +
-        ".application-modal, " +
-        "[data-application-modal]"
-    );
-
-}
-
-
-/* =========================================================
-   CREATE APPLICATION MODAL
-========================================================= */
-
-function createApplicationModal() {
-
-    if (
-        getApplicationModal()
-    ) {
-
-        return;
-
-    }
-
-    const modal =
-        document.createElement(
-            "div"
-        );
-
-    modal.id =
-        "applicationModal";
-
-    modal.className =
-        "application-modal modal-overlay";
-
-    modal.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-    modal.innerHTML =
-        `
-        <div
-            class="application-modal-dialog modal-content"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="applicationModalTitle"
-        >
-
-            <div class="application-modal-header">
-
-                <div>
-
-                    <div
-                        class="application-modal-label"
-                    >
-                        ЗВЕРНЕННЯ ГРОМАДЯНИНА
-                    </div>
-
-                    <h2
-                        id="applicationModalTitle"
-                    >
-                        Перегляд звернення
-                    </h2>
-
-                </div>
-
-                <button
-                    type="button"
-                    class="application-modal-close"
-                    data-close-application-modal
-                    aria-label="Закрити"
-                >
-                    ×
-                </button>
-
-            </div>
-
-            <div
-                class="application-modal-body"
-            >
-
-                <div
-                    class="application-modal-status-row"
-                >
-
-                    <span>
-                        Статус
-                    </span>
-
-                    <span
-                        id="applicationModalStatus"
-                    >
-                        —
-                    </span>
-
-                </div>
-
-                <div
-                    class="application-modal-grid"
-                >
-
-                    <div
-                        class="application-modal-field"
-                    >
-
-                        <span>
-                            Номер звернення
-                        </span>
-
-                        <strong
-                            id="applicationModalNumber"
-                        >
-                            —
-                        </strong>
-
-                    </div>
-
-                    <div
-                        class="application-modal-field"
-                    >
-
-                        <span>
-                            Дата подання
-                        </span>
-
-                        <strong
-                            id="applicationModalDate"
-                        >
-                            —
-                        </strong>
-
-                    </div>
-
-                    <div
-                        class="application-modal-field"
-                    >
-
-                        <span>
-                            Послуга
-                        </span>
-
-                        <strong
-                            id="applicationModalService"
-                        >
-                            —
-                        </strong>
-
-                    </div>
-
-                    <div
-                        class="application-modal-field"
-                    >
-
-                        <span>
-                            Відповідальний
-                        </span>
-
-                        <strong
-                            id="applicationModalResponsible"
-                        >
-                            Не призначено
-                        </strong>
-
-                    </div>
-
-                    <div
-                        class="application-modal-field"
-                    >
-
-                        <span>
-                            Контакт
-                        </span>
-
-                        <strong
-                            id="applicationModalContact"
-                        >
-                            —
-                        </strong>
-
-                    </div>
-
-                </div>
-
-                <div
-                    class="application-modal-section"
-                >
-
-                    <div
-                        class="application-modal-section-title"
-                    >
-                        Опис звернення
-                    </div>
-
-                    <div
-                        id="applicationModalMessage"
-                        class="application-modal-text"
-                    >
-                        —
-                    </div>
-
-                </div>
-
-                <div
-                    id="applicationModalResponseSection"
-                    class="application-modal-section"
-                    style="display:none;"
-                >
-
-                    <div
-                        class="application-modal-section-title"
-                    >
-                        Відповідь уряду
-                    </div>
-
-                    <div
-                        id="applicationModalResponse"
-                        class="application-modal-text"
-                    >
-                        —
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div
-                class="application-modal-footer"
-            >
-
-                <button
-                    type="button"
-                    class="application-modal-button"
-                    data-close-application-modal
-                >
-                    Закрити
-                </button>
-
-            </div>
-
-        </div>
-        `;
-
-    document.body.appendChild(
-        modal
-    );
-
-    setupApplicationModal();
-
-}
-
-
-/* =========================================================
-   FILL APPLICATION MODAL
-========================================================= */
-
-function fillApplicationModal(
-    modal,
-    application
-) {
-
-    const number =
-        application.number ||
-        application.applicationNumber ||
-        application.requestNumber ||
-        "—";
 
     const service =
         application.service ||
@@ -2346,173 +2568,284 @@ function fillApplicationModal(
 
     const responsible =
         application.responsible ||
-        application.executor ||
-        application.employee ||
         "Не призначено";
 
-    const contact =
-        application.contact ||
-        application.preferredContact ||
-        (
-            OlympState.citizen
-                ? (
-                    OlympState.citizen.contact ||
-                    OlympState.citizen.preferredContact ||
-                    ""
-                )
-                : ""
-        ) ||
-        "—";
-
-    const response =
+    const comment =
         application.comment ||
         application.response ||
-        application.answer ||
-        application.adminComment ||
         "";
 
-    setModalText(
-        modal,
-        "#applicationModalNumber",
-        number
-    );
-
-    setModalText(
-        modal,
-        "#applicationModalService",
-        service
-    );
-
-    setModalText(
-        modal,
-        "#applicationModalStatus",
-        status
-    );
-
-    setModalText(
-        modal,
-        "#applicationModalDate",
-        date
-    );
-
-    setModalText(
-        modal,
-        "#applicationModalResponsible",
-        responsible
-    );
-
-    setModalText(
-        modal,
-        "#applicationModalContact",
-        contact
-    );
-
-    setModalText(
-        modal,
-        "#applicationModalMessage",
-        message
-    );
-
-    const responseSection =
+    const numberElement =
         modal.querySelector(
-            "#applicationModalResponseSection"
+            "#applicationModalNumber"
         );
-
-    const responseElement =
-        modal.querySelector(
-            "#applicationModalResponse"
-        );
-
-    if (
-        response
-    ) {
-
-        if (
-            responseElement
-        ) {
-
-            responseElement.textContent =
-                response;
-
-        }
-
-        if (
-            responseSection
-        ) {
-
-            responseSection.style.display =
-                "";
-
-        }
-
-    } else {
-
-        if (
-            responseElement
-        ) {
-
-            responseElement.textContent =
-                "Відповідь ще не надана.";
-
-        }
-
-        if (
-            responseSection
-        ) {
-
-            responseSection.style.display =
-                "";
-
-        }
-
-    }
 
     const statusElement =
         modal.querySelector(
             "#applicationModalStatus"
         );
 
-    if (
-        statusElement
-    ) {
+    const serviceElement =
+        modal.querySelector(
+            "#applicationModalService"
+        );
+
+    const dateElement =
+        modal.querySelector(
+            "#applicationModalDate"
+        );
+
+    const responsibleElement =
+        modal.querySelector(
+            "#applicationModalResponsible"
+        );
+
+    const messageElement =
+        modal.querySelector(
+            "#applicationModalMessage"
+        );
+
+    const commentElement =
+        modal.querySelector(
+            "#applicationModalComment"
+        );
+
+    const commentBlock =
+        modal.querySelector(
+            "#applicationModalCommentBlock"
+        );
+
+    if (numberElement) {
+
+        numberElement.textContent =
+            number ||
+            "—";
+
+    }
+
+    if (statusElement) {
+
+        statusElement.textContent =
+            status;
 
         statusElement.className =
-            "application-modal-status " +
+            "application-status " +
             getStatusClass(
                 status
             );
 
     }
 
+    if (serviceElement) {
+
+        serviceElement.textContent =
+            service;
+
+    }
+
+    if (dateElement) {
+
+        dateElement.textContent =
+            date;
+
+    }
+
+    if (responsibleElement) {
+
+        responsibleElement.textContent =
+            responsible;
+
+    }
+
+    if (messageElement) {
+
+        messageElement.textContent =
+            message;
+
+    }
+
+    if (
+        commentBlock &&
+        commentElement
+    ) {
+
+        if (
+            comment
+        ) {
+
+            commentElement.textContent =
+                comment;
+
+            commentBlock.style.display =
+                "";
+
+        } else {
+
+            commentElement.textContent =
+                "";
+
+            commentBlock.style.display =
+                "none";
+
+        }
+
+    }
+
+    modal.classList.add(
+        "active"
+    );
+
+    modal.style.display =
+        "flex";
+
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
 }
 
 
 /* =========================================================
-   SET MODAL TEXT
+   CREATE APPLICATION MODAL
 ========================================================= */
 
-function setModalText(
-    modal,
-    selector,
-    value
-) {
+function createApplicationModal() {
 
-    const element =
-        modal.querySelector(
-            selector
+    const modal =
+        document.createElement(
+            "div"
         );
 
-    if (
-        element
-    ) {
+    modal.id =
+        "applicationModal";
 
-        element.textContent =
-            value === undefined ||
-            value === null
-                ? ""
-                : String(value);
+    modal.className =
+        "modal application-modal";
 
-    }
+    modal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+    modal.innerHTML = `
+
+        <div
+            class="modal-overlay"
+            data-close-application-modal
+        ></div>
+
+        <div class="modal-content">
+
+            <button
+                type="button"
+                class="modal-close"
+                data-close-application-modal
+                aria-label="Закрити"
+            >
+                ×
+            </button>
+
+            <div class="application-modal-header">
+
+                <div>
+
+                    <div class="application-modal-label">
+                        ЗВЕРНЕННЯ
+                    </div>
+
+                    <h2 id="applicationModalNumber">
+                        —
+                    </h2>
+
+                </div>
+
+                <div
+                    id="applicationModalStatus"
+                    class="application-status status-pending"
+                >
+                    —
+                </div>
+
+            </div>
+
+            <div class="application-modal-body">
+
+                <div class="application-detail">
+
+                    <span>
+                        Державна послуга
+                    </span>
+
+                    <strong id="applicationModalService">
+                        —
+                    </strong>
+
+                </div>
+
+                <div class="application-detail">
+
+                    <span>
+                        Дата подання
+                    </span>
+
+                    <strong id="applicationModalDate">
+                        —
+                    </strong>
+
+                </div>
+
+                <div class="application-detail">
+
+                    <span>
+                        Відповідальний
+                    </span>
+
+                    <strong id="applicationModalResponsible">
+                        —
+                    </strong>
+
+                </div>
+
+                <div class="application-detail application-detail-message">
+
+                    <span>
+                        Ваше звернення
+                    </span>
+
+                    <div id="applicationModalMessage">
+                        —
+                    </div>
+
+                </div>
+
+                <div
+                    class="application-detail"
+                    id="applicationModalCommentBlock"
+                    style="display:none;"
+                >
+
+                    <span>
+                        Відповідь уряду
+                    </span>
+
+                    <div id="applicationModalComment">
+                        —
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+    return modal;
 
 }
 
@@ -2524,11 +2857,11 @@ function setModalText(
 function closeApplicationModal() {
 
     const modal =
-        getApplicationModal();
+        document.querySelector(
+            "#applicationModal"
+        );
 
-    if (
-        !modal
-    ) {
+    if (!modal) {
 
         return;
 
@@ -2538,32 +2871,12 @@ function closeApplicationModal() {
         "active"
     );
 
+    modal.style.display =
+        "none";
+
     modal.setAttribute(
         "aria-hidden",
         "true"
-    );
-
-    /*
-     * Небольшая задержка позволяет CSS-анимации
-     * нормально завершиться.
-     */
-
-    setTimeout(
-        function () {
-
-            if (
-                !modal.classList.contains(
-                    "active"
-                )
-            ) {
-
-                modal.style.display =
-                    "none";
-
-            }
-
-        },
-        200
     );
 
     document.body.classList.remove(
@@ -2574,78 +2887,40 @@ function closeApplicationModal() {
 
 
 /* =========================================================
-   GLOBAL CLOSE MODAL
+   MODAL EVENTS
 ========================================================= */
 
-window.closeApplicationModal =
-    closeApplicationModal;
+function setupApplicationModalEvents() {
 
-
-/* =========================================================
-   SETUP APPLICATION MODAL
-========================================================= */
-
-function setupApplicationModal() {
-
-    const modal =
-        getApplicationModal();
-
-    if (
-        !modal
-    ) {
-
-        return;
-
-    }
-
-    if (
-        modal.dataset.olympModalBound ===
-        "true"
-    ) {
-
-        return;
-
-    }
-
-    modal.dataset.olympModalBound =
-        "true";
-
-    /*
-     * Кнопки закрытия
-     */
-
-    modal
-        .querySelectorAll(
-            "[data-close-application-modal]"
-        )
-        .forEach(
-            function (button) {
-
-                button.addEventListener(
-                    "click",
-                    function (event) {
-
-                        event.preventDefault();
-
-                        closeApplicationModal();
-
-                    }
-                );
-
-            }
-        );
-
-    /*
-     * Клик по затемнённому фону
-     */
-
-    modal.addEventListener(
+    document.addEventListener(
         "click",
         function (event) {
 
+            const close =
+                event.target.closest(
+                    "[data-close-application-modal]"
+                );
+
             if (
-                event.target ===
-                modal
+                close
+            ) {
+
+                event.preventDefault();
+
+                closeApplicationModal();
+
+            }
+
+        }
+    );
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key ===
+                "Escape"
             ) {
 
                 closeApplicationModal();
@@ -2656,39 +2931,6 @@ function setupApplicationModal() {
     );
 
 }
-
-
-/* =========================================================
-   ESC — CLOSE MODAL
-========================================================= */
-
-document.addEventListener(
-    "keydown",
-    function (event) {
-
-        if (
-            event.key ===
-            "Escape"
-        ) {
-
-            const modal =
-                getApplicationModal();
-
-            if (
-                modal &&
-                modal.classList.contains(
-                    "active"
-                )
-            ) {
-
-                closeApplicationModal();
-
-            }
-
-        }
-
-    }
-);
 
 
 /* =========================================================
@@ -2706,20 +2948,27 @@ function updateStatistics(
             ? applications
             : [];
 
-    let pending =
-        0;
+    const values = {
 
-    let approved =
-        0;
+        total:
+            applications.length,
 
-    let completed =
-        0;
+        pending:
+            0,
 
-    let rejected =
-        0;
+        approved:
+            0,
 
-    let closed =
-        0;
+        completed:
+            0,
+
+        rejected:
+            0,
+
+        closed:
+            0
+
+    };
 
     applications.forEach(
         function (application) {
@@ -2731,79 +2980,57 @@ function updateStatistics(
                 ).toLowerCase();
 
             if (
-                status.indexOf(
+                status.includes(
                     "розгляді"
-                ) !== -1
+                )
             ) {
 
-                pending++;
+                values.pending++;
 
             }
 
             if (
-                status.indexOf(
+                status.includes(
                     "прийнято"
-                ) !== -1
+                )
             ) {
 
-                approved++;
+                values.approved++;
 
             }
 
             if (
-                status.indexOf(
+                status.includes(
                     "виконано"
-                ) !== -1
+                )
             ) {
 
-                completed++;
+                values.completed++;
 
             }
 
             if (
-                status.indexOf(
+                status.includes(
                     "відхилено"
-                ) !== -1
+                )
             ) {
 
-                rejected++;
+                values.rejected++;
 
             }
 
             if (
-                status.indexOf(
+                status.includes(
                     "закрито"
-                ) !== -1
+                )
             ) {
 
-                closed++;
+                values.closed++;
 
             }
 
         }
     );
-
-    const values = {
-
-        total:
-            applications.length,
-
-        pending:
-            pending,
-
-        approved:
-            approved,
-
-        completed:
-            completed,
-
-        rejected:
-            rejected,
-
-        closed:
-            closed
-
-    };
 
     Object.keys(values).forEach(
         function (key) {
@@ -2830,7 +3057,7 @@ function updateStatistics(
 
 
 /* =========================================================
-   SETUP FORMS
+   FORMS
 ========================================================= */
 
 function setupForms() {
@@ -3048,13 +3275,7 @@ function setupApplicationForms() {
         );
 
     forms.forEach(
-        function (form) {
-
-            bindApplicationForm(
-                form
-            );
-
-        }
+        bindApplicationForm
     );
 
     document
@@ -3113,14 +3334,7 @@ function bindApplicationForm(
 ) {
 
     if (
-        !form
-    ) {
-
-        return;
-
-    }
-
-    if (
+        !form ||
         form.dataset.olympBound ===
         "true"
     ) {
@@ -3150,43 +3364,39 @@ function bindApplicationForm(
 
             }
 
-            const data = {
-
-                service:
-                    getFormValue(
-                        form,
-                        [
-                            "service",
-                            "serviceName",
-                            "type"
-                        ]
-                    ),
-
-                message:
-                    getFormValue(
-                        form,
-                        [
-                            "message",
-                            "description",
-                            "text"
-                        ]
-                    ),
-
-                contact:
-                    getFormValue(
-                        form,
-                        [
-                            "contact",
-                            "preferredContact"
-                        ]
-                    )
-
-            };
-
             const result =
-                await createApplication(
-                    data
-                );
+                await createApplication({
+
+                    service:
+                        getFormValue(
+                            form,
+                            [
+                                "service",
+                                "serviceName",
+                                "type"
+                            ]
+                        ),
+
+                    message:
+                        getFormValue(
+                            form,
+                            [
+                                "message",
+                                "description",
+                                "text"
+                            ]
+                        ),
+
+                    contact:
+                        getFormValue(
+                            form,
+                            [
+                                "contact",
+                                "preferredContact"
+                            ]
+                        )
+
+                });
 
             if (
                 result &&
@@ -3200,25 +3410,8 @@ function bindApplicationForm(
                 } catch (error) {
 
                     console.warn(
+                        "OLYMP form reset:",
                         error
-                    );
-
-                }
-
-                const modal =
-                    form.closest(
-                        ".modal, " +
-                        ".modal-overlay, " +
-                        "[role='dialog'], " +
-                        "[data-modal]"
-                    );
-
-                if (
-                    modal
-                ) {
-
-                    modal.classList.remove(
-                        "active"
                     );
 
                 }
@@ -3232,7 +3425,7 @@ function bindApplicationForm(
 
 
 /* =========================================================
-   LOGOUT
+   LOGOUT BUTTONS
 ========================================================= */
 
 function setupLogoutButtons() {
@@ -3275,78 +3468,14 @@ function setupLogoutButtons() {
 }
 
 
-async function logoutCitizen() {
-
-    const token =
-        OlympState.sessionToken;
-
-    try {
-
-        if (
-            token
-        ) {
-
-            await apiRequest(
-                "logout",
-                {
-
-                    sessionToken:
-                        token,
-
-                    token:
-                        token
-
-                }
-            );
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "Logout API error:",
-            error
-        );
-
-    }
-
-    clearSession();
-
-    showMessage(
-        "Ви вийшли з особистого кабінету.",
-        "success"
-    );
-
-    setTimeout(
-        function () {
-
-            const loginUrl =
-                findLoginPage();
-
-            if (
-                loginUrl
-            ) {
-
-                window.location.href =
-                    loginUrl;
-
-            }
-
-        },
-        300
-    );
-
-}
-
-
 /* =========================================================
    APPLICATION BUTTONS
 ========================================================= */
 
 function setupApplicationButtons() {
 
-    const buttons =
-        document.querySelectorAll(
+    document
+        .querySelectorAll(
             "[data-submit-application], " +
             "[data-application-submit], " +
             "#submitApplication, " +
@@ -3355,17 +3484,10 @@ function setupApplicationButtons() {
             "#sendRequest, " +
             "#submitAppeal, " +
             "#sendAppeal"
+        )
+        .forEach(
+            bindApplicationButton
         );
-
-    buttons.forEach(
-        function (button) {
-
-            bindApplicationButton(
-                button
-            );
-
-        }
-    );
 
 }
 
@@ -3379,14 +3501,7 @@ function bindApplicationButton(
 ) {
 
     if (
-        !button
-    ) {
-
-        return;
-
-    }
-
-    if (
+        !button ||
         button.dataset.olympApplicationBound ===
         "true"
     ) {
@@ -3418,8 +3533,6 @@ function bindApplicationButton(
         async function (event) {
 
             event.preventDefault();
-
-            event.stopPropagation();
 
             if (
                 !isLoggedIn()
@@ -3532,7 +3645,7 @@ function bindApplicationButton(
 
 
 /* =========================================================
-   GET ELEMENT VALUE
+   ELEMENT VALUE
 ========================================================= */
 
 function getElementValue(
@@ -3563,25 +3676,42 @@ function getElementValue(
             );
 
         if (
-            element
+            !element
         ) {
 
-            if (
-                element.value !== undefined
-            ) {
+            continue;
 
-                const value =
-                    String(
-                        element.value
-                    ).trim();
+        }
 
-                if (
-                    value
-                ) {
+        if (
+            element.value !== undefined
+        ) {
 
-                    return value;
+            const value =
+                String(
+                    element.value
+                ).trim();
 
-                }
+            if (value) {
+
+                return value;
+
+            }
+
+        }
+
+        if (
+            element.textContent
+        ) {
+
+            const value =
+                String(
+                    element.textContent
+                ).trim();
+
+            if (value) {
+
+                return value;
 
             }
 
@@ -3624,12 +3754,14 @@ function clearApplicationFields(
                     ).toLowerCase();
 
                 if (
-                    name === "service" ||
-                    name === "servicename" ||
-                    name === "type" ||
-                    name === "message" ||
-                    name === "description" ||
-                    name === "text"
+                    [
+                        "service",
+                        "servicename",
+                        "type",
+                        "message",
+                        "description",
+                        "text"
+                    ].includes(name)
                 ) {
 
                     if (
@@ -3673,6 +3805,10 @@ function setupCabinetLinks() {
                     "click",
                     function () {
 
+                        /*
+                         * Обычная навигация.
+                         */
+
                     }
                 );
 
@@ -3688,11 +3824,8 @@ function setupCabinetLinks() {
 
 function showLoginRequired() {
 
-    const message =
-        "Для подання заявки необхідно увійти до особистого кабінету.";
-
     showMessage(
-        message,
+        "Для подання заявки необхідно увійти до особистого кабінету.",
         "error"
     );
 
@@ -3757,19 +3890,19 @@ function redirectToCabinet() {
 
     }
 
-    const cabinetLink =
+    const link =
         document.querySelector(
             "a[href*='cabinet.html'], " +
             "a[href*='cabinet']"
         );
 
     if (
-        cabinetLink &&
-        cabinetLink.href
+        link &&
+        link.href
     ) {
 
         window.location.href =
-            cabinetLink.href;
+            link.href;
 
         return;
 
@@ -3807,7 +3940,7 @@ function findLoginPage() {
 
 
 /* =========================================================
-   CLOSE AUTH
+   CLOSE AUTH FORMS
 ========================================================= */
 
 function closeAuthForms() {
@@ -3843,6 +3976,14 @@ function getFormValue(
     names
 ) {
 
+    if (
+        !form
+    ) {
+
+        return "";
+
+    }
+
     for (
         let i = 0;
         i < names.length;
@@ -3864,9 +4005,7 @@ function getFormValue(
                     element.value
                 ).trim();
 
-            if (
-                value
-            ) {
+            if (value) {
 
                 return value;
 
@@ -3890,9 +4029,7 @@ function setLoading(
 ) {
 
     OlympState.loading =
-        Boolean(
-            state
-        );
+        Boolean(state);
 
     document
         .querySelectorAll(
@@ -3905,6 +4042,21 @@ function setLoading(
                     state
                         ? ""
                         : "none";
+
+            }
+        );
+
+    document
+        .querySelectorAll(
+            "button[type='submit']"
+        )
+        .forEach(
+            function (button) {
+
+                button.classList.toggle(
+                    "loading",
+                    Boolean(state)
+                );
 
             }
         );
@@ -4065,9 +4217,7 @@ function normalizeOlympId(
 
         result =
             "OLYMP-" +
-            result.substring(
-                5
-            );
+            result.substring(5);
 
     }
 
@@ -4091,9 +4241,9 @@ function getStatusClass(
         ).toLowerCase();
 
     if (
-        value.indexOf(
+        value.includes(
             "прийнято"
-        ) !== -1
+        )
     ) {
 
         return "status-approved";
@@ -4101,9 +4251,9 @@ function getStatusClass(
     }
 
     if (
-        value.indexOf(
+        value.includes(
             "виконано"
-        ) !== -1
+        )
     ) {
 
         return "status-completed";
@@ -4111,9 +4261,9 @@ function getStatusClass(
     }
 
     if (
-        value.indexOf(
+        value.includes(
             "відхилено"
-        ) !== -1
+        )
     ) {
 
         return "status-rejected";
@@ -4121,9 +4271,9 @@ function getStatusClass(
     }
 
     if (
-        value.indexOf(
+        value.includes(
             "закрито"
-        ) !== -1
+        )
     ) {
 
         return "status-closed";
@@ -4152,9 +4302,7 @@ function formatDate(
     }
 
     const date =
-        new Date(
-            value
-        );
+        new Date(value);
 
     if (
         isNaN(
@@ -4162,9 +4310,7 @@ function formatDate(
         )
     ) {
 
-        return String(
-            value
-        );
+        return String(value);
 
     }
 
@@ -4190,15 +4336,11 @@ function formatDate(
                     "2-digit"
 
             }
-        ).format(
-            date
-        );
+        ).format(date);
 
     } catch (error) {
 
-        return String(
-            value
-        );
+        return String(value);
 
     }
 
@@ -4228,31 +4370,12 @@ function isSessionError(
         ).toLowerCase();
 
     return (
-
-        message.indexOf(
-            "сесія"
-        ) !== -1 ||
-
-        message.indexOf(
-            "сесс"
-        ) !== -1 ||
-
-        message.indexOf(
-            "увійдіть"
-        ) !== -1 ||
-
-        message.indexOf(
-            "войд"
-        ) !== -1 ||
-
-        message.indexOf(
-            "olymp-id"
-        ) !== -1 ||
-
-        message.indexOf(
-            "token"
-        ) !== -1
-
+        message.includes("сесія") ||
+        message.includes("сесс") ||
+        message.includes("увійдіть") ||
+        message.includes("войд") ||
+        message.includes("olymp-id") ||
+        message.includes("token")
     );
 
 }
@@ -4297,633 +4420,57 @@ function escapeHTML(
 
 
 /* =========================================================
-   SAVE AVATAR
-========================================================= */
-
-async function saveAvatar(
-    avatarUrl
-) {
-
-    if (
-        !isLoggedIn()
-    ) {
-
-        showLoginRequired();
-
-        return {
-            success:
-                false
-        };
-
-    }
-
-    avatarUrl =
-        String(
-            avatarUrl ||
-            ""
-        ).trim();
-
-    if (
-        !avatarUrl
-    ) {
-
-        showMessage(
-            "Вкажіть посилання на аватар.",
-            "error"
-        );
-
-        return {
-            success:
-                false
-        };
-
-    }
-
-    try {
-
-        const result =
-            await apiRequest(
-                "saveavatar",
-                {
-
-                    olympId:
-                        OlympState.olympId,
-
-                    sessionToken:
-                        OlympState.sessionToken,
-
-                    token:
-                        OlympState.sessionToken,
-
-                    avatarUrl:
-                        avatarUrl,
-
-                    avatar:
-                        avatarUrl,
-
-                    image:
-                        avatarUrl,
-
-                    url:
-                        avatarUrl
-
-                }
-            );
-
-        if (
-            !result ||
-            !result.success
-        ) {
-
-            showMessage(
-                result &&
-                result.message
-                    ? result.message
-                    : "Не вдалося зберегти аватар.",
-                "error"
-            );
-
-            return result;
-
-        }
-
-        const citizen =
-            result.citizen ||
-            result.profile;
-
-        if (
-            citizen
-        ) {
-
-            OlympState.citizen =
-                citizen;
-
-            OlympState.profile =
-                citizen;
-
-            localStorage.setItem(
-                OLYMP_CONFIG.STORAGE.CITIZEN,
-                JSON.stringify(citizen)
-            );
-
-            localStorage.setItem(
-                OLYMP_CONFIG.STORAGE.PROFILE,
-                JSON.stringify(citizen)
-            );
-
-        }
-
-        updateAvatarUI(
-            citizen
-        );
-
-        showMessage(
-            "Аватар успішно збережено.",
-            "success"
-        );
-
-        return result;
-
-    } catch (error) {
-
-        console.error(
-            "saveAvatar:",
-            error
-        );
-
-        showMessage(
-            error.message ||
-            "Помилка збереження аватара.",
-            "error"
-        );
-
-        return {
-            success:
-                false
-        };
-
-    }
-
-}
-
-
-/* =========================================================
-   REMOVE AVATAR
-========================================================= */
-
-async function removeAvatar() {
-
-    if (
-        !isLoggedIn()
-    ) {
-
-        showLoginRequired();
-
-        return {
-            success:
-                false
-        };
-
-    }
-
-    try {
-
-        const result =
-            await apiRequest(
-                "removeavatar",
-                {
-
-                    olympId:
-                        OlympState.olympId,
-
-                    sessionToken:
-                        OlympState.sessionToken,
-
-                    token:
-                        OlympState.sessionToken
-
-                }
-            );
-
-        if (
-            !result ||
-            !result.success
-        ) {
-
-            showMessage(
-                result &&
-                result.message
-                    ? result.message
-                    : "Не вдалося видалити аватар.",
-                "error"
-            );
-
-            return result;
-
-        }
-
-        if (
-            OlympState.citizen
-        ) {
-
-            OlympState.citizen.avatarUrl =
-                "";
-
-            OlympState.citizen.avatar =
-                "";
-
-            OlympState.citizen.photo =
-                "";
-
-            localStorage.setItem(
-                OLYMP_CONFIG.STORAGE.CITIZEN,
-                JSON.stringify(
-                    OlympState.citizen
-                )
-            );
-
-        }
-
-        updateAvatarUI(
-            OlympState.citizen
-        );
-
-        showMessage(
-            "Аватар видалено.",
-            "success"
-        );
-
-        return result;
-
-    } catch (error) {
-
-        console.error(
-            "removeAvatar:",
-            error
-        );
-
-        return {
-            success:
-                false
-        };
-
-    }
-
-}
-
-
-/* =========================================================
-   UPDATE AUTH UI
-========================================================= */
-
-function updateAuthUI() {
-
-    const loggedIn =
-        isLoggedIn();
-
-    const citizen =
-        getCurrentUser();
-
-    document
-        .querySelectorAll(
-            "[data-auth-only]"
-        )
-        .forEach(
-            function (element) {
-
-                element.style.display =
-                    loggedIn
-                        ? ""
-                        : "none";
-
-            }
-        );
-
-    document
-        .querySelectorAll(
-            "[data-guest-only]"
-        )
-        .forEach(
-            function (element) {
-
-                element.style.display =
-                    loggedIn
-                        ? "none"
-                        : "";
-
-            }
-        );
-
-    setText(
-        "[data-user-olymp-id]",
-        OlympState.olympId
-    );
-
-    setText(
-        "#userOlympId",
-        OlympState.olympId
-    );
-
-    setText(
-        "#olympId",
-        OlympState.olympId
-    );
-
-    setText(
-        "#profileOlympId",
-        OlympState.olympId
-    );
-
-    if (
-        citizen
-    ) {
-
-        const name =
-            citizen.fullName ||
-            citizen.name ||
-            citizen.fio ||
-            "";
-
-        setText(
-            "[data-user-name]",
-            name
-        );
-
-        setText(
-            "#userName",
-            name
-        );
-
-        setText(
-            "#profileName",
-            name
-        );
-
-        setText(
-            "#citizenName",
-            name
-        );
-
-        setText(
-            "[data-user-email]",
-            citizen.email ||
-            ""
-        );
-
-        setText(
-            "#profileEmail",
-            citizen.email ||
-            ""
-        );
-
-        setText(
-            "[data-user-phone]",
-            citizen.phone ||
-            ""
-        );
-
-        setText(
-            "#profilePhone",
-            citizen.phone ||
-            ""
-        );
-
-        setText(
-            "[data-user-discord]",
-            citizen.discord ||
-            ""
-        );
-
-        setText(
-            "#profileDiscord",
-            citizen.discord ||
-            ""
-        );
-
-        setText(
-            "[data-user-birth-date]",
-            citizen.birthDate ||
-            ""
-        );
-
-        setText(
-            "#profileBirthDate",
-            citizen.birthDate ||
-            ""
-        );
-
-        setText(
-            "[data-user-status]",
-            citizen.status ||
-            "Активний"
-        );
-
-    }
-
-    updateAvatarUI(
-        citizen
-    );
-
-    updateApplicationButtons();
-
-}
-
-
-/* =========================================================
-   UPDATE APPLICATION BUTTONS
-========================================================= */
-
-function updateApplicationButtons() {
-
-    const loggedIn =
-        isLoggedIn();
-
-    document
-        .querySelectorAll(
-            "[data-submit-application], " +
-            "[data-application-submit], " +
-            "#submitApplication, " +
-            "#sendApplication, " +
-            "#submitRequest, " +
-            "#sendRequest"
-        )
-        .forEach(
-            function (button) {
-
-                if (
-                    loggedIn
-                ) {
-
-                    button.classList.remove(
-                        "login-required"
-                    );
-
-                    button.removeAttribute(
-                        "aria-disabled"
-                    );
-
-                } else {
-
-                    button.classList.add(
-                        "login-required"
-                    );
-
-                    button.setAttribute(
-                        "aria-disabled",
-                        "true"
-                    );
-
-                }
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   UPDATE AVATAR UI
-========================================================= */
-
-function updateAvatarUI(
-    citizen
-) {
-
-    if (
-        !citizen
-    ) {
-
-        return;
-
-    }
-
-    const avatar =
-        citizen.avatarUrl ||
-        citizen.avatar ||
-        citizen.photo ||
-        "";
-
-    document
-        .querySelectorAll(
-            "[data-user-avatar]"
-        )
-        .forEach(
-            function (img) {
-
-                if (
-                    avatar
-                ) {
-
-                    img.src =
-                        avatar;
-
-                    img.style.display =
-                        "";
-
-                }
-
-            }
-        );
-
-    document
-        .querySelectorAll(
-            "#userAvatar, #profileAvatar, #avatarPreview"
-        )
-        .forEach(
-            function (img) {
-
-                if (
-                    avatar
-                ) {
-
-                    img.src =
-                        avatar;
-
-                }
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   IS LOGGED IN
-========================================================= */
-
-function isLoggedIn() {
-
-    return Boolean(
-        OlympState.authenticated &&
-        OlympState.sessionToken &&
-        OlympState.olympId
-    );
-
-}
-
-
-/* =========================================================
-   CURRENT USER
-========================================================= */
-
-function getCurrentUser() {
-
-    return (
-        OlympState.citizen ||
-        OlympState.profile ||
-        null
-    );
-
-}
-
-
-/* =========================================================
-   CURRENT OLYMP ID
-========================================================= */
-
-function getCurrentOlympId() {
-
-    return (
-        OlympState.olympId ||
-        ""
-    );
-
-}
-
-
-/* =========================================================
    GLOBAL API
 ========================================================= */
 
-window.OlympGovernment =
-    {
+window.OlympGovernment = {
 
-        register:
-            registerCitizen,
+    register:
+        registerCitizen,
 
-        login:
-            loginCitizen,
+    login:
+        loginCitizen,
 
-        logout:
-            logoutCitizen,
+    logout:
+        logoutCitizen,
 
-        profile:
-            loadProfile,
+    profile:
+        loadProfile,
 
-        applications:
-            loadApplications,
+    applications:
+        loadApplications,
 
-        createApplication:
-            createApplication,
+    createApplication:
+        createApplication,
 
-        openApplicationModal:
-            openApplicationModal,
+    saveAvatar:
+        saveAvatar,
 
-        closeApplicationModal:
-            closeApplicationModal,
+    removeAvatar:
+        removeAvatar,
 
-        saveAvatar:
-            saveAvatar,
+    validateSession:
+        validateSession,
 
-        removeAvatar:
-            removeAvatar,
+    isLoggedIn:
+        isLoggedIn,
 
-        validateSession:
-            validateSession,
+    getCurrentUser:
+        getCurrentUser,
 
-        isLoggedIn:
-            isLoggedIn,
+    getOlympId:
+        getCurrentOlympId,
 
-        getCurrentUser:
-            getCurrentUser,
+    state:
+        OlympState,
 
-        getOlympId:
-            getCurrentOlympId,
+    openApplicationModal:
+        openApplicationModal,
 
-        state:
-            OlympState
+    closeApplicationModal:
+        closeApplicationModal
 
-    };
+};
 
 
 /* =========================================================
@@ -4942,12 +4489,6 @@ window.logoutCitizen =
 window.createApplication =
     createApplication;
 
-window.openApplicationModal =
-    openApplicationModal;
-
-window.closeApplicationModal =
-    closeApplicationModal;
-
 window.saveAvatar =
     saveAvatar;
 
@@ -4965,57 +4506,65 @@ window.isLoggedIn =
 
 
 /* =========================================================
+   IMPORTANT:
+   ЭТИ ДВЕ ФУНКЦИИ НУЖНЫ ТВОЕМУ HTML
+========================================================= */
+
+window.openApplicationModal =
+    openApplicationModal;
+
+window.closeApplicationModal =
+    closeApplicationModal;
+
+
+/* =========================================================
    DEBUG
 ========================================================= */
 
-window.OLYMP_DEBUG =
-    {
+window.OLYMP_DEBUG = {
 
-        getState:
-            function () {
+    getState:
+        function () {
 
-                return {
+            return {
 
-                    authenticated:
-                        OlympState.authenticated,
+                authenticated:
+                    OlympState.authenticated,
 
-                    olympId:
-                        OlympState.olympId,
+                olympId:
+                    OlympState.olympId,
 
-                    hasToken:
-                        Boolean(
-                            OlympState.sessionToken
-                        ),
+                hasToken:
+                    Boolean(
+                        OlympState.sessionToken
+                    ),
 
-                    citizen:
-                        OlympState.citizen,
+                citizen:
+                    OlympState.citizen,
 
-                    applications:
-                        OlympState.applications
+                applications:
+                    OlympState.applications
 
-                };
+            };
 
-            },
+        },
 
-        clearSession:
-            clearSession,
+    clearSession:
+        clearSession,
 
-        validate:
-            validateSession,
+    validate:
+        validateSession,
 
-        restore:
-            restoreSession,
+    restore:
+        restoreSession,
 
-        createApplication:
-            createApplication,
+    createApplication:
+        createApplication,
 
-        openApplicationModal:
-            openApplicationModal,
+    openApplicationModal:
+        openApplicationModal
 
-        closeApplicationModal:
-            closeApplicationModal
-
-    };
+};
 
 
 /* =========================================================
@@ -5030,9 +4579,4 @@ console.log(
 console.log(
     "OLYMP API:",
     OLYMP_CONFIG.API_URL
-);
-
-console.log(
-    "openApplicationModal:",
-    typeof window.openApplicationModal
 );
