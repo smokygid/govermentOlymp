@@ -1351,7 +1351,7 @@ async function submitApplication(
     if (
         !OLYMP_CONFIG.API_URL ||
         OLYMP_CONFIG.API_URL.includes(
-            "AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ"
+            "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec"
         )
     ) {
 
