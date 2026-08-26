@@ -1,25 +1,18 @@
 /* =========================================================
    OLYMP GOVERNMENT
-   PERSONAL CABINET 5.0
+   PERSONAL CABINET 6.0
 
-   Система:
-   • OLYMP-ID
-   • Пароль
-   • Авторизация гражданина
+   • OLYMP-ID + пароль
+   • Авторизация
    • Автоматическое восстановление сессии
-   • Профиль гражданина
+   • Профіль громадянина
    • Аватар
-   • Предпросмотр аватара
-   • Сохранение аватара
-   • Удаление аватара
-   • Google Drive
-   • Все заявки гражданина
-   • Статусы
-   • Ответы государственных органов
+   • Заявки
+   • Статуси
    • Статистика
-   • Просмотр заявки
-   • Копирование
-   • Выход
+   • Перегляд заявки
+   • Копіювання номера
+   • Вихід
 ========================================================= */
 
 
@@ -30,14 +23,11 @@
 const API_URL =
     "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec";
 
-
 const STORAGE_KEY =
     "olympCitizenSession";
 
-
 const CABINET_VERSION =
-    "5.0";
-
+    "6.0";
 
 const SESSION_MAX_AGE =
     30 * 24 * 60 * 60 * 1000;
@@ -145,9 +135,6 @@ function initCabinet() {
 
 function setupEvents() {
 
-
-    /* LOGIN */
-
     if (loginForm) {
 
         loginForm.addEventListener(
@@ -157,8 +144,6 @@ function setupEvents() {
 
     }
 
-
-    /* LOGOUT */
 
     if (logoutButton) {
 
@@ -170,8 +155,6 @@ function setupEvents() {
     }
 
 
-    /* COPY */
-
     if (copyNumberButton) {
 
         copyNumberButton.addEventListener(
@@ -181,8 +164,6 @@ function setupEvents() {
 
     }
 
-
-    /* AVATAR */
 
     if (avatarInput) {
 
@@ -214,12 +195,8 @@ function setupEvents() {
     }
 
 
-    /* ID */
-
     const citizenIdInput =
-        document.getElementById(
-            "citizenId"
-        );
+        document.getElementById("citizenId");
 
 
     if (citizenIdInput) {
@@ -239,40 +216,11 @@ function setupEvents() {
     }
 
 
-    /* PASSWORD */
-
-    const citizenPasswordInput =
-        document.getElementById(
-            "citizenPassword"
-        );
-
-
-    if (citizenPasswordInput) {
-
-        citizenPasswordInput.addEventListener(
-            "input",
-            function () {
-
-                this.value =
-                    cleanPassword(
-                        this.value
-                    );
-
-            }
-        );
-
-    }
-
-
-    /* ESC */
-
     document.addEventListener(
         "keydown",
         function (event) {
 
-            if (
-                event.key === "Escape"
-            ) {
+            if (event.key === "Escape") {
 
                 hideToast();
 
@@ -307,8 +255,8 @@ async function handleLogin(event) {
         );
 
 
-    let olympId =
-        normalizeOlympId(
+    const olympId =
+        formatOlympId(
             citizenIdInput
                 ? citizenIdInput.value
                 : ""
@@ -323,17 +271,7 @@ async function handleLogin(event) {
         );
 
 
-    olympId =
-        formatOlympId(
-            olympId
-        );
-
-
-    if (
-        !/^OLYMP-\d{6}$/.test(
-            olympId
-        )
-    ) {
+    if (!/^OLYMP-\d{6}$/.test(olympId)) {
 
         showLoginError(
             "Невірний формат OLYMP-ID. Приклад: OLYMP-000001"
@@ -380,21 +318,18 @@ async function handleLogin(event) {
             await apiRequest(
                 "login",
                 {
-
-                    olympId:
-                        olympId,
-
-                    citizenId:
-                        olympId,
-
-                    idNumber:
-                        olympId,
-
-                    password:
-                        password
-
+                    olympId: olympId,
+                    citizenId: olympId,
+                    idNumber: olympId,
+                    password: password
                 }
             );
+
+
+        console.log(
+            "LOGIN RESPONSE:",
+            response
+        );
 
 
         if (
@@ -403,18 +338,10 @@ async function handleLogin(event) {
         ) {
 
             throw new Error(
-
                 response &&
                 response.message
-
-                    ?
-
-                response.message
-
-                    :
-
-                "Невірний OLYMP-ID або пароль."
-
+                    ? response.message
+                    : "Невірний OLYMP-ID або пароль."
             );
 
         }
@@ -445,6 +372,12 @@ async function handleLogin(event) {
         }
 
 
+        /*
+         * Зберігаємо сесію.
+         * Після цього повторний ввід
+         * ID + пароля не потрібен.
+         */
+
         saveSession(
             olympId,
             password
@@ -453,14 +386,30 @@ async function handleLogin(event) {
 
         renderCabinet();
 
-
         hideLoading();
-
 
         showToast(
             "Вхід успішно виконано.",
             "success"
         );
+
+
+        /*
+         * Очищаємо поля входу,
+         * але НЕ видаляємо сесію.
+         */
+
+        if (citizenIdInput) {
+
+            citizenIdInput.value = "";
+
+        }
+
+        if (passwordInput) {
+
+            passwordInput.value = "";
+
+        }
 
 
     } catch (error) {
@@ -473,18 +422,14 @@ async function handleLogin(event) {
 
         hideLoading();
 
-
         showLoginError(
             error.message ||
             "Помилка входу."
         );
 
-
     } finally {
 
-        setLoginLoading(
-            false
-        );
+        setLoginLoading(false);
 
     }
 
@@ -501,6 +446,10 @@ async function restoreSession() {
         loadSession();
 
 
+    /*
+     * Немає збереженої сесії.
+     */
+
     if (!session) {
 
         showLogin();
@@ -509,6 +458,10 @@ async function restoreSession() {
 
     }
 
+
+    /*
+     * Перевірка терміну сесії.
+     */
 
     if (
         session.savedAt &&
@@ -542,7 +495,6 @@ async function restoreSession() {
             await apiRequest(
                 "profile",
                 {
-
                     olympId:
                         session.olympId,
 
@@ -554,9 +506,14 @@ async function restoreSession() {
 
                     password:
                         session.password
-
                 }
             );
+
+
+        console.log(
+            "PROFILE RESPONSE:",
+            response
+        );
 
 
         if (
@@ -567,10 +524,24 @@ async function restoreSession() {
             throw new Error(
                 response &&
                 response.message
-                    ?
-                response.message
-                    :
-                "Сесія недійсна."
+                    ? response.message
+                    : "Сесію не вдалося відновити."
+            );
+
+        }
+
+
+        const citizen =
+            response.citizen ||
+            response.profile ||
+            response.user ||
+            null;
+
+
+        if (!citizen) {
+
+            throw new Error(
+                "Профіль громадянина не отримано."
             );
 
         }
@@ -578,10 +549,7 @@ async function restoreSession() {
 
         currentCitizen =
             normalizeCitizen(
-                response.citizen ||
-                response.profile ||
-                response.user ||
-                null
+                citizen
             );
 
 
@@ -592,14 +560,13 @@ async function restoreSession() {
             );
 
 
-        if (!currentCitizen) {
+        currentApplication =
+            null;
 
-            throw new Error(
-                "Профіль не отримано."
-            );
 
-        }
-
+        /*
+         * Оновлюємо час сесії.
+         */
 
         saveSession(
             session.olympId,
@@ -609,29 +576,81 @@ async function restoreSession() {
 
         renderCabinet();
 
-
         hideLoading();
 
 
     } catch (error) {
 
-        console.warn(
-            "SESSION ERROR:",
+        console.error(
+            "SESSION RESTORE ERROR:",
             error
         );
 
 
-        clearSession();
-
-        currentCitizen = null;
-
-        currentApplications = [];
-
-        currentApplication = null;
-
         hideLoading();
 
-        showLogin();
+
+        /*
+         * Якщо проблема саме в авторизації —
+         * видаляємо сесію.
+         */
+
+        const message =
+            String(
+                error.message || ""
+            ).toLowerCase();
+
+
+        const authError =
+            message.includes("невірний") ||
+            message.includes("неправиль") ||
+            message.includes("недійсна") ||
+            message.includes("авторизац") ||
+            message.includes("не знайден") ||
+            message.includes("парол");
+
+
+        if (authError) {
+
+            clearSession();
+
+            currentCitizen = null;
+
+            currentApplications = [];
+
+            currentApplication = null;
+
+            showLogin();
+
+            showLoginError(
+                "Сесію завершено. Увійдіть повторно."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Якщо сервер тимчасово недоступний,
+         * НЕ викидаємо користувача.
+         */
+
+        showCabinet();
+
+        renderCitizenProfile(
+            currentCitizen
+        );
+
+        renderApplications(
+            currentApplications
+        );
+
+
+        showToast(
+            "Не вдалося оновити дані сервера.",
+            "error"
+        );
 
     }
 
@@ -639,7 +658,7 @@ async function restoreSession() {
 
 
 /* =========================================================
-   API
+   API REQUEST
 ========================================================= */
 
 async function apiRequest(
@@ -707,16 +726,9 @@ async function apiRequest(
             await fetch(
                 url,
                 {
-
-                    method:
-                        "GET",
-
-                    cache:
-                        "no-store",
-
-                    redirect:
-                        "follow"
-
+                    method: "GET",
+                    cache: "no-store",
+                    redirect: "follow"
                 }
             );
 
@@ -780,7 +792,7 @@ async function apiRequest(
 
 
 /* =========================================================
-   CABINET
+   RENDER CABINET
 ========================================================= */
 
 function renderCabinet() {
@@ -843,29 +855,15 @@ function renderCitizenProfile(
     }
 
 
-    const olympId =
-        citizen.olympId ||
-        citizen.idNumber ||
-        citizen.citizenId ||
-        "";
-
-
-    const fullName =
-        citizen.fullName ||
-        citizen.name ||
-        citizen.fio ||
-        "";
-
-
     setText(
         "profileCitizenId",
-        olympId
+        citizen.olympId
     );
 
 
     setText(
         "profileFullName",
-        fullName
+        citizen.fullName
     );
 
 
@@ -917,7 +915,7 @@ function renderCitizenProfile(
 
 
 /* =========================================================
-   AVATAR RENDER
+   AVATAR
 ========================================================= */
 
 function renderAvatar(
@@ -933,10 +931,7 @@ function renderAvatar(
 
     const avatarUrl =
         clean(
-            citizen.avatarUrl ||
-            citizen.avatar ||
-            citizen.photo ||
-            ""
+            citizen.avatarUrl
         );
 
 
@@ -948,7 +943,8 @@ function renderAvatar(
 
     if (avatarUrl) {
 
-        profileAvatar.innerHTML = "";
+        profileAvatar.innerHTML =
+            "";
 
 
         const img =
@@ -1045,13 +1041,10 @@ function showInitialsAvatar(
 
 
     const words =
-        name.split(
-            " "
-        );
+        name.split(" ");
 
 
-    let initials =
-        "";
+    let initials = "";
 
 
     if (words[0]) {
@@ -1101,19 +1094,14 @@ async function handleAvatarSelect(
     }
 
 
-    const allowed =
-        [
-            "image/jpeg",
-            "image/png",
-            "image/webp"
-        ];
+    const allowed = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ];
 
 
-    if (
-        !allowed.includes(
-            file.type
-        )
-    ) {
+    if (!allowed.includes(file.type)) {
 
         showToast(
             "Дозволені JPG, PNG або WEBP.",
@@ -1157,9 +1145,7 @@ async function handleAvatarSelect(
             );
 
 
-        if (
-            !selectedAvatarData
-        ) {
+        if (!selectedAvatarData) {
 
             throw new Error(
                 "Не вдалося обробити зображення."
@@ -1206,10 +1192,13 @@ async function handleAvatarSelect(
     } catch (error) {
 
         console.error(
+            "AVATAR PREPARE ERROR:",
             error
         );
 
+
         hideLoading();
+
 
         showToast(
             "Не вдалося підготувати фото.",
@@ -1374,18 +1363,14 @@ function compressImage(
 
 async function saveAvatar() {
 
-    if (
-        !currentCitizen
-    ) {
+    if (!currentCitizen) {
 
         return;
 
     }
 
 
-    if (
-        !selectedAvatarData
-    ) {
+    if (!selectedAvatarData) {
 
         showToast(
             "Спочатку виберіть фото.",
@@ -1404,9 +1389,11 @@ async function saveAvatar() {
     if (!session) {
 
         showToast(
-            "Сесія завершилася. Увійдіть повторно.",
+            "Сесія завершилася.",
             "error"
         );
+
+        showLogin();
 
         return;
 
@@ -1428,18 +1415,10 @@ async function saveAvatar() {
 
     try {
 
-        /*
-           ВАЖЛИВО:
-
-           Фото вже стиснуте до приблизно
-           500px і JPEG 0.72.
-        */
-
         const response =
             await apiRequest(
                 "saveAvatar",
                 {
-
                     olympId:
                         session.olympId,
 
@@ -1451,7 +1430,6 @@ async function saveAvatar() {
 
                     image:
                         selectedAvatarData
-
                 }
             );
 
@@ -1462,26 +1440,16 @@ async function saveAvatar() {
         ) {
 
             throw new Error(
-
                 response &&
                 response.message
-
-                    ?
-
-                response.message
-
-                    :
-
-                "Не вдалося зберегти аватар."
-
+                    ? response.message
+                    : "Не вдалося зберегти аватар."
             );
 
         }
 
 
-        if (
-            response.avatarUrl
-        ) {
+        if (response.avatarUrl) {
 
             currentCitizen.avatarUrl =
                 response.avatarUrl;
@@ -1489,14 +1457,12 @@ async function saveAvatar() {
         }
 
 
-        selectedAvatarData =
-            "";
+        selectedAvatarData = "";
 
 
         if (avatarInput) {
 
-            avatarInput.value =
-                "";
+            avatarInput.value = "";
 
         }
 
@@ -1550,7 +1516,6 @@ async function saveAvatar() {
             "error"
         );
 
-
     } finally {
 
         if (saveAvatarButton) {
@@ -1578,13 +1543,11 @@ async function removeAvatar() {
     }
 
 
-    const confirmed =
-        window.confirm(
+    if (
+        !window.confirm(
             "Видалити поточний аватар?"
-        );
-
-
-    if (!confirmed) {
+        )
+    ) {
 
         return;
 
@@ -1596,6 +1559,8 @@ async function removeAvatar() {
 
 
     if (!session) {
+
+        showLogin();
 
         return;
 
@@ -1613,7 +1578,6 @@ async function removeAvatar() {
             await apiRequest(
                 "removeAvatar",
                 {
-
                     olympId:
                         session.olympId,
 
@@ -1622,7 +1586,6 @@ async function removeAvatar() {
 
                     password:
                         session.password
-
                 }
             );
 
@@ -1633,18 +1596,10 @@ async function removeAvatar() {
         ) {
 
             throw new Error(
-
                 response &&
                 response.message
-
-                    ?
-
-                response.message
-
-                    :
-
-                "Не вдалося видалити аватар."
-
+                    ? response.message
+                    : "Не вдалося видалити аватар."
             );
 
         }
@@ -1675,6 +1630,7 @@ async function removeAvatar() {
     } catch (error) {
 
         hideLoading();
+
 
         showToast(
             error.message ||
@@ -1784,15 +1740,11 @@ function renderApplications(
 
 
     currentApplications.forEach(
-        function (
-            application,
-            index
-        ) {
+        function (application) {
 
             container.appendChild(
                 createApplicationCard(
-                    application,
-                    index
+                    application
                 )
             );
 
@@ -2188,11 +2140,8 @@ function openApplication(
 
                 details.scrollIntoView(
                     {
-                        behavior:
-                            "smooth",
-
-                        block:
-                            "start"
+                        behavior: "smooth",
+                        block: "start"
                     }
                 );
 
@@ -2340,14 +2289,8 @@ function updateApplicationsCounter(
         Array.isArray(
             applications
         )
-            ?
-        applications
-            :
-        [];
-
-
-    const total =
-        list.length;
+            ? applications
+            : [];
 
 
     const pending =
@@ -2402,7 +2345,7 @@ function updateApplicationsCounter(
 
     setText(
         "statTotal",
-        total
+        list.length
     );
 
 
@@ -2460,9 +2403,7 @@ function updateStatus(
 
 
     const value =
-        clean(
-            status
-        ) ||
+        clean(status) ||
         "🟡 На розгляді";
 
 
@@ -2479,25 +2420,17 @@ function updateStatus(
 }
 
 
-/* =========================================================
-   STATUS CLASS
-========================================================= */
-
 function getStatusClass(
     status
 ) {
 
     const value =
-        clean(
-            status
-        )
-        .toLowerCase();
+        clean(status)
+            .toLowerCase();
 
 
     if (
-        value.includes(
-            "прийнято"
-        )
+        value.includes("прийнято")
     ) {
 
         return "status-accepted";
@@ -2506,9 +2439,7 @@ function getStatusClass(
 
 
     if (
-        value.includes(
-            "виконано"
-        )
+        value.includes("виконано")
     ) {
 
         return "status-completed";
@@ -2517,9 +2448,7 @@ function getStatusClass(
 
 
     if (
-        value.includes(
-            "відхилено"
-        )
+        value.includes("відхилено")
     ) {
 
         return "status-rejected";
@@ -2528,9 +2457,7 @@ function getStatusClass(
 
 
     if (
-        value.includes(
-            "закрито"
-        )
+        value.includes("закрито")
     ) {
 
         return "status-closed";
@@ -2543,23 +2470,17 @@ function getStatusClass(
 }
 
 
-/* =========================================================
-   STATUS CONTAINS
-========================================================= */
-
 function statusContains(
     status,
     text
 ) {
 
-    return clean(
-        status
-    )
-    .toLowerCase()
-    .includes(
-        String(text)
+    return clean(status)
         .toLowerCase()
-    );
+        .includes(
+            String(text)
+                .toLowerCase()
+        );
 
 }
 
@@ -2614,11 +2535,8 @@ function logout() {
 
     window.scrollTo(
         {
-            top:
-                0,
-
-            behavior:
-                "smooth"
+            top: 0,
+            behavior: "smooth"
         }
     );
 
@@ -2636,28 +2554,38 @@ function saveSession(
 
     try {
 
+        const session = {
+
+            version:
+                CABINET_VERSION,
+
+            olympId:
+                formatOlympId(
+                    olympId
+                ),
+
+            password:
+                password,
+
+            savedAt:
+                Date.now()
+
+        };
+
+
         localStorage.setItem(
             STORAGE_KEY,
             JSON.stringify(
-                {
-
-                    version:
-                        CABINET_VERSION,
-
-                    olympId:
-                        formatOlympId(
-                            olympId
-                        ),
-
-                    password:
-                        password,
-
-                    savedAt:
-                        Date.now()
-
-                }
+                session
             )
         );
+
+
+        console.log(
+            "SESSION SAVED:",
+            session.olympId
+        );
+
 
     } catch (error) {
 
@@ -2711,9 +2639,25 @@ function loadSession() {
             );
 
 
+        if (
+            !/^OLYMP-\d{6}$/.test(
+                session.olympId
+            )
+        ) {
+
+            return null;
+
+        }
+
+
         return session;
 
     } catch (error) {
+
+        console.error(
+            "LOAD SESSION ERROR:",
+            error
+        );
 
         return null;
 
@@ -2733,6 +2677,7 @@ function clearSession() {
     } catch (error) {
 
         console.error(
+            "CLEAR SESSION ERROR:",
             error
         );
 
@@ -3040,8 +2985,7 @@ async function copyText(
         textarea.select();
 
 
-        let success =
-            false;
+        let success = false;
 
 
         try {
@@ -3053,8 +2997,7 @@ async function copyText(
 
         } catch (e) {
 
-            success =
-                false;
+            success = false;
 
         }
 
@@ -3064,16 +3007,11 @@ async function copyText(
 
         showToast(
             success
-                ?
-            successMessage ||
-            "Скопійовано."
-                :
-            "Не вдалося скопіювати.",
+                ? successMessage || "Скопійовано."
+                : "Не вдалося скопіювати.",
             success
-                ?
-            "success"
-                :
-            "error"
+                ? "success"
+                : "error"
         );
 
     }
@@ -3233,8 +3171,7 @@ function normalizeApplication(
                 application.applicationNumber ||
                 application.requestNumber ||
                 ""
-            )
-            .toUpperCase(),
+            ).toUpperCase(),
 
 
         accessCode:
@@ -3242,8 +3179,7 @@ function normalizeApplication(
                 application.accessCode ||
                 application.code ||
                 ""
-            )
-            .toUpperCase(),
+            ).toUpperCase(),
 
 
         olympId:
@@ -3356,7 +3292,7 @@ function normalizeApplication(
 
 
 /* =========================================================
-   ID
+   OLYMP-ID
 ========================================================= */
 
 function normalizeOlympId(
@@ -3375,6 +3311,12 @@ function normalizeOlympId(
         );
 
 
+    /*
+     * OLYMP000001
+     * →
+     * OLYMP-000001
+     */
+
     if (
         /^OLYMP\d{6}$/.test(
             result
@@ -3383,9 +3325,32 @@ function normalizeOlympId(
 
         result =
             "OLYMP-" +
-            result.substring(
-                5
-            );
+            result.substring(5);
+
+    }
+
+
+    /*
+     * OLYMP-1
+     * →
+     * OLYMP-000001
+     */
+
+    const shortMatch =
+        result.match(
+            /^OLYMP-(\d{1,6})$/
+        );
+
+
+    if (shortMatch) {
+
+        result =
+            "OLYMP-" +
+            shortMatch[1]
+                .padStart(
+                    6,
+                    "0"
+                );
 
     }
 
@@ -3399,35 +3364,9 @@ function formatOlympId(
     value
 ) {
 
-    let result =
-        normalizeOlympId(
-            value
-        );
-
-
-    result =
-        result.replace(
-            /-+/g,
-            "-"
-        );
-
-
-    if (
-        /^OLYMP\d{6}$/.test(
-            result
-        )
-    ) {
-
-        result =
-            "OLYMP-" +
-            result.substring(
-                5
-            );
-
-    }
-
-
-    return result;
+    return normalizeOlympId(
+        value
+    );
 
 }
 
@@ -3510,18 +3449,21 @@ function setText(
     }
 
 
-    element.textContent =
+    if (
         value !== undefined &&
         value !== null &&
         String(value).trim() !== ""
+    ) {
 
-            ?
+        element.textContent =
+            String(value);
 
-        String(value)
+    } else {
 
-            :
+        element.textContent =
+            "—";
 
-        "—";
+    }
 
 }
 
@@ -3563,16 +3505,9 @@ function formatDate(
     return date.toLocaleDateString(
         "uk-UA",
         {
-
-            day:
-                "2-digit",
-
-            month:
-                "2-digit",
-
-            year:
-                "numeric"
-
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
         }
     );
 
@@ -3612,22 +3547,11 @@ function formatDateTime(
     return date.toLocaleString(
         "uk-UA",
         {
-
-            day:
-                "2-digit",
-
-            month:
-                "2-digit",
-
-            year:
-                "numeric",
-
-            hour:
-                "2-digit",
-
-            minute:
-                "2-digit"
-
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
         }
     );
 
