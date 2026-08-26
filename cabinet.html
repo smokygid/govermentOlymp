@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="uk">
 
@@ -23,37 +24,146 @@
     >
 
     <!-- =====================================================
-         AVATAR OVERRIDE
-         Фіксуємо розмір аватара незалежно від cabinet.css
+         PROFILE / AVATAR OVERRIDE
     ====================================================== -->
 
     <style>
 
         /* =================================================
-           PROFILE HEADER
+           PROFILE CARD
         ================================================== */
 
         .profile-card .card-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1fr)
+                320px;
+
+            align-items: start;
+
             gap: 40px;
+
             padding: 32px;
+
         }
 
 
         /* =================================================
-           AVATAR BLOCK
+           LEFT SIDE — PERSONAL INFORMATION
+        ================================================== */
+
+        .profile-information {
+
+            min-width: 0;
+
+        }
+
+
+        .profile-information h2 {
+
+            margin-bottom: 8px;
+
+        }
+
+
+        .profile-description {
+
+            margin-bottom: 24px;
+
+            color: #718096;
+
+            line-height: 1.6;
+
+            max-width: 650px;
+
+        }
+
+
+        /* =================================================
+           PROFILE GRID
+        ================================================== */
+
+        .profile-information .profile-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 12px;
+
+            margin-top: 24px;
+
+        }
+
+
+        .profile-information .info-item {
+
+            min-width: 0;
+
+            padding: 16px 18px;
+
+            border: 1px solid #e7ebf0;
+
+            border-radius: 12px;
+
+            background: #fafbfc;
+
+        }
+
+
+        .profile-information .info-item span {
+
+            display: block;
+
+            margin-bottom: 6px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.04em;
+
+            color: #718096;
+
+        }
+
+
+        .profile-information .info-item strong {
+
+            display: block;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+            word-break: break-word;
+
+            color: #182235;
+
+            font-size: 14px;
+
+        }
+
+
+        /* =================================================
+           RIGHT SIDE — AVATAR
         ================================================== */
 
         .profile-avatar-wrapper {
 
             width: 320px;
+
             max-width: 100%;
 
             flex-shrink: 0;
 
             display: flex;
+
             flex-direction: column;
 
             align-items: center;
@@ -70,12 +180,15 @@
         .profile-avatar {
 
             width: 180px !important;
+
             height: 180px !important;
 
             min-width: 180px !important;
+
             min-height: 180px !important;
 
             max-width: 180px !important;
+
             max-height: 180px !important;
 
             border-radius: 50%;
@@ -85,6 +198,7 @@
             display: flex;
 
             align-items: center;
+
             justify-content: center;
 
             background: #eef2f7;
@@ -109,12 +223,15 @@
         .profile-avatar-image {
 
             width: 100% !important;
+
             height: 100% !important;
 
             min-width: 100% !important;
+
             min-height: 100% !important;
 
             max-width: 100% !important;
+
             max-height: 100% !important;
 
             display: block;
@@ -235,8 +352,7 @@
 
             cursor: pointer;
 
-            transition:
-                0.2s ease;
+            transition: 0.2s ease;
 
             box-sizing: border-box;
 
@@ -288,7 +404,7 @@
 
 
         /* =================================================
-           PREVIEW
+           AVATAR PREVIEW
         ================================================== */
 
         .avatar-preview-box {
@@ -338,6 +454,7 @@
             height: 140px !important;
 
             max-width: 140px !important;
+
             max-height: 140px !important;
 
             object-fit: cover;
@@ -355,16 +472,42 @@
 
 
         /* =================================================
-           MOBILE
+           TABLET
         ================================================== */
 
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
 
             .profile-card .card-header {
 
-                flex-direction: column;
+                grid-template-columns:
+                    minmax(0, 1fr)
+                    280px;
 
-                align-items: stretch;
+                gap: 25px;
+
+            }
+
+
+            .profile-avatar-wrapper {
+
+                width: 280px;
+
+            }
+
+        }
+
+
+        /* =================================================
+           MOBILE
+        ================================================== */
+
+        @media (max-width: 800px) {
+
+            .profile-card .card-header {
+
+                grid-template-columns: 1fr;
+
+                gap: 30px;
 
             }
 
@@ -379,6 +522,13 @@
 
             }
 
+
+            .profile-information .profile-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
         }
 
 
@@ -387,12 +537,15 @@
             .profile-avatar {
 
                 width: 150px !important;
+
                 height: 150px !important;
 
                 min-width: 150px !important;
+
                 min-height: 150px !important;
 
                 max-width: 150px !important;
+
                 max-height: 150px !important;
 
             }
@@ -401,9 +554,11 @@
             .avatar-preview-box img {
 
                 width: 120px !important;
+
                 height: 120px !important;
 
                 max-width: 120px !important;
+
                 max-height: 120px !important;
 
             }
@@ -493,21 +648,17 @@
 
         <div class="login-container">
 
-
             <div class="login-icon">
                 🔐
             </div>
-
 
             <div class="section-label">
                 ОСОБИСТИЙ КАБІНЕТ
             </div>
 
-
             <h1>
                 Вхід до кабінету
             </h1>
-
 
             <p class="login-description">
 
@@ -523,7 +674,6 @@
                 class="login-form"
                 autocomplete="on"
             >
-
 
                 <div class="form-group">
 
@@ -624,7 +774,6 @@
 
             </div>
 
-
         </div>
 
     </section>
@@ -686,7 +835,12 @@
 
             <div class="card-header">
 
-                <div>
+
+                <!-- =================================================
+                     LEFT — PERSONAL INFORMATION
+                ================================================== -->
+
+                <div class="profile-information">
 
                     <div class="card-label">
                         ГРОМАДЯНИН
@@ -696,22 +850,135 @@
                         Особиста інформація
                     </h2>
 
-                    <p>
+                    <p class="profile-description">
                         Ваші персональні дані та аватар
                         доступні лише після авторизації.
                     </p>
 
+
+                    <!-- =================================================
+                         PROFILE GRID
+                    ================================================== -->
+
+                    <div class="profile-grid">
+
+
+                        <div class="info-item">
+
+                            <span>
+                                OLYMP-ID
+                            </span>
+
+                            <strong id="profileCitizenId">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <span>
+                                ПІБ
+                            </span>
+
+                            <strong id="profileFullName">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <span>
+                                Дата народження
+                            </span>
+
+                            <strong id="profileBirthDate">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <span>
+                                Телефон
+                            </span>
+
+                            <strong id="profilePhone">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <span>
+                                Email
+                            </span>
+
+                            <strong id="profileEmail">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <span>
+                                Discord
+                            </span>
+
+                            <strong id="profileDiscord">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <span>
+                                Бажаний спосіб зв'язку
+                            </span>
+
+                            <strong id="profileContact">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="info-item">
+
+                            <span>
+                                Дата реєстрації
+                            </span>
+
+                            <strong id="profileCreatedAt">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
                 </div>
 
 
+
                 <!-- =================================================
-                     AVATAR
+                     RIGHT — AVATAR
                 ================================================== -->
 
                 <div class="profile-avatar-wrapper">
 
-
-                    <!-- CURRENT AVATAR -->
 
                     <div
                         id="profileAvatar"
@@ -720,8 +987,6 @@
                         👤
                     </div>
 
-
-                    <!-- AVATAR ACTIONS -->
 
                     <div class="avatar-actions">
 
@@ -812,121 +1077,6 @@
                     src=""
                     alt="Попередній перегляд аватара"
                 >
-
-            </div>
-
-
-
-            <!-- =================================================
-                 PROFILE GRID
-            ================================================== -->
-
-            <div class="profile-grid">
-
-
-                <div class="info-item">
-
-                    <span>
-                        OLYMP-ID
-                    </span>
-
-                    <strong id="profileCitizenId">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span>
-                        ПІБ
-                    </span>
-
-                    <strong id="profileFullName">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span>
-                        Дата народження
-                    </span>
-
-                    <strong id="profileBirthDate">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span>
-                        Телефон
-                    </span>
-
-                    <strong id="profilePhone">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span>
-                        Email
-                    </span>
-
-                    <strong id="profileEmail">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span>
-                        Discord
-                    </span>
-
-                    <strong id="profileDiscord">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span>
-                        Бажаний спосіб зв'язку
-                    </span>
-
-                    <strong id="profileContact">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span>
-                        Дата реєстрації
-                    </span>
-
-                    <strong id="profileCreatedAt">
-                        —
-                    </strong>
-
-                </div>
-
 
             </div>
 
@@ -1459,3 +1609,4 @@
 </body>
 
 </html>
+```
