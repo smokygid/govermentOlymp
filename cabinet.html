@@ -36,9 +36,6 @@
 
     <div class="header-inner">
 
-
-        <!-- BRAND -->
-
         <a
             href="index.html"
             class="brand"
@@ -63,8 +60,6 @@
         </a>
 
 
-        <!-- NAVIGATION -->
-
         <nav class="cabinet-nav">
 
             <a href="index.html">
@@ -83,7 +78,6 @@
             </a>
 
         </nav>
-
 
     </div>
 
@@ -128,13 +122,11 @@
             <p class="login-description">
 
                 Увійдіть до особистого кабінету,
-                використовуючи ваш ID громадянина
+                використовуючи ваш OLYMP-ID
                 та пароль.
 
             </p>
 
-
-            <!-- LOGIN FORM -->
 
             <form
                 id="loginForm"
@@ -143,29 +135,30 @@
             >
 
 
-                <!-- ID -->
-
                 <div class="form-group">
 
                     <label for="citizenId">
-                        ID громадянина
+                        OLYMP-ID
                     </label>
 
                     <input
                         type="text"
                         id="citizenId"
                         name="citizenId"
-                        placeholder="Наприклад: OLYMP-000001"
+                        placeholder="OLYMP-000001"
                         autocomplete="username"
                         autocapitalize="characters"
                         spellcheck="false"
+                        maxlength="11"
                         required
                     >
 
+                    <small>
+                        Наприклад: OLYMP-000001
+                    </small>
+
                 </div>
 
-
-                <!-- PASSWORD -->
 
                 <div class="form-group">
 
@@ -185,15 +178,11 @@
                 </div>
 
 
-                <!-- ERROR -->
-
                 <div
                     id="loginError"
                     class="form-error"
                 ></div>
 
-
-                <!-- BUTTON -->
 
                 <button
                     type="submit"
@@ -207,11 +196,8 @@
 
                 </button>
 
-
             </form>
 
-
-            <!-- REGISTER -->
 
             <div class="login-register">
 
@@ -229,24 +215,22 @@
             </div>
 
 
-            <!-- HELP -->
-
             <div class="login-help">
 
                 <strong>
-                    Захищений доступ
+                    🔒 Захищений доступ
                 </strong>
 
-                <br>
+                <p>
+                    Для входу використовуйте
+                    OLYMP-ID та пароль,
+                    створені під час реєстрації.
+                </p>
 
-                Для входу використовуйте
-                ID громадянина та пароль,
-                створені під час реєстрації.
-
-                <br><br>
-
-                Не передавайте свої дані
-                для входу стороннім особам.
+                <p>
+                    Не передавайте свої дані
+                    стороннім особам.
+                </p>
 
             </div>
 
@@ -273,52 +257,20 @@
 
         <div class="cabinet-title-row">
 
+            <div>
 
-            <div class="cabinet-welcome">
-
-
-                <!-- SMALL AVATAR -->
-
-                <div
-                    id="cabinetHeaderAvatar"
-                    class="cabinet-header-avatar"
-                >
-
-                    <span
-                        id="cabinetHeaderAvatarPlaceholder"
-                    >
-                        👤
-                    </span>
-
-                    <img
-                        id="cabinetHeaderAvatarImage"
-                        src=""
-                        alt="Аватар профілю"
-                        style="display:none;"
-                    >
-
+                <div class="section-label">
+                    ОСОБИСТИЙ КАБІНЕТ
                 </div>
 
+                <h1>
+                    Вітаємо у вашому кабінеті
+                </h1>
 
-                <div>
-
-                    <div class="section-label">
-                        ОСОБИСТИЙ КАБІНЕТ
-                    </div>
-
-
-                    <h1>
-                        Вітаємо у вашому кабінеті
-                    </h1>
-
-
-                    <p>
-                        Тут зберігається ваша особиста
-                        інформація та історія державних звернень.
-                    </p>
-
-                </div>
-
+                <p>
+                    Тут зберігається ваша особиста
+                    інформація та історія державних звернень.
+                </p>
 
             </div>
 
@@ -328,11 +280,8 @@
                 id="logoutButton"
                 class="logout-button"
             >
-
                 Вийти
-
             </button>
-
 
         </div>
 
@@ -347,7 +296,6 @@
 
             <div class="card-header">
 
-
                 <div>
 
                     <div class="card-label">
@@ -361,61 +309,94 @@
                 </div>
 
 
-                <!-- =================================================
-                     PROFILE AVATAR
-                ================================================== -->
+                <!-- AVATAR -->
 
-                <div
-                    id="profileAvatar"
-                    class="profile-avatar"
-                    title="Аватар профілю"
-                >
+                <div class="profile-avatar-wrapper">
 
-                    <span
-                        id="profileAvatarPlaceholder"
+                    <div
+                        id="profileAvatar"
+                        class="profile-avatar"
                     >
                         👤
-                    </span>
+                    </div>
 
-                    <img
-                        id="profileAvatarImage"
-                        src=""
-                        alt="Аватар профілю"
-                        style="display:none;"
-                    >
+                    <div class="avatar-actions">
+
+                        <label
+                            for="avatarInput"
+                            class="avatar-button"
+                        >
+                            Змінити аватар
+                        </label>
+
+                        <input
+                            type="file"
+                            id="avatarInput"
+                            accept="image/png,image/jpeg,image/webp"
+                            hidden
+                        >
+
+                        <button
+                            type="button"
+                            id="saveAvatarButton"
+                            class="avatar-save-button hidden"
+                        >
+                            Зберегти аватар
+                        </button>
+
+                        <button
+                            type="button"
+                            id="removeAvatarButton"
+                            class="avatar-remove-button hidden"
+                        >
+                            Видалити
+                        </button>
+
+                    </div>
 
                 </div>
 
+            </div>
+
+
+            <!-- AVATAR PREVIEW -->
+
+            <div
+                id="avatarPreviewBox"
+                class="avatar-preview-box hidden"
+            >
+
+                <span>
+                    Попередній перегляд
+                </span>
+
+                <img
+                    id="avatarPreview"
+                    src=""
+                    alt="Попередній перегляд аватара"
+                >
 
             </div>
 
 
 
-            <!-- =================================================
-                 PROFILE GRID
-            ================================================== -->
+            <!-- PROFILE GRID -->
 
             <div class="profile-grid">
 
 
-                <!-- ID -->
-
                 <div class="info-item">
 
                     <span>
-                        ID громадянина
+                        OLYMP-ID
                     </span>
 
-                    <strong
-                        id="profileCitizenId"
-                    >
+                    <strong id="profileCitizenId">
                         —
                     </strong>
 
                 </div>
 
-
-                <!-- FULL NAME -->
 
                 <div class="info-item">
 
@@ -423,16 +404,12 @@
                         ПІБ
                     </span>
 
-                    <strong
-                        id="profileFullName"
-                    >
+                    <strong id="profileFullName">
                         —
                     </strong>
 
                 </div>
 
-
-                <!-- BIRTH DATE -->
 
                 <div class="info-item">
 
@@ -440,16 +417,12 @@
                         Дата народження
                     </span>
 
-                    <strong
-                        id="profileBirthDate"
-                    >
+                    <strong id="profileBirthDate">
                         —
                     </strong>
 
                 </div>
 
-
-                <!-- PHONE -->
 
                 <div class="info-item">
 
@@ -457,16 +430,12 @@
                         Телефон
                     </span>
 
-                    <strong
-                        id="profilePhone"
-                    >
+                    <strong id="profilePhone">
                         —
                     </strong>
 
                 </div>
 
-
-                <!-- EMAIL -->
 
                 <div class="info-item">
 
@@ -474,16 +443,12 @@
                         Email
                     </span>
 
-                    <strong
-                        id="profileEmail"
-                    >
+                    <strong id="profileEmail">
                         —
                     </strong>
 
                 </div>
 
-
-                <!-- DISCORD -->
 
                 <div class="info-item">
 
@@ -491,33 +456,25 @@
                         Discord
                     </span>
 
-                    <strong
-                        id="profileDiscord"
-                    >
+                    <strong id="profileDiscord">
                         —
                     </strong>
 
                 </div>
 
 
-                <!-- AVATAR -->
-
                 <div class="info-item">
 
                     <span>
-                        Аватар профілю
+                        Бажаний спосіб зв'язку
                     </span>
 
-                    <strong
-                        id="profileAvatarUrl"
-                    >
-                        Не встановлено
+                    <strong id="profileContact">
+                        —
                     </strong>
 
                 </div>
 
-
-                <!-- REGISTRATION DATE -->
 
                 <div class="info-item">
 
@@ -525,135 +482,12 @@
                         Дата реєстрації
                     </span>
 
-                    <strong
-                        id="profileCreatedAt"
-                    >
+                    <strong id="profileCreatedAt">
                         —
                     </strong>
 
                 </div>
 
-
-                <!-- STATUS -->
-
-                <div class="info-item">
-
-                    <span>
-                        Статус облікового запису
-                    </span>
-
-                    <strong
-                        id="profileStatus"
-                    >
-                        —
-                    </strong>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- =================================================
-                 AVATAR SETTINGS
-            ================================================== -->
-
-            <div
-                class="profile-avatar-settings"
-                id="avatarSettings"
-            >
-
-                <div class="avatar-settings-header">
-
-                    <div>
-
-                        <div class="card-label">
-                            НАЛАШТУВАННЯ ПРОФІЛЮ
-                        </div>
-
-                        <h3>
-                            Аватар профілю
-                        </h3>
-
-                    </div>
-
-                </div>
-
-
-                <p class="avatar-description">
-
-                    Вкажіть пряме посилання на зображення,
-                    яке буде використовуватися як ваш аватар.
-
-                </p>
-
-
-                <div class="avatar-form">
-
-
-                    <div class="form-group">
-
-                        <label for="avatarUrlInput">
-                            Посилання на аватар
-                        </label>
-
-                        <input
-                            type="url"
-                            id="avatarUrlInput"
-                            name="avatar"
-                            placeholder="https://example.com/avatar.png"
-                            autocomplete="off"
-                        >
-
-                        <small>
-                            Використовуйте пряме посилання
-                            на зображення JPG, PNG або WEBP.
-                        </small>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        id="saveAvatarButton"
-                        class="primary-button"
-                    >
-
-                        Зберегти аватар
-
-                    </button>
-
-
-                </div>
-
-
-                <!-- AVATAR PREVIEW -->
-
-                <div
-                    id="avatarPreview"
-                    class="avatar-preview"
-                    style="display:none;"
-                >
-
-                    <span>
-                        Попередній перегляд
-                    </span>
-
-                    <img
-                        id="avatarPreviewImage"
-                        src=""
-                        alt="Попередній перегляд аватара"
-                    >
-
-                </div>
-
-
-                <!-- AVATAR ERROR -->
-
-                <div
-                    id="avatarError"
-                    class="form-error"
-                ></div>
 
             </div>
 
@@ -668,7 +502,6 @@
 
         <section class="statistics-section">
 
-
             <div class="section-heading">
 
                 <div class="card-label">
@@ -682,11 +515,8 @@
             </div>
 
 
-
             <div class="statistics-grid">
 
-
-                <!-- TOTAL -->
 
                 <div class="stat-card">
 
@@ -700,9 +530,7 @@
                             Всього заявок
                         </span>
 
-                        <strong
-                            id="statTotal"
-                        >
+                        <strong id="statTotal">
                             0
                         </strong>
 
@@ -710,8 +538,6 @@
 
                 </div>
 
-
-                <!-- PENDING -->
 
                 <div class="stat-card">
 
@@ -725,9 +551,7 @@
                             На розгляді
                         </span>
 
-                        <strong
-                            id="statPending"
-                        >
+                        <strong id="statPending">
                             0
                         </strong>
 
@@ -735,8 +559,6 @@
 
                 </div>
 
-
-                <!-- ACCEPTED -->
 
                 <div class="stat-card">
 
@@ -750,9 +572,7 @@
                             Прийнято
                         </span>
 
-                        <strong
-                            id="statAccepted"
-                        >
+                        <strong id="statAccepted">
                             0
                         </strong>
 
@@ -760,8 +580,6 @@
 
                 </div>
 
-
-                <!-- COMPLETED -->
 
                 <div class="stat-card">
 
@@ -775,9 +593,7 @@
                             Виконано
                         </span>
 
-                        <strong
-                            id="statCompleted"
-                        >
+                        <strong id="statCompleted">
                             0
                         </strong>
 
@@ -785,8 +601,6 @@
 
                 </div>
 
-
-                <!-- REJECTED -->
 
                 <div class="stat-card">
 
@@ -800,9 +614,7 @@
                             Відхилено
                         </span>
 
-                        <strong
-                            id="statRejected"
-                        >
+                        <strong id="statRejected">
                             0
                         </strong>
 
@@ -810,8 +622,6 @@
 
                 </div>
 
-
-                <!-- CLOSED -->
 
                 <div class="stat-card">
 
@@ -825,9 +635,7 @@
                             Закрито
                         </span>
 
-                        <strong
-                            id="statClosed"
-                        >
+                        <strong id="statClosed">
                             0
                         </strong>
 
@@ -850,7 +658,6 @@
 
 
             <div class="section-heading">
-
 
                 <div>
 
@@ -877,20 +684,15 @@
                     Подати нову заявку
                 </a>
 
-
             </div>
 
 
-
-            <!-- APPLICATIONS LIST -->
 
             <div
                 id="applicationsList"
                 class="applications-list"
             >
 
-
-                <!-- LOADING -->
 
                 <div
                     id="applicationsLoading"
@@ -905,8 +707,6 @@
 
                 </div>
 
-
-                <!-- EMPTY -->
 
                 <div
                     id="applicationsEmpty"
@@ -966,11 +766,8 @@
             </div>
 
 
-
             <div class="application-card">
 
-
-                <!-- TOP -->
 
                 <div class="application-top">
 
@@ -984,9 +781,7 @@
 
                         <div class="application-number-row">
 
-                            <strong
-                                id="applicationNumberView"
-                            >
+                            <strong id="applicationNumberView">
                                 —
                             </strong>
 
@@ -1004,8 +799,6 @@
                     </div>
 
 
-                    <!-- STATUS -->
-
                     <div
                         id="applicationStatus"
                         class="status-badge status-pending"
@@ -1018,8 +811,6 @@
 
 
 
-                <!-- BASIC DATA -->
-
                 <div class="application-grid">
 
 
@@ -1029,9 +820,7 @@
                             Дата подання
                         </span>
 
-                        <strong
-                            id="applicationDate"
-                        >
+                        <strong id="applicationDate">
                             —
                         </strong>
 
@@ -1044,9 +833,7 @@
                             Державна послуга
                         </span>
 
-                        <strong
-                            id="applicationService"
-                        >
+                        <strong id="applicationService">
                             —
                         </strong>
 
@@ -1059,10 +846,8 @@
                             Відповідальний
                         </span>
 
-                        <strong
-                            id="applicationResponsible"
-                        >
-                            —
+                        <strong id="applicationResponsible">
+                            Не призначено
                         </strong>
 
                     </div>
@@ -1074,9 +859,7 @@
                             Код заявки
                         </span>
 
-                        <strong
-                            id="applicationAccessCode"
-                        >
+                        <strong id="applicationAccessCode">
                             —
                         </strong>
 
@@ -1087,14 +870,11 @@
 
 
 
-                <!-- MESSAGE -->
-
                 <div class="application-block">
 
                     <span>
                         ОПИС ЗВЕРНЕННЯ
                     </span>
-
 
                     <div
                         id="applicationMessage"
@@ -1107,14 +887,11 @@
 
 
 
-                <!-- GOVERNMENT ANSWER -->
-
                 <div class="application-block">
 
                     <span>
                         ВІДПОВІДЬ ДЕРЖАВНОГО ОРГАНУ
                     </span>
-
 
                     <div
                         id="applicationComment"
@@ -1139,11 +916,9 @@
 
         <div class="security-notice">
 
-
             <div class="security-icon">
                 🔒
             </div>
-
 
             <div>
 
@@ -1151,16 +926,14 @@
                     Захищений доступ
                 </strong>
 
-
                 <p>
-                    Не передавайте ID громадянина
+                    Не передавайте OLYMP-ID
                     та пароль стороннім особам.
                     Дані ваших заявок доступні
                     лише після авторизації.
                 </p>
 
             </div>
-
 
         </div>
 
@@ -1178,7 +951,6 @@
 
 <footer class="cabinet-footer">
 
-
     <div>
 
         <strong>
@@ -1193,11 +965,8 @@
 
 
     <div>
-
         © 2026 OLYMP Government
-
     </div>
-
 
 </footer>
 
@@ -1214,19 +983,15 @@
 
     <div class="loading-box">
 
-
         <div class="loader"></div>
-
 
         <strong>
             Обробка запиту
         </strong>
 
-
         <span>
             Будь ласка, зачекайте...
         </span>
-
 
     </div>
 
