@@ -1351,7 +1351,7 @@ async function submitApplication(
     if (
         !OLYMP_CONFIG.API_URL ||
         OLYMP_CONFIG.API_URL.includes(
-            "ВСТАВЬ_СЮДА"
+            "AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ"
         )
     ) {
 
