@@ -1,30 +1,27 @@
 /* =========================================================
    OLYMP GOVERNMENT
    PERSONAL CABINET / GOVERNMENT PORTAL
-   SCRIPT.JS 7.0
+   SCRIPT.JS 6.4
 
    Совместим с:
    - index.html
-   - Code.gs 6.x
+   - Code.gs 6.1+
 
-   ОСНОВНОЕ:
-   - Государственные услуги
-   - Поиск
-   - Фильтрация
-   - Модальные окна
-   - Авторизация гражданина
-   - Session Token
-   - Профиль гражданина
-   - Отправка заявки
-   - Реальная запись в Google Sheets
+   ИСПРАВЛЕНО:
+   - Корректное определение авторизации
+   - Поддержка сохранённого профиля
+   - Автоматическая синхронизация OLYMP-ID
+   - Автоматическая синхронизация Session Token
+   - Заявка доступна авторизованному пользователю
+   - Проверка профиля перед отправкой
    - Получение реального номера заявки
-   - Получение статуса
-   - Получение заявок пользователя
-   - Отображение заявок в кабинете
-   - Мобильное меню
-   - Черновик заявки
+   - Запись заявки в Google Sheets
+   - Получение статуса заявки
    - Защита от повторной отправки
-   - Автоматическое обновление заявок
+   - Черновик заявки
+   - Мобильное меню
+   - Поиск и фильтрация
+   - Модальные окна
 ========================================================= */
 
 
@@ -49,11 +46,38 @@ const OLYMP_CONFIG = {
     OLYMP_ID_KEY:
         "olymp_id",
 
-    APPLICATIONS_KEY:
-        "olymp_applications",
+    /*
+     * Дополнительные ключи,
+     * которые могут использоваться
+     * страницей личного кабинета.
+     */
 
-    DRAFT_KEY:
-        "olymp_application_draft_7_0"
+    ALT_SESSION_KEYS: [
+        "sessionToken",
+        "session_token",
+        "token",
+        "olympSessionToken",
+        "olymp_session",
+        "userSession"
+    ],
+
+    ALT_ID_KEYS: [
+        "olympId",
+        "OLYMP_ID",
+        "olympID",
+        "citizenId",
+        "idNumber",
+        "userOlympId"
+    ],
+
+    ALT_USER_KEYS: [
+        "user",
+        "profile",
+        "citizen",
+        "currentUser",
+        "olymp_user",
+        "userProfile"
+    ]
 
 };
 
@@ -70,7 +94,7 @@ function log(...args) {
     ) {
 
         console.log(
-            "[OLYMP 7.0]",
+            "[OLYMP 6.4]",
             ...args
         );
 
@@ -130,10 +154,8 @@ function initializePortal() {
 
     initializeAuthState();
 
-    initializeApplicationsRefresh();
-
     log(
-        "OLYMP Government 7.0 инициализирован."
+        "OLYMP Government 6.4 инициализирован."
     );
 
 }
@@ -145,37 +167,257 @@ function initializePortal() {
 
 function initializeAuthState() {
 
-    const token =
-        getSessionToken();
-
-    const olympId =
-        getOlympId();
+    const auth =
+        getAuthenticationData();
 
 
     log(
         "Состояние авторизации:",
         {
             authenticated:
-                Boolean(token && olympId),
+                auth.authenticated,
 
             olympId:
-                olympId || null,
+                auth.olympId || null,
 
             hasToken:
-                Boolean(token)
+                Boolean(auth.token),
+
+            hasUser:
+                Boolean(auth.user)
 
         }
     );
 
 
+    /*
+     * Если пользователь авторизован,
+     * синхронизируем локальные данные.
+     */
+
     if (
-        token &&
-        olympId
+        auth.authenticated
     ) {
 
-        loadCitizenProfile();
+        synchronizeAuthentication(
+            auth
+        );
 
-        loadCitizenApplications();
+
+        /*
+         * Если есть токен и ID,
+         * пытаемся получить свежий профиль.
+         */
+
+        if (
+            auth.token &&
+            auth.olympId
+        ) {
+
+            loadCitizenProfile();
+
+        } else {
+
+            /*
+             * Если API-данные ещё не готовы,
+             * используем локальный профиль.
+             */
+
+            if (auth.user) {
+
+                fillApplicationFromProfile(
+                    auth.user
+                );
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   GET AUTHENTICATION DATA
+========================================================= */
+
+function getAuthenticationData() {
+
+    let token =
+        getSessionToken();
+
+    let olympId =
+        getOlympId();
+
+    let user =
+        getSavedUser();
+
+
+    /*
+     * Если стандартные ключи пустые,
+     * ищем альтернативные.
+     */
+
+    if (!token) {
+
+        token =
+            findAlternativeSessionToken();
+
+    }
+
+
+    if (!olympId) {
+
+        olympId =
+            findAlternativeOlympId();
+
+    }
+
+
+    if (!user) {
+
+        user =
+            findAlternativeUser();
+
+    }
+
+
+    /*
+     * Пытаемся получить ID из профиля.
+     */
+
+    if (
+        !olympId &&
+        user
+    ) {
+
+        olympId =
+            extractOlympId(
+                user
+            );
+
+    }
+
+
+    /*
+     * Пытаемся получить токен из профиля.
+     */
+
+    if (
+        !token &&
+        user
+    ) {
+
+        token =
+            extractSessionToken(
+                user
+            );
+
+    }
+
+
+    /*
+     * Если пользователь есть в localStorage,
+     * считаем его авторизованным даже если
+     * старый ключ token отсутствует.
+     *
+     * Это важно для совместимости
+     * с личным кабинетом.
+     */
+
+    const authenticated =
+        Boolean(
+            user ||
+            (token && olympId)
+        );
+
+
+    return {
+
+        authenticated,
+        token: token || "",
+        olympId: olympId || "",
+        user: user || null
+
+    };
+
+}
+
+
+/* =========================================================
+   SYNCHRONIZE AUTHENTICATION
+========================================================= */
+
+function synchronizeAuthentication(
+    auth
+) {
+
+    if (!auth) {
+
+        return;
+
+    }
+
+
+    let token =
+        auth.token || "";
+
+
+    let olympId =
+        auth.olympId || "";
+
+
+    let user =
+        auth.user || null;
+
+
+    /*
+     * Если есть пользователь,
+     * ещё раз извлекаем ID.
+     */
+
+    if (
+        !olympId &&
+        user
+    ) {
+
+        olympId =
+            extractOlympId(
+                user
+            );
+
+    }
+
+
+    /*
+     * Сохраняем всё в стандартные ключи.
+     */
+
+    if (
+        token ||
+        olympId ||
+        user
+    ) {
+
+        saveSession(
+            token,
+            olympId,
+            user
+        );
+
+    }
+
+
+    /*
+     * Заполняем форму профилем.
+     */
+
+    if (user) {
+
+        fillApplicationFromProfile(
+            user
+        );
 
     }
 
@@ -190,11 +432,36 @@ function getSessionToken() {
 
     try {
 
-        return String(
+        /*
+         * Сначала стандартный ключ.
+         */
+
+        let token =
             localStorage.getItem(
                 OLYMP_CONFIG.SESSION_KEY
-            ) || ""
-        ).trim();
+            );
+
+
+        if (
+            token
+        ) {
+
+            return String(
+                token
+            ).trim();
+
+        }
+
+
+        /*
+         * Затем альтернативные ключи.
+         */
+
+        token =
+            findAlternativeSessionToken();
+
+
+        return token || "";
 
     } catch (error) {
 
@@ -211,6 +478,152 @@ function getSessionToken() {
 
 
 /* =========================================================
+   FIND ALTERNATIVE SESSION TOKEN
+========================================================= */
+
+function findAlternativeSessionToken() {
+
+    try {
+
+        for (
+            const key
+            of OLYMP_CONFIG.ALT_SESSION_KEYS
+        ) {
+
+            const value =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if (
+                value
+            ) {
+
+                const token =
+                    String(
+                        value
+                    ).trim();
+
+
+                if (
+                    token
+                ) {
+
+                    log(
+                        "Найден альтернативный session token:",
+                        key
+                    );
+
+
+                    return token;
+
+                }
+
+            }
+
+        }
+
+
+        /*
+         * Иногда token хранится
+         * внутри объекта пользователя.
+         */
+
+        const user =
+            getSavedUser();
+
+
+        if (
+            user
+        ) {
+
+            const token =
+                extractSessionToken(
+                    user
+                );
+
+
+            if (
+                token
+            ) {
+
+                return token;
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Ошибка поиска альтернативного токена.",
+            error
+        );
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   EXTRACT SESSION TOKEN
+========================================================= */
+
+function extractSessionToken(
+    user
+) {
+
+    if (
+        !user ||
+        typeof user !== "object"
+    ) {
+
+        return "";
+
+    }
+
+
+    const possibleKeys = [
+
+        "sessionToken",
+        "session_token",
+        "token",
+        "accessToken",
+        "access_token",
+        "authToken",
+        "auth_token"
+
+    ];
+
+
+    for (
+        const key
+        of possibleKeys
+    ) {
+
+        if (
+            user[key]
+        ) {
+
+            return String(
+                user[key]
+            ).trim();
+
+        }
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
    SAVE SESSION
 ========================================================= */
 
@@ -222,7 +635,9 @@ function saveSession(
 
     try {
 
-        if (token) {
+        if (
+            token
+        ) {
 
             localStorage.setItem(
                 OLYMP_CONFIG.SESSION_KEY,
@@ -232,19 +647,23 @@ function saveSession(
         }
 
 
-        if (olympId) {
+        if (
+            olympId
+        ) {
 
             localStorage.setItem(
                 OLYMP_CONFIG.OLYMP_ID_KEY,
-                String(olympId)
-                    .trim()
-                    .toUpperCase()
+                normalizeOlympIdClient(
+                    olympId
+                )
             );
 
         }
 
 
-        if (citizen) {
+        if (
+            citizen
+        ) {
 
             localStorage.setItem(
                 OLYMP_CONFIG.USER_KEY,
@@ -257,7 +676,7 @@ function saveSession(
 
 
         log(
-            "Сессия сохранена."
+            "Сессия синхронизирована."
         );
 
     } catch (error) {
@@ -280,19 +699,227 @@ function getOlympId() {
 
     try {
 
-        return String(
+        /*
+         * Стандартный ключ.
+         */
+
+        let id =
             localStorage.getItem(
                 OLYMP_CONFIG.OLYMP_ID_KEY
-            ) || ""
-        )
-        .trim()
-        .toUpperCase();
+            );
+
+
+        if (
+            id
+        ) {
+
+            return normalizeOlympIdClient(
+                id
+            );
+
+        }
+
+
+        /*
+         * Альтернативные ключи.
+         */
+
+        id =
+            findAlternativeOlympId();
+
+
+        if (
+            id
+        ) {
+
+            return normalizeOlympIdClient(
+                id
+            );
+
+        }
+
+
+        /*
+         * Пробуем взять ID
+         * из сохранённого пользователя.
+         */
+
+        const user =
+            getSavedUser();
+
+
+        if (
+            user
+        ) {
+
+            id =
+                extractOlympId(
+                    user
+                );
+
+
+            if (
+                id
+            ) {
+
+                return normalizeOlympIdClient(
+                    id
+                );
+
+            }
+
+        }
 
     } catch (error) {
+
+        console.warn(
+            "Ошибка получения OLYMP-ID.",
+            error
+        );
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   FIND ALTERNATIVE OLYMP ID
+========================================================= */
+
+function findAlternativeOlympId() {
+
+    try {
+
+        for (
+            const key
+            of OLYMP_CONFIG.ALT_ID_KEYS
+        ) {
+
+            const value =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if (
+                value
+            ) {
+
+                const id =
+                    String(
+                        value
+                    ).trim();
+
+
+                if (
+                    id
+                ) {
+
+                    log(
+                        "Найден альтернативный OLYMP-ID:",
+                        key,
+                        id
+                    );
+
+
+                    return normalizeOlympIdClient(
+                        id
+                    );
+
+                }
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Ошибка поиска OLYMP-ID.",
+            error
+        );
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   EXTRACT OLYMP ID
+========================================================= */
+
+function extractOlympId(
+    user
+) {
+
+    if (
+        !user ||
+        typeof user !== "object"
+    ) {
 
         return "";
 
     }
+
+
+    const possibleKeys = [
+
+        "olympId",
+        "OLYMP_ID",
+        "olympID",
+        "citizenId",
+        "idNumber",
+        "userOlympId",
+        "userId",
+        "id"
+
+    ];
+
+
+    for (
+        const key
+        of possibleKeys
+    ) {
+
+        if (
+            user[key]
+        ) {
+
+            const value =
+                String(
+                    user[key]
+                ).trim();
+
+
+            /*
+             * Проверяем,
+             * действительно ли это OLYMP-ID.
+             */
+
+            if (
+                value.toUpperCase().includes(
+                    "OLYMP"
+                )
+            ) {
+
+                return normalizeOlympIdClient(
+                    value
+                );
+
+            }
+
+        }
+
+    }
+
+
+    return "";
 
 }
 
@@ -311,22 +938,122 @@ function getSavedUser() {
             );
 
 
-        if (!raw) {
+        if (
+            raw
+        ) {
 
-            return null;
+            try {
+
+                return JSON.parse(
+                    raw
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "Стандартный профиль повреждён."
+                );
+
+            }
 
         }
 
 
-        return JSON.parse(
-            raw
-        );
+        /*
+         * Ищем альтернативный профиль.
+         */
+
+        return findAlternativeUser();
 
     } catch (error) {
+
+        console.warn(
+            "Не удалось получить пользователя.",
+            error
+        );
 
         return null;
 
     }
+
+}
+
+
+/* =========================================================
+   FIND ALTERNATIVE USER
+========================================================= */
+
+function findAlternativeUser() {
+
+    try {
+
+        for (
+            const key
+            of OLYMP_CONFIG.ALT_USER_KEYS
+        ) {
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if (
+                !raw
+            ) {
+
+                continue;
+
+            }
+
+
+            try {
+
+                const parsed =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                if (
+                    parsed &&
+                    typeof parsed === "object"
+                ) {
+
+                    log(
+                        "Найден альтернативный профиль:",
+                        key
+                    );
+
+
+                    return parsed;
+
+                }
+
+            } catch (error) {
+
+                /*
+                 * Иногда ключ содержит просто ID,
+                 * поэтому JSON не требуется.
+                 */
+
+                continue;
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Ошибка поиска альтернативного профиля.",
+            error
+        );
+
+    }
+
+
+    return null;
 
 }
 
@@ -351,8 +1078,15 @@ function clearSession() {
             OLYMP_CONFIG.USER_KEY
         );
 
-        localStorage.removeItem(
-            OLYMP_CONFIG.APPLICATIONS_KEY
+
+        /*
+         * Не удаляем альтернативные ключи,
+         * чтобы случайно не уничтожить сессию
+         * другого модуля кабинета.
+         */
+
+        log(
+            "Основная сессия очищена."
         );
 
     } catch (error) {
@@ -444,7 +1178,9 @@ function initializeServiceSearch() {
         );
 
 
-    if (!search) {
+    if (
+        !search
+    ) {
 
         return;
 
@@ -471,7 +1207,9 @@ function initializeClearSearch() {
         );
 
 
-    if (!button) {
+    if (
+        !button
+    ) {
 
         return;
 
@@ -488,9 +1226,12 @@ function initializeClearSearch() {
                 );
 
 
-            if (search) {
+            if (
+                search
+            ) {
 
-                search.value = "";
+                search.value =
+                    "";
 
                 search.focus();
 
@@ -598,7 +1339,8 @@ function filterServices() {
         );
 
 
-    let visibleCount = 0;
+    let visibleCount =
+        0;
 
 
     services.forEach(
@@ -673,7 +1415,9 @@ function filterServices() {
     );
 
 
-    if (noResults) {
+    if (
+        noResults
+    ) {
 
         noResults.classList.toggle(
             "active",
@@ -681,6 +1425,16 @@ function filterServices() {
         );
 
     }
+
+
+    log(
+        "Фильтрация:",
+        {
+            query,
+            category,
+            visibleCount
+        }
+    );
 
 }
 
@@ -697,7 +1451,9 @@ function updateServiceCount() {
         );
 
 
-    if (!counter) {
+    if (
+        !counter
+    ) {
 
         return;
 
@@ -720,9 +1476,13 @@ function updateServiceCount() {
    OPEN SERVICE
 ========================================================= */
 
-function openService(button) {
+function openService(
+    button
+) {
 
-    if (!button) {
+    if (
+        !button
+    ) {
 
         return;
 
@@ -735,7 +1495,9 @@ function openService(button) {
         );
 
 
-    if (!card) {
+    if (
+        !card
+    ) {
 
         return;
 
@@ -825,7 +1587,9 @@ function openService(button) {
         );
 
 
-    if (!modal) {
+    if (
+        !modal
+    ) {
 
         return;
 
@@ -880,8 +1644,9 @@ function getCategoryName(
 
     return (
         categories[
-            String(category)
-                .toLowerCase()
+            String(
+                category || ""
+            ).toLowerCase()
         ] ||
         "ДЕРЖАВНА ПОСЛУГА"
     );
@@ -901,7 +1666,9 @@ function closeServiceModal() {
         );
 
 
-    if (!modal) {
+    if (
+        !modal
+    ) {
 
         return;
 
@@ -927,7 +1694,7 @@ function closeServiceModal() {
 
 
 /* =========================================================
-   SERVICE APPLICATION BUTTON
+   APPLY FROM SERVICE
 ========================================================= */
 
 function initializeServiceApplicationButton() {
@@ -938,7 +1705,9 @@ function initializeServiceApplicationButton() {
         );
 
 
-    if (!button) {
+    if (
+        !button
+    ) {
 
         return;
 
@@ -982,7 +1751,9 @@ function openApplicationModal(
         );
 
 
-    if (!modal) {
+    if (
+        !modal
+    ) {
 
         return;
 
@@ -1001,7 +1772,9 @@ function openApplicationModal(
         );
 
 
-    if (success) {
+    if (
+        success
+    ) {
 
         success.classList.remove(
             "active"
@@ -1013,7 +1786,9 @@ function openApplicationModal(
     }
 
 
-    if (form) {
+    if (
+        form
+    ) {
 
         form.style.display =
             "";
@@ -1021,24 +1796,54 @@ function openApplicationModal(
     }
 
 
-    const token =
-        getSessionToken();
+    /*
+     * =====================================================
+     * ИСПРАВЛЕНИЕ 6.4
+     *
+     * Получаем авторизацию не только из двух ключей,
+     * а из всей системы авторизации.
+     * =====================================================
+     */
 
-    const olympId =
-        getOlympId();
+    const auth =
+        getAuthenticationData();
 
+
+    log(
+        "Проверка авторизации перед открытием заявки:",
+        auth
+    );
+
+
+    /*
+     * Если пользователь реально не найден.
+     */
 
     if (
-        !token ||
-        !olympId
+        !auth.authenticated
     ) {
 
         showFormError(
             "Для подання заявки необхідно увійти до особистого кабінету."
         );
 
+    } else {
+
+        /*
+         * Пользователь авторизован.
+         * Синхронизируем данные.
+         */
+
+        synchronizeAuthentication(
+            auth
+        );
+
     }
 
+
+    /*
+     * Устанавливаем услугу.
+     */
 
     if (
         serviceName
@@ -1050,7 +1855,9 @@ function openApplicationModal(
             );
 
 
-        if (select) {
+        if (
+            select
+        ) {
 
             setServiceSelectValue(
                 select,
@@ -1062,7 +1869,28 @@ function openApplicationModal(
     }
 
 
+    /*
+     * Подставляем профиль.
+     */
+
     fillApplicationFromSavedProfile();
+
+
+    /*
+     * Если ID есть в системе авторизации,
+     * обязательно устанавливаем его в форму.
+     */
+
+    if (
+        auth.olympId
+    ) {
+
+        setInputIfExists(
+            "idNumber",
+            auth.olympId
+        );
+
+    }
 
 
     modal.classList.add(
@@ -1090,7 +1918,9 @@ function openApplicationModal(
                 );
 
 
-            if (firstInput) {
+            if (
+                firstInput
+            ) {
 
                 firstInput.focus();
 
@@ -1118,7 +1948,7 @@ function setServiceSelectValue(
         );
 
 
-    const normalized =
+    const normalizedService =
         String(
             serviceName || ""
         )
@@ -1131,17 +1961,17 @@ function setServiceSelectValue(
             function (option) {
 
                 return (
-                    option.value
-                        .trim()
-                        .toLowerCase() ===
-                    normalized
+                    option.value.trim() ===
+                    serviceName.trim()
                 );
 
             }
         );
 
 
-    if (exact) {
+    if (
+        exact
+    ) {
 
         select.value =
             exact.value;
@@ -1159,14 +1989,16 @@ function setServiceSelectValue(
                     option.textContent
                         .trim()
                         .toLowerCase() ===
-                    normalized
+                    normalizedService
                 );
 
             }
         );
 
 
-    if (textMatch) {
+    if (
+        textMatch
+    ) {
 
         select.value =
             textMatch.value;
@@ -1194,7 +2026,9 @@ function closeApplicationModal() {
         );
 
 
-    if (!modal) {
+    if (
+        !modal
+    ) {
 
         return;
 
@@ -1227,13 +2061,14 @@ function closeApplicationModal() {
         );
 
 
-    if (submitButton) {
+    if (
+        submitButton
+    ) {
 
         submitButton.disabled =
             false;
 
         submitButton.textContent =
-            submitButton.dataset.originalText ||
             "Надіслати заявку";
 
     }
@@ -1277,7 +2112,9 @@ function initializeModalEvents() {
         );
 
 
-    if (serviceModal) {
+    if (
+        serviceModal
+    ) {
 
         serviceModal.addEventListener(
             "click",
@@ -1304,7 +2141,9 @@ function initializeModalEvents() {
         );
 
 
-    if (applicationModal) {
+    if (
+        applicationModal
+    ) {
 
         applicationModal.addEventListener(
             "click",
@@ -1339,7 +2178,9 @@ function initializeApplicationForm() {
         );
 
 
-    if (!form) {
+    if (
+        !form
+    ) {
 
         return;
 
@@ -1384,17 +2225,38 @@ function initializeApplicationForm() {
 
 async function loadCitizenProfile() {
 
+    const auth =
+        getAuthenticationData();
+
+
     const token =
-        getSessionToken();
+        auth.token;
+
 
     const olympId =
-        getOlympId();
+        auth.olympId;
 
 
     if (
         !token ||
         !olympId
     ) {
+
+        /*
+         * Если API-данных недостаточно,
+         * используем локальный профиль.
+         */
+
+        if (
+            auth.user
+        ) {
+
+            fillApplicationFromProfile(
+                auth.user
+            );
+
+        }
+
 
         return null;
 
@@ -1425,158 +2287,8 @@ async function loadCitizenProfile() {
         );
 
 
-        const response =
-            await fetch(
-                OLYMP_CONFIG.API_URL +
-                "?" +
-                params.toString(),
-                {
-
-                    method:
-                        "GET",
-
-                    cache:
-                        "no-store"
-
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "HTTP " +
-                response.status
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        log(
-            "Ответ profile:",
-            data
-        );
-
-
-        if (
-            data &&
-            data.success === true
-        ) {
-
-            const citizen =
-                data.citizen ||
-                data.profile ||
-                data.user;
-
-
-            if (citizen) {
-
-                saveSession(
-                    token,
-                    olympId,
-                    citizen
-                );
-
-
-                fillApplicationFromProfile(
-                    citizen
-                );
-
-            }
-
-
-            return data;
-
-        }
-
-
-        if (
-            isSessionError(
-                data
-            )
-        ) {
-
-            clearSession();
-
-        }
-
-
-        return null;
-
-    } catch (error) {
-
-        console.warn(
-            "Не вдалося завантажити профіль.",
-            error
-        );
-
-        return null;
-
-    }
-
-}
-
-
-/* =========================================================
-   LOAD CITIZEN APPLICATIONS
-========================================================= */
-
-async function loadCitizenApplications() {
-
-    const token =
-        getSessionToken();
-
-    const olympId =
-        getOlympId();
-
-
-    if (
-        !token ||
-        !olympId
-    ) {
-
-        return [];
-
-    }
-
-
-    if (
-        !OLYMP_CONFIG.API_URL
-    ) {
-
-        return [];
-
-    }
-
-
-    try {
-
-        const params =
-            new URLSearchParams();
-
-
-        /*
-         * Основной action.
-         */
-
         params.append(
-            "action",
-            "applications"
-        );
-
-
-        params.append(
-            "olympId",
-            olympId
-        );
-
-
-        params.append(
-            "sessionToken",
+            "token",
             token
         );
 
@@ -1598,34 +2310,95 @@ async function loadCitizenApplications() {
             );
 
 
-        if (!response.ok) {
+        const data =
+            await response.json();
 
-            throw new Error(
-                "HTTP " +
-                response.status
+
+        if (
+            data &&
+            data.success
+        ) {
+
+            const citizen =
+                data.citizen ||
+                data.profile ||
+                data.user;
+
+
+            if (
+                citizen
+            ) {
+
+                saveSession(
+                    token,
+                    olympId,
+                    citizen
+                );
+
+
+                fillApplicationFromProfile(
+                    citizen
+                );
+
+            }
+
+
+            log(
+                "Профіль завантажено.",
+                citizen
+            );
+
+
+            return data;
+
+        }
+
+
+        /*
+         * Не очищаем сессию сразу.
+         *
+         * Иногда Google Apps Script может
+         * временно вернуть ошибку сети/API.
+         *
+         * Поэтому локальный профиль сохраняем.
+         */
+
+        if (
+            auth.user
+        ) {
+
+            fillApplicationFromProfile(
+                auth.user
             );
 
         }
 
 
-        const data =
-            await response.json();
-
-
-        log(
-            "Ответ applications:",
-            data
-        );
-
-
         if (
-            !data ||
-            data.success !== true
+            data &&
+            data.message
         ) {
 
+            const message =
+                String(
+                    data.message
+                ).toLowerCase();
+
+
+            /*
+             * Только явное сообщение
+             * о недействительной сессии.
+             */
+
             if (
-                isSessionError(
-                    data
+                message.includes(
+                    "недействитель"
+                ) ||
+                message.includes(
+                    "неверный токен"
+                ) ||
+                message.includes(
+                    "invalid session"
                 )
             ) {
 
@@ -1633,983 +2406,42 @@ async function loadCitizenApplications() {
 
             }
 
-
-            renderApplications(
-                []
-            );
-
-
-            return [];
-
         }
 
 
-        const applications =
-            normalizeApplicationsResponse(
-                data
-            );
-
-
-        try {
-
-            localStorage.setItem(
-                OLYMP_CONFIG.APPLICATIONS_KEY,
-                JSON.stringify(
-                    applications
-                )
-            );
-
-        } catch (storageError) {
-
-            console.warn(
-                "Не удалось сохранить заявки локально.",
-                storageError
-            );
-
-        }
-
-
-        renderApplications(
-            applications
-        );
-
-
-        updateApplicationStatistics(
-            applications
-        );
-
-
-        return applications;
+        return null;
 
     } catch (error) {
 
         console.warn(
-            "Не вдалося завантажити заявки громадянина.",
+            "Не вдалося завантажити профіль.",
             error
         );
 
 
         /*
-         * Если ранее уже были сохранённые заявки,
-         * показываем их.
+         * Ошибка сети НЕ означает,
+         * что пользователь вышел.
          */
 
-        const cached =
-            getCachedApplications();
+        const savedUser =
+            getSavedUser();
 
 
         if (
-            cached.length
+            savedUser
         ) {
 
-            renderApplications(
-                cached
-            );
-
-            updateApplicationStatistics(
-                cached
-            );
-
-            return cached;
-
-        }
-
-
-        renderApplications(
-            []
-        );
-
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================================================
-   NORMALIZE APPLICATION RESPONSE
-========================================================= */
-
-function normalizeApplicationsResponse(
-    data
-) {
-
-    if (
-        !data
-    ) {
-
-        return [];
-
-    }
-
-
-    let applications =
-        data.applications ||
-        data.data ||
-        data.items ||
-        data.requests ||
-        [];
-
-
-    if (
-        !Array.isArray(
-            applications
-        )
-    ) {
-
-        applications = [];
-
-    }
-
-
-    return applications.map(
-        function (item) {
-
-            if (!item) {
-
-                return null;
-
-            }
-
-
-            return {
-
-                number:
-                    item.number ||
-                    item.applicationNumber ||
-                    item.id ||
-                    item.requestNumber ||
-                    "",
-
-                service:
-                    item.service ||
-                    item.serviceName ||
-                    item.category ||
-                    "Звернення громадянина",
-
-                status:
-                    item.status ||
-                    "🟡 На розгляді",
-
-                fullName:
-                    item.fullName ||
-                    item.name ||
-                    item.fio ||
-                    "",
-
-                olympId:
-                    item.olympId ||
-                    item.citizenId ||
-                    item.idNumber ||
-                    getOlympId(),
-
-                contact:
-                    item.contact ||
-                    "",
-
-                message:
-                    item.message ||
-                    item.description ||
-                    "",
-
-                createdAt:
-                    item.createdAt ||
-                    item.date ||
-                    item.created ||
-                    item.timestamp ||
-                    "",
-
-                updatedAt:
-                    item.updatedAt ||
-                    item.updated ||
-                    "",
-
-                raw:
-                    item
-
-            };
-
-        }
-    )
-    .filter(
-        function (item) {
-
-            return Boolean(
-                item
+            fillApplicationFromProfile(
+                savedUser
             );
 
         }
-    );
-
-}
 
 
-/* =========================================================
-   CACHED APPLICATIONS
-========================================================= */
-
-function getCachedApplications() {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                OLYMP_CONFIG.APPLICATIONS_KEY
-            );
-
-
-        if (!raw) {
-
-            return [];
-
-        }
-
-
-        const data =
-            JSON.parse(
-                raw
-            );
-
-
-        return Array.isArray(
-            data
-        )
-            ? data
-            : [];
-
-    } catch (error) {
-
-        return [];
+        return null;
 
     }
-
-}
-
-
-/* =========================================================
-   RENDER APPLICATIONS
-========================================================= */
-
-function renderApplications(
-    applications
-) {
-
-    if (
-        !Array.isArray(
-            applications
-        )
-    ) {
-
-        applications = [];
-
-    }
-
-
-    /*
-     * Ищем возможные контейнеры,
-     * чтобы script.js работал с разными версиями index.html.
-     */
-
-    const container =
-        document.getElementById(
-            "applicationsList"
-        ) ||
-        document.getElementById(
-            "userApplications"
-        ) ||
-        document.getElementById(
-            "applications"
-        );
-
-
-    if (!container) {
-
-        log(
-            "Контейнер заявок не найден."
-        );
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        "";
-
-
-    if (
-        applications.length === 0
-    ) {
-
-        container.innerHTML = `
-            <div class="empty-applications">
-                <div class="empty-applications-icon">📄</div>
-                <h3>Заявок поки немає</h3>
-                <p>Ваші звернення до Уряду штату з'являться тут.</p>
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    /*
-     * Сначала новые.
-     */
-
-    applications =
-        [...applications].sort(
-            function (a, b) {
-
-                const dateA =
-                    new Date(
-                        a.createdAt || 0
-                    ).getTime();
-
-                const dateB =
-                    new Date(
-                        b.createdAt || 0
-                    ).getTime();
-
-
-                return dateB - dateA;
-
-            }
-        );
-
-
-    applications.forEach(
-        function (application) {
-
-            const card =
-                createApplicationCard(
-                    application
-                );
-
-
-            container.appendChild(
-                card
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   CREATE APPLICATION CARD
-========================================================= */
-
-function createApplicationCard(
-    application
-) {
-
-    const card =
-        document.createElement(
-            "div"
-        );
-
-
-    card.className =
-        "application-card";
-
-
-    const number =
-        application.number ||
-        "Номер не визначено";
-
-
-    const service =
-        application.service ||
-        "Звернення громадянина";
-
-
-    const status =
-        application.status ||
-        "🟡 На розгляді";
-
-
-    const date =
-        formatApplicationDate(
-            application.createdAt
-        );
-
-
-    card.innerHTML = `
-        <div class="application-card-header">
-            <div>
-                <div class="application-number">
-                    № ${escapeHtml(number)}
-                </div>
-
-                <div class="application-date">
-                    ${escapeHtml(date)}
-                </div>
-            </div>
-
-            <span class="status-badge ${getStatusClass(status)}">
-                ${escapeHtml(status)}
-            </span>
-        </div>
-
-        <div class="application-card-body">
-
-            <div class="application-service">
-                ${escapeHtml(service)}
-            </div>
-
-            ${
-                application.message
-                    ? `
-                        <div class="application-message">
-                            ${escapeHtml(
-                                truncateText(
-                                    application.message,
-                                    180
-                                )
-                            )}
-                        </div>
-                    `
-                    : ""
-            }
-
-        </div>
-
-        <div class="application-card-footer">
-
-            <button
-                type="button"
-                class="application-view-btn"
-            >
-                Переглянути
-            </button>
-
-        </div>
-    `;
-
-
-    const button =
-        card.querySelector(
-            ".application-view-btn"
-        );
-
-
-    if (button) {
-
-        button.addEventListener(
-            "click",
-            function () {
-
-                openApplicationDetails(
-                    application
-                );
-
-            }
-        );
-
-    }
-
-
-    return card;
-
-}
-
-
-/* =========================================================
-   OPEN APPLICATION DETAILS
-========================================================= */
-
-function openApplicationDetails(
-    application
-) {
-
-    if (!application) {
-
-        return;
-
-    }
-
-
-    /*
-     * Если в index.html уже есть модальное окно заявки,
-     * используем его.
-     */
-
-    const modal =
-        document.getElementById(
-            "applicationViewModal"
-        ) ||
-        document.getElementById(
-            "viewApplicationModal"
-        );
-
-
-    if (
-        modal
-    ) {
-
-        setElementText(
-            "viewApplicationNumber",
-            application.number
-                ? "№ " +
-                  application.number
-                : "Номер не визначено"
-        );
-
-
-        setElementText(
-            "viewApplicationService",
-            application.service ||
-            "Звернення громадянина"
-        );
-
-
-        setElementText(
-            "viewApplicationStatus",
-            application.status ||
-            "🟡 На розгляді"
-        );
-
-
-        setElementText(
-            "viewApplicationMessage",
-            application.message ||
-            "Опис відсутній."
-        );
-
-
-        setElementText(
-            "viewApplicationDate",
-            formatApplicationDate(
-                application.createdAt
-            )
-        );
-
-
-        modal.classList.add(
-            "active"
-        );
-
-
-        modal.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-
-
-        document.body.classList.add(
-            "modal-open"
-        );
-
-
-        return;
-
-    }
-
-
-    /*
-     * Если отдельного модального окна в HTML нет,
-     * создаём его автоматически.
-     */
-
-    createApplicationDetailsModal(
-        application
-    );
-
-}
-
-
-/* =========================================================
-   CREATE DETAILS MODAL
-========================================================= */
-
-function createApplicationDetailsModal(
-    application
-) {
-
-    const old =
-        document.getElementById(
-            "olympDynamicApplicationModal"
-        );
-
-
-    if (old) {
-
-        old.remove();
-
-    }
-
-
-    const modal =
-        document.createElement(
-            "div"
-        );
-
-
-    modal.id =
-        "olympDynamicApplicationModal";
-
-
-    modal.className =
-        "modal olymp-dynamic-modal active";
-
-
-    modal.setAttribute(
-        "aria-hidden",
-        "false"
-    );
-
-
-    modal.innerHTML = `
-
-        <div class="modal-content">
-
-            <button
-                type="button"
-                class="modal-close"
-                aria-label="Закрити"
-            >
-                ×
-            </button>
-
-            <div class="modal-header">
-
-                <div class="modal-icon">
-                    📄
-                </div>
-
-                <div>
-                    <h2>
-                        Заявка
-                    </h2>
-
-                    <div class="application-number">
-                        № ${escapeHtml(
-                            application.number ||
-                            "Номер не визначено"
-                        )}
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="application-detail">
-
-                <strong>
-                    Послуга
-                </strong>
-
-                <span>
-                    ${escapeHtml(
-                        application.service ||
-                        "Звернення громадянина"
-                    )}
-                </span>
-
-            </div>
-
-            <div class="application-detail">
-
-                <strong>
-                    Статус
-                </strong>
-
-                <span class="status-badge ${getStatusClass(application.status)}">
-                    ${escapeHtml(
-                        application.status ||
-                        "🟡 На розгляді"
-                    )}
-                </span>
-
-            </div>
-
-            <div class="application-detail">
-
-                <strong>
-                    Дата подання
-                </strong>
-
-                <span>
-                    ${escapeHtml(
-                        formatApplicationDate(
-                            application.createdAt
-                        )
-                    )}
-                </span>
-
-            </div>
-
-            <div class="application-detail application-detail-message">
-
-                <strong>
-                    Опис звернення
-                </strong>
-
-                <p>
-                    ${escapeHtml(
-                        application.message ||
-                        "Опис відсутній."
-                    )}
-                </p>
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(
-        modal
-    );
-
-
-    const closeButton =
-        modal.querySelector(
-            ".modal-close"
-        );
-
-
-    if (closeButton) {
-
-        closeButton.addEventListener(
-            "click",
-            function () {
-
-                modal.remove();
-
-                document.body.classList.remove(
-                    "modal-open"
-                );
-
-            }
-        );
-
-    }
-
-
-    modal.addEventListener(
-        "click",
-        function (event) {
-
-            if (
-                event.target ===
-                modal
-            ) {
-
-                modal.remove();
-
-                document.body.classList.remove(
-                    "modal-open"
-                );
-
-            }
-
-        }
-    );
-
-
-    document.body.classList.add(
-        "modal-open"
-    );
-
-}
-
-
-/* =========================================================
-   UPDATE APPLICATION STATISTICS
-========================================================= */
-
-function updateApplicationStatistics(
-    applications
-) {
-
-    if (
-        !Array.isArray(
-            applications
-        )
-    ) {
-
-        applications = [];
-
-    }
-
-
-    const total =
-        applications.length;
-
-
-    const pending =
-        applications.filter(
-            function (item) {
-
-                return String(
-                    item.status || ""
-                ).includes(
-                    "На розгляді"
-                );
-
-            }
-        ).length;
-
-
-    const accepted =
-        applications.filter(
-            function (item) {
-
-                return String(
-                    item.status || ""
-                ).includes(
-                    "Прийнято"
-                );
-
-            }
-        ).length;
-
-
-    const completed =
-        applications.filter(
-            function (item) {
-
-                return String(
-                    item.status || ""
-                ).includes(
-                    "Виконано"
-                );
-
-            }
-        ).length;
-
-
-    const rejected =
-        applications.filter(
-            function (item) {
-
-                return String(
-                    item.status || ""
-                ).includes(
-                    "Відхилено"
-                );
-
-            }
-        ).length;
-
-
-    const closed =
-        applications.filter(
-            function (item) {
-
-                return String(
-                    item.status || ""
-                ).includes(
-                    "Закрито"
-                );
-
-            }
-        ).length;
-
-
-    setFirstExistingText(
-        [
-            "applicationsCount",
-            "totalApplications",
-            "statTotalApplications"
-        ],
-        total
-    );
-
-
-    setFirstExistingText(
-        [
-            "pendingApplications",
-            "statPendingApplications"
-        ],
-        pending
-    );
-
-
-    setFirstExistingText(
-        [
-            "acceptedApplications",
-            "statAcceptedApplications"
-        ],
-        accepted
-    );
-
-
-    setFirstExistingText(
-        [
-            "completedApplications",
-            "statCompletedApplications"
-        ],
-        completed
-    );
-
-
-    setFirstExistingText(
-        [
-            "rejectedApplications",
-            "statRejectedApplications"
-        ],
-        rejected
-    );
-
-
-    setFirstExistingText(
-        [
-            "closedApplications",
-            "statClosedApplications"
-        ],
-        closed
-    );
-
-}
-
-
-/* =========================================================
-   REFRESH APPLICATIONS
-========================================================= */
-
-function initializeApplicationsRefresh() {
-
-    const buttons =
-        document.querySelectorAll(
-            "[data-refresh-applications]"
-        );
-
-
-    buttons.forEach(
-        function (button) {
-
-            button.addEventListener(
-                "click",
-                function () {
-
-                    loadCitizenApplications();
-
-                }
-            );
-
-        }
-    );
-
-
-    /*
-     * Если на странице есть список заявок,
-     * можно обновить его событием.
-     */
-
-    window.addEventListener(
-        "olymp:refresh-applications",
-        function () {
-
-            loadCitizenApplications();
-
-        }
-    );
 
 }
 
@@ -2620,16 +2452,33 @@ function initializeApplicationsRefresh() {
 
 function fillApplicationFromSavedProfile() {
 
-    const user =
-        getSavedUser();
+    const auth =
+        getAuthenticationData();
 
 
     if (
-        user
+        auth.user
     ) {
 
         fillApplicationFromProfile(
-            user
+            auth.user
+        );
+
+    }
+
+
+    /*
+     * Даже если объекта user нет,
+     * ID пользователя всё равно подставляем.
+     */
+
+    if (
+        auth.olympId
+    ) {
+
+        setInputIfExists(
+            "idNumber",
+            auth.olympId
         );
 
     }
@@ -2645,24 +2494,42 @@ function fillApplicationFromProfile(
     citizen
 ) {
 
-    if (!citizen) {
+    if (
+        !citizen
+    ) {
 
         return;
 
     }
 
 
+    /*
+     * ПІБ
+     */
+
     setInputIfExists(
         "fullName",
         citizen.fullName ||
         citizen.name ||
         citizen.fio ||
+        citizen.full_name ||
         ""
     );
 
 
+    /*
+     * OLYMP-ID
+     */
+
+    const citizenOlympId =
+        extractOlympId(
+            citizen
+        );
+
+
     setInputIfExists(
         "idNumber",
+        citizenOlympId ||
         citizen.olympId ||
         citizen.citizenId ||
         citizen.idNumber ||
@@ -2670,16 +2537,22 @@ function fillApplicationFromProfile(
     );
 
 
+    /*
+     * Контакт
+     */
+
     setInputIfExists(
         "contact",
         citizen.contact ||
         citizen.preferredContact ||
+        citizen.phone ||
+        citizen.email ||
         ""
     );
 
 
     log(
-        "Данные гражданина подставлены в форму."
+        "Дані громадянина підставлені у форму."
     );
 
 }
@@ -2700,7 +2573,9 @@ function setInputIfExists(
         );
 
 
-    if (!element) {
+    if (
+        !element
+    ) {
 
         return;
 
@@ -2709,7 +2584,8 @@ function setInputIfExists(
 
     if (
         value !== undefined &&
-        value !== null
+        value !== null &&
+        String(value).trim() !== ""
     ) {
 
         element.value =
@@ -2746,7 +2622,9 @@ async function submitApplication(
         );
 
 
-    if (!form) {
+    if (
+        !form
+    ) {
 
         return;
 
@@ -2754,24 +2632,150 @@ async function submitApplication(
 
 
     /*
-     * Авторизация.
+     * =====================================================
+     * ПОВТОРНО ПОЛУЧАЕМ АВТОРИЗАЦИЮ
+     *
+     * Здесь больше НЕЛЬЗЯ проверять только:
+     *
+     * getSessionToken()
+     * getOlympId()
+     *
+     * потому что профиль может быть сохранён
+     * другим модулем кабинета.
+     * =====================================================
      */
 
-    const token =
-        getSessionToken();
+    const auth =
+        getAuthenticationData();
 
 
-    const olympId =
-        getOlympId();
+    log(
+        "Авторизация перед отправкой:",
+        auth
+    );
 
+
+    /*
+     * Если есть сохранённый пользователь,
+     * синхронизируем данные.
+     */
 
     if (
-        !token ||
-        !olympId
+        auth.authenticated
+    ) {
+
+        synchronizeAuthentication(
+            auth
+        );
+
+    }
+
+
+    /*
+     * Авторизация.
+     *
+     * Пользователь считается авторизованным,
+     * если найден:
+     *
+     * 1. профиль
+     *
+     * ИЛИ
+     *
+     * 2. token + OLYMP-ID
+     */
+
+    if (
+        !auth.authenticated
     ) {
 
         showFormError(
             "Для подання заявки необхідно увійти до особистого кабінету."
+        );
+
+
+        applicationSending =
+            false;
+
+
+        return;
+
+    }
+
+
+    /*
+     * Получаем актуальный ID.
+     */
+
+    let olympId =
+        auth.olympId ||
+        getOlympId();
+
+
+    /*
+     * Если ID всё ещё не найден,
+     * пробуем взять его из формы.
+     */
+
+    if (
+        !olympId
+    ) {
+
+        olympId =
+            getInputValue(
+                "idNumber"
+            );
+
+    }
+
+
+    olympId =
+        normalizeOlympIdClient(
+            olympId
+        );
+
+
+    /*
+     * Получаем токен.
+     */
+
+    let token =
+        auth.token ||
+        getSessionToken();
+
+
+    /*
+     * Если токен находится внутри профиля.
+     */
+
+    if (
+        !token &&
+        auth.user
+    ) {
+
+        token =
+            extractSessionToken(
+                auth.user
+            );
+
+    }
+
+
+    /*
+     * Важный момент:
+     *
+     * Если профиль найден, но token ещё
+     * не синхронизировался, НЕ показываем
+     * ошибку "войдите".
+     *
+     * Сначала пытаемся обновить профиль.
+     */
+
+    if (
+        !olympId
+    ) {
+
+        showFormError(
+            "OLYMP-ID не визначено. Перезавантажте особистий кабінет."
         );
 
 
@@ -2781,7 +2785,7 @@ async function submitApplication(
 
 
     /*
-     * Данные.
+     * Получаем данные.
      */
 
     const fullName =
@@ -2815,18 +2819,22 @@ async function submitApplication(
 
 
     /*
-     * Проверка ПІБ.
+     * Проверяем ПІБ.
      */
 
-    if (!fullName) {
+    if (
+        !fullName
+    ) {
 
         showFormError(
             "Вкажіть ПІБ."
         );
 
+
         focusElement(
             "fullName"
         );
+
 
         return;
 
@@ -2834,23 +2842,32 @@ async function submitApplication(
 
 
     /*
-     * Проверка ID.
+     * Проверяем OLYMP-ID.
      */
 
-    if (!idNumber) {
+    if (
+        !idNumber
+    ) {
 
         showFormError(
             "OLYMP-ID не визначено."
         );
 
-        focusElement(
-            "idNumber"
+
+        setInputIfExists(
+            "idNumber",
+            olympId
         );
+
 
         return;
 
     }
 
+
+    /*
+     * Проверяем соответствие ID.
+     */
 
     if (
         normalizeOlympIdClient(
@@ -2865,6 +2882,13 @@ async function submitApplication(
             "OLYMP-ID не відповідає поточному користувачу."
         );
 
+
+        setInputIfExists(
+            "idNumber",
+            olympId
+        );
+
+
         return;
 
     }
@@ -2874,15 +2898,19 @@ async function submitApplication(
      * Услуга.
      */
 
-    if (!service) {
+    if (
+        !service
+    ) {
 
         showFormError(
             "Оберіть державну послугу."
         );
 
+
         focusElement(
             "applicationService"
         );
+
 
         return;
 
@@ -2893,15 +2921,19 @@ async function submitApplication(
      * Сообщение.
      */
 
-    if (!message) {
+    if (
+        !message
+    ) {
 
         showFormError(
             "Вкажіть опис звернення."
         );
 
+
         focusElement(
             "message"
         );
+
 
         return;
 
@@ -2920,6 +2952,7 @@ async function submitApplication(
             "URL Google Apps Script не налаштований."
         );
 
+
         return;
 
     }
@@ -2935,13 +2968,17 @@ async function submitApplication(
         );
 
 
-    if (submitButton) {
+    if (
+        submitButton
+    ) {
 
         submitButton.disabled =
             true;
 
+
         submitButton.dataset.originalText =
             submitButton.textContent;
+
 
         submitButton.textContent =
             "Відправлення...";
@@ -2950,7 +2987,9 @@ async function submitApplication(
 
 
     /*
+     * =====================================================
      * PAYLOAD
+     * =====================================================
      */
 
     const payload = {
@@ -2994,10 +3033,7 @@ async function submitApplication(
     try {
 
         /*
-         * Google Apps Script Web App.
-         *
-         * Content-Type text/plain используется,
-         * чтобы не создавать лишний CORS preflight.
+         * POST JSON
          */
 
         const response =
@@ -3030,7 +3066,13 @@ async function submitApplication(
             );
 
 
-        if (!response.ok) {
+        /*
+         * HTTP.
+         */
+
+        if (
+            !response.ok
+        ) {
 
             throw new Error(
                 "HTTP " +
@@ -3039,6 +3081,10 @@ async function submitApplication(
 
         }
 
+
+        /*
+         * Ответ.
+         */
 
         const responseText =
             await response.text();
@@ -3076,12 +3122,7 @@ async function submitApplication(
 
 
         /*
-         * =====================================================
-         * КРИТИЧЕСКИ ВАЖНО
-         *
-         * Только success === true означает,
-         * что заявка действительно принята сервером.
-         * =====================================================
+         * УСПЕХ ТОЛЬКО success === true
          */
 
         if (
@@ -3100,55 +3141,24 @@ async function submitApplication(
 
 
         /*
-         * Получаем реальную заявку.
+         * Реальный номер.
          */
 
         const application =
             data.application ||
-            data.request ||
-            data.data ||
             {};
 
-
-        /*
-         * Получаем реальный номер.
-         */
 
         const realNumber =
             data.number ||
             data.applicationNumber ||
             application.number ||
             application.applicationNumber ||
-            application.requestNumber ||
             "";
 
 
         /*
-         * ВАЖНО:
-         *
-         * Если сервер сообщил success=true,
-         * но не передал номер — не придумываем
-         * настоящий номер.
-         */
-
-        if (!realNumber) {
-
-            log(
-                "Сервер подтвердил заявку, но номер не передан.",
-                data
-            );
-
-        }
-
-
-        const realStatus =
-            application.status ||
-            data.status ||
-            "🟡 На розгляді";
-
-
-        /*
-         * Показываем подтверждение.
+         * Успех.
          */
 
         showApplicationSuccess(
@@ -3158,7 +3168,9 @@ async function submitApplication(
                     realNumber,
 
                 status:
-                    realStatus,
+                    application.status ||
+                    data.status ||
+                    "🟡 На розгляді",
 
                 application:
                     application
@@ -3169,54 +3181,11 @@ async function submitApplication(
         );
 
 
-        /*
-         * Удаляем черновик.
-         */
-
         clearApplicationDraft();
 
 
-        /*
-         * Разрешаем новую отправку.
-         */
-
-        applicationSending =
-            false;
-
-
-        /*
-         * Восстанавливаем кнопку.
-         */
-
-        if (submitButton) {
-
-            submitButton.disabled =
-                false;
-
-            submitButton.textContent =
-                submitButton.dataset.originalText ||
-                "Надіслати заявку";
-
-        }
-
-
-        /*
-         * После создания заявки
-         * сразу обновляем список.
-         */
-
-        setTimeout(
-            function () {
-
-                loadCitizenApplications();
-
-            },
-            500
-        );
-
-
         log(
-            "Заявка успешно сохранена сервером.",
+            "Заявка успешно сохранена.",
             data
         );
 
@@ -3230,17 +3199,72 @@ async function submitApplication(
 
 
         /*
-         * НИКАКОГО ЛОЖНОГО УСПЕХА.
-         *
-         * Если fetch не получил подтверждение
-         * success:true — заявка считается
-         * НЕ подтверждённой.
+         * CORS.
          */
 
-        showFormError(
-            getApplicationErrorMessage(
+        const corsError =
+            isPossibleCorsError(
                 error
-            )
+            );
+
+
+        if (
+            corsError
+        ) {
+
+            log(
+                "Похоже на CORS. Запускаем резервную отправку."
+            );
+
+
+            try {
+
+                submitApplicationFallback(
+                    payload
+                );
+
+
+                /*
+                 * ВАЖНО:
+                 *
+                 * Резервная отправка не подтверждает
+                 * результат сервера.
+                 *
+                 * Поэтому НЕ говорим пользователю,
+                 * что заявка точно сохранена.
+                 */
+
+                showApplicationFallbackMessage(
+                    service
+                );
+
+
+                clearApplicationDraft();
+
+
+                applicationSending =
+                    false;
+
+
+                return;
+
+            } catch (fallbackError) {
+
+                console.error(
+                    "Резервная отправка также не удалась:",
+                    fallbackError
+                );
+
+            }
+
+        }
+
+
+        showFormError(
+            error &&
+            error.message
+                ? error.message
+                : "Не вдалося відправити заявку."
         );
 
 
@@ -3248,10 +3272,13 @@ async function submitApplication(
             false;
 
 
-        if (submitButton) {
+        if (
+            submitButton
+        ) {
 
             submitButton.disabled =
                 false;
+
 
             submitButton.textContent =
                 submitButton.dataset.originalText ||
@@ -3265,65 +3292,16 @@ async function submitApplication(
 
 
 /* =========================================================
-   ERROR MESSAGE
+   CHECK CORS ERROR
 ========================================================= */
 
-function getApplicationErrorMessage(
+function isPossibleCorsError(
     error
 ) {
 
-    if (!error) {
-
-        return "Не вдалося відправити заявку.";
-
-    }
-
-
-    const message =
-        String(
-            error.message ||
-            ""
-        ).trim();
-
-
     if (
-        message.includes(
-            "Failed to fetch"
-        ) ||
-        message.includes(
-            "NetworkError"
-        ) ||
-        message.includes(
-            "Network Error"
-        )
+        !error
     ) {
-
-        return (
-            "Не вдалося отримати відповідь від сервера. " +
-            "Заявку НЕ підтверджено. Перевірте підключення " +
-            "до Google Apps Script."
-        );
-
-    }
-
-
-    return (
-        message ||
-        "Не вдалося відправити заявку."
-    );
-
-}
-
-
-/* =========================================================
-   SESSION ERROR
-========================================================= */
-
-function isSessionError(
-    data
-) {
-
-    if (!data) {
 
         return false;
 
@@ -3332,25 +3310,243 @@ function isSessionError(
 
     const message =
         String(
-            data.message ||
-            data.error ||
+            error.message ||
             ""
         ).toLowerCase();
 
 
     return (
         message.includes(
-            "сес"
+            "cors"
         ) ||
         message.includes(
-            "session"
+            "failed to fetch"
         ) ||
         message.includes(
-            "token"
+            "networkerror"
         ) ||
         message.includes(
-            "авториза"
+            "network error"
         )
+    );
+
+}
+
+
+/* =========================================================
+   FALLBACK SUBMIT
+========================================================= */
+
+function submitApplicationFallback(
+    payload
+) {
+
+    const form =
+        document.createElement(
+            "form"
+        );
+
+
+    form.method =
+        "POST";
+
+
+    form.action =
+        OLYMP_CONFIG.API_URL;
+
+
+    form.target =
+        "olymp_hidden_frame";
+
+
+    form.style.display =
+        "none";
+
+
+    Object.keys(
+        payload
+    ).forEach(
+        function (key) {
+
+            const input =
+                document.createElement(
+                    "input"
+                );
+
+
+            input.type =
+                "hidden";
+
+
+            input.name =
+                key;
+
+
+            input.value =
+                payload[key] === undefined ||
+                payload[key] === null
+                    ? ""
+                    : String(
+                        payload[key]
+                      );
+
+
+            form.appendChild(
+                input
+            );
+
+        }
+    );
+
+
+    let iframe =
+        document.getElementById(
+            "olymp_hidden_frame"
+        );
+
+
+    if (
+        !iframe
+    ) {
+
+        iframe =
+            document.createElement(
+                "iframe"
+            );
+
+
+        iframe.name =
+            "olymp_hidden_frame";
+
+
+        iframe.id =
+            "olymp_hidden_frame";
+
+
+        iframe.style.display =
+            "none";
+
+
+        document.body.appendChild(
+            iframe
+        );
+
+    }
+
+
+    document.body.appendChild(
+        form
+    );
+
+
+    form.submit();
+
+
+    setTimeout(
+        function () {
+
+            if (
+                form.parentNode
+            ) {
+
+                form.remove();
+
+            }
+
+        },
+        3000
+    );
+
+
+    log(
+        "Резервная отправка выполнена."
+    );
+
+}
+
+
+/* =========================================================
+   FALLBACK MESSAGE
+========================================================= */
+
+function showApplicationFallbackMessage(
+    service
+) {
+
+    const form =
+        document.getElementById(
+            "applicationForm"
+        );
+
+
+    if (
+        form
+    ) {
+
+        form.style.display =
+            "none";
+
+    }
+
+
+    const success =
+        document.getElementById(
+            "successMessage"
+        );
+
+
+    if (
+        !success
+    ) {
+
+        alert(
+            "Заявка передана. Перевірте особистий кабінет через декілька секунд."
+        );
+
+
+        return;
+
+    }
+
+
+    success.style.display =
+        "block";
+
+
+    success.classList.add(
+        "active"
+    );
+
+
+    setElementText(
+        "applicationNumber",
+        "Заявку передано"
+    );
+
+
+    setApplicationStatus(
+        "🟡 На розгляді"
+    );
+
+
+    const successText =
+        success.querySelector(
+            "p"
+        );
+
+
+    if (
+        successText
+    ) {
+
+        successText.textContent =
+            "Заявку передано на сервер. Номер заявки з'явиться в особистому кабінеті після збереження.";
+    }
+
+
+    log(
+        "Резервная отправка заявки:",
+        service
     );
 
 }
@@ -3377,14 +3573,18 @@ function showApplicationSuccess(
         );
 
 
-    if (!success) {
+    if (
+        !success
+    ) {
 
         return;
 
     }
 
 
-    if (form) {
+    if (
+        form
+    ) {
 
         form.style.display =
             "none";
@@ -3404,23 +3604,34 @@ function showApplicationSuccess(
     /*
      * Реальный номер.
      *
-     * Если сервер не передал номер,
-     * НЕ создаём фальшивый номер.
+     * Если Code.gs не вернул номер,
+     * не подменяем его временным номером.
      */
 
     const number =
         response &&
         response.number
             ? response.number
-            : "Очікується";
+            : "";
 
 
-    setElementText(
-        "applicationNumber",
-        number === "Очікується"
-            ? "№ Очікується"
-            : "№ " + number
-    );
+    if (
+        number
+    ) {
+
+        setElementText(
+            "applicationNumber",
+            "№ " + number
+        );
+
+    } else {
+
+        setElementText(
+            "applicationNumber",
+            "Заявка зареєстрована"
+        );
+
+    }
 
 
     /*
@@ -3445,12 +3656,12 @@ function showApplicationSuccess(
         );
 
 
-    if (successText) {
+    if (
+        successText
+    ) {
 
         successText.textContent =
-            number === "Очікується"
-                ? "Заявку прийнято сервером. Номер заявки буде доступний після оновлення даних."
-                : "Ваше звернення успішно зареєстровано та передано до Уряду штату Olymp.";
+            "Ваше звернення успішно зареєстровано та передано до Уряду штату Olymp.";
 
     }
 
@@ -3480,7 +3691,9 @@ function setApplicationStatus(
         );
 
 
-    if (!container) {
+    if (
+        !container
+    ) {
 
         return;
 
@@ -3493,15 +3706,24 @@ function setApplicationStatus(
         );
 
 
-    if (!badge) {
+    if (
+        !badge
+    ) {
 
         return;
 
     }
 
 
+    const normalizedStatus =
+        String(
+            status ||
+            "🟡 На розгляді"
+        );
+
+
     badge.textContent =
-        status;
+        normalizedStatus;
 
 
     badge.classList.remove(
@@ -3513,100 +3735,73 @@ function setApplicationStatus(
     );
 
 
-    badge.classList.add(
-        getStatusClass(
-            status
+    if (
+        normalizedStatus.includes(
+            "На розгляді"
         )
-    );
+    ) {
+
+        badge.classList.add(
+            "pending"
+        );
+
+    } else if (
+        normalizedStatus.includes(
+            "Прийнято"
+        )
+    ) {
+
+        badge.classList.add(
+            "accepted"
+        );
+
+    } else if (
+        normalizedStatus.includes(
+            "Виконано"
+        )
+    ) {
+
+        badge.classList.add(
+            "completed"
+        );
+
+    } else if (
+        normalizedStatus.includes(
+            "Відхилено"
+        )
+    ) {
+
+        badge.classList.add(
+            "rejected"
+        );
+
+    } else if (
+        normalizedStatus.includes(
+            "Закрито"
+        )
+    ) {
+
+        badge.classList.add(
+            "closed"
+        );
+
+    }
 
 }
 
 
 /* =========================================================
-   STATUS CLASS
+   TEMPORARY NUMBER
 ========================================================= */
 
-function getStatusClass(
-    status
-) {
+function generateTemporaryApplicationNumber() {
 
-    const value =
-        String(
-            status || ""
-        ).toLowerCase();
-
-
-    if (
-        value.includes(
-            "на розгляді"
-        ) ||
-        value.includes(
-            "pending"
-        )
-    ) {
-
-        return "pending";
-
-    }
-
-
-    if (
-        value.includes(
-            "прийнято"
-        ) ||
-        value.includes(
-            "accepted"
-        )
-    ) {
-
-        return "accepted";
-
-    }
-
-
-    if (
-        value.includes(
-            "виконано"
-        ) ||
-        value.includes(
-            "completed"
-        )
-    ) {
-
-        return "completed";
-
-    }
-
-
-    if (
-        value.includes(
-            "відхилено"
-        ) ||
-        value.includes(
-            "rejected"
-        )
-    ) {
-
-        return "rejected";
-
-    }
-
-
-    if (
-        value.includes(
-            "закрито"
-        ) ||
-        value.includes(
-            "closed"
-        )
-    ) {
-
-        return "closed";
-
-    }
-
-
-    return "pending";
+    return (
+        "OLYMP-" +
+        Date.now()
+            .toString()
+            .slice(-6)
+    );
 
 }
 
@@ -3625,7 +3820,9 @@ function showFormError(
         );
 
 
-    if (old) {
+    if (
+        old
+    ) {
 
         old.remove();
 
@@ -3638,11 +3835,14 @@ function showFormError(
         );
 
 
-    if (!form) {
+    if (
+        !form
+    ) {
 
         alert(
             message
         );
+
 
         return;
 
@@ -3728,7 +3928,9 @@ function getInputValue(
         );
 
 
-    if (!element) {
+    if (
+        !element
+    ) {
 
         return "";
 
@@ -3757,7 +3959,9 @@ function setElementText(
         );
 
 
-    if (!element) {
+    if (
+        !element
+    ) {
 
         return;
 
@@ -3765,56 +3969,7 @@ function setElementText(
 
 
     element.textContent =
-        text === undefined ||
-        text === null
-            ? ""
-            : String(text);
-
-}
-
-
-/* =========================================================
-   SET FIRST EXISTING TEXT
-========================================================= */
-
-function setFirstExistingText(
-    ids,
-    value
-) {
-
-    if (
-        !Array.isArray(
-            ids
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    for (
-        let i = 0;
-        i < ids.length;
-        i++
-    ) {
-
-        const element =
-            document.getElementById(
-                ids[i]
-            );
-
-
-        if (element) {
-
-            element.textContent =
-                String(value);
-
-            return;
-
-        }
-
-    }
+        text;
 
 }
 
@@ -3833,7 +3988,9 @@ function focusElement(
         );
 
 
-    if (!element) {
+    if (
+        !element
+    ) {
 
         return;
 
@@ -3853,7 +4010,7 @@ function focusElement(
 
 
 /* =========================================================
-   NORMALIZE OLYMP ID
+   NORMALIZE OLYMP ID CLIENT
 ========================================================= */
 
 function normalizeOlympIdClient(
@@ -3873,7 +4030,9 @@ function normalizeOlympIdClient(
 
 
     /*
-     * OLYMP000001 → OLYMP-000001
+     * OLYMP000001
+     * ->
+     * OLYMP-000001
      */
 
     if (
@@ -3890,18 +4049,31 @@ function normalizeOlympIdClient(
 
 
     /*
-     * OLYMP0001 → OLYMP-0001
+     * OLYMP-1
+     * ->
+     * OLYMP-000001
+     *
+     * Это позволяет системе
+     * работать с короткими ID.
      */
 
+    const shortMatch =
+        result.match(
+            /^OLYMP-(\d+)$/
+        );
+
+
     if (
-        /^OLYMP\d{4}$/.test(
-            result
-        )
+        shortMatch &&
+        shortMatch[1].length < 6
     ) {
 
         result =
             "OLYMP-" +
-            result.substring(5);
+            shortMatch[1].padStart(
+                6,
+                "0"
+            );
 
     }
 
@@ -3913,6 +4085,14 @@ function normalizeOlympIdClient(
 
 /* =========================================================
    DRAFT
+========================================================= */
+
+const APPLICATION_DRAFT_KEY =
+    "olymp_application_draft_6_4";
+
+
+/* =========================================================
+   SAVE DRAFT
 ========================================================= */
 
 function saveApplicationDraft() {
@@ -3950,7 +4130,7 @@ function saveApplicationDraft() {
 
 
         localStorage.setItem(
-            OLYMP_CONFIG.DRAFT_KEY,
+            APPLICATION_DRAFT_KEY,
             JSON.stringify(
                 data
             )
@@ -3976,13 +4156,36 @@ function restoreApplicationDraft() {
 
     try {
 
-        const saved =
+        /*
+         * Сначала новый ключ.
+         */
+
+        let saved =
             localStorage.getItem(
-                OLYMP_CONFIG.DRAFT_KEY
+                APPLICATION_DRAFT_KEY
             );
 
 
-        if (!saved) {
+        /*
+         * Если нет нового,
+         * пробуем старый черновик 6.3.
+         */
+
+        if (
+            !saved
+        ) {
+
+            saved =
+                localStorage.getItem(
+                    "olymp_application_draft_6_3"
+                );
+
+        }
+
+
+        if (
+            !saved
+        ) {
 
             return;
 
@@ -4086,7 +4289,9 @@ function setInputValue(
         );
 
 
-    if (!element) {
+    if (
+        !element
+    ) {
 
         return;
 
@@ -4108,7 +4313,11 @@ function clearApplicationDraft() {
     try {
 
         localStorage.removeItem(
-            OLYMP_CONFIG.DRAFT_KEY
+            APPLICATION_DRAFT_KEY
+        );
+
+        localStorage.removeItem(
+            "olymp_application_draft_6_3"
         );
 
     } catch (error) {
@@ -4119,148 +4328,6 @@ function clearApplicationDraft() {
         );
 
     }
-
-}
-
-
-/* =========================================================
-   FORMAT DATE
-========================================================= */
-
-function formatApplicationDate(
-    value
-) {
-
-    if (!value) {
-
-        return "Дата не вказана";
-
-    }
-
-
-    const date =
-        new Date(
-            value
-        );
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return String(
-            value
-        );
-
-    }
-
-
-    try {
-
-        return new Intl.DateTimeFormat(
-            "uk-UA",
-            {
-
-                day:
-                    "2-digit",
-
-                month:
-                    "2-digit",
-
-                year:
-                    "numeric",
-
-                hour:
-                    "2-digit",
-
-                minute:
-                    "2-digit"
-
-            }
-        ).format(
-            date
-        );
-
-    } catch (error) {
-
-        return date.toLocaleString();
-
-    }
-
-}
-
-
-/* =========================================================
-   TRUNCATE TEXT
-========================================================= */
-
-function truncateText(
-    text,
-    length
-) {
-
-    const value =
-        String(
-            text || ""
-        );
-
-
-    if (
-        value.length <= length
-    ) {
-
-        return value;
-
-    }
-
-
-    return (
-        value.substring(
-            0,
-            length
-        ) +
-        "..."
-    );
-
-}
-
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
-function escapeHtml(
-    value
-) {
-
-    return String(
-        value === undefined ||
-        value === null
-            ? ""
-            : value
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
 
 }
 
@@ -4279,7 +4346,9 @@ document.addEventListener(
             );
 
 
-        if (!link) {
+        if (
+            !link
+        ) {
 
             return;
 
@@ -4306,7 +4375,9 @@ document.addEventListener(
             );
 
 
-        if (!link) {
+        if (
+            !link
+        ) {
 
             return;
 
@@ -4329,24 +4400,15 @@ document.addEventListener(
         }
 
 
-        let target;
+        const target =
+            document.querySelector(
+                targetId
+            );
 
 
-        try {
-
-            target =
-                document.querySelector(
-                    targetId
-                );
-
-        } catch (error) {
-
-            return;
-
-        }
-
-
-        if (!target) {
+        if (
+            !target
+        ) {
 
             return;
 
@@ -4384,7 +4446,9 @@ window.addEventListener(
             );
 
 
-        if (!header) {
+        if (
+            !header
+        ) {
 
             return;
 
@@ -4434,16 +4498,76 @@ window.closeApplicationModal =
     closeApplicationModal;
 
 
-window.loadCitizenProfile =
-    loadCitizenProfile;
+/* =========================================================
+   DEBUG AUTH
+========================================================= */
+
+window.OLYMP_DEBUG_AUTH =
+    function () {
+
+        const auth =
+            getAuthenticationData();
 
 
-window.loadCitizenApplications =
-    loadCitizenApplications;
+        console.log(
+            "========== OLYMP AUTH DEBUG =========="
+        );
 
 
-window.renderApplications =
-    renderApplications;
+        console.log(
+            "authenticated:",
+            auth.authenticated
+        );
+
+
+        console.log(
+            "olympId:",
+            auth.olympId
+        );
+
+
+        console.log(
+            "token:",
+            auth.token
+        );
+
+
+        console.log(
+            "user:",
+            auth.user
+        );
+
+
+        console.log(
+            "localStorage:",
+            {
+                session:
+                    localStorage.getItem(
+                        OLYMP_CONFIG.SESSION_KEY
+                    ),
+
+                olympId:
+                    localStorage.getItem(
+                        OLYMP_CONFIG.OLYMP_ID_KEY
+                    ),
+
+                user:
+                    localStorage.getItem(
+                        OLYMP_CONFIG.USER_KEY
+                    )
+
+            }
+        );
+
+
+        console.log(
+            "======================================"
+        );
+
+
+        return auth;
+
+    };
 
 
 /* =========================================================
@@ -4451,5 +4575,5 @@ window.renderApplications =
 ========================================================= */
 
 log(
-    "OLYMP Government Script 7.0 готов."
+    "OLYMP Government Script 6.4 готов."
 );
