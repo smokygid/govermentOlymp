@@ -1,33 +1,30 @@
 /* =========================================================
    OLYMP GOVERNMENT
-   PERSONAL CABINET 4.0
+   PERSONAL CABINET 5.0
 
-   ИСПРАВЛЕННАЯ ВЕРСИЯ
-
-   • Вхід за ID громадянина + паролем
-   • Підтримка citizenId
-   • Підтримка olympId
-   • Автоматичне збереження сесії
-   • Відновлення сесії
-   • Особиста інформація
+   Система:
    • OLYMP-ID
-   • Всі заявки громадянина
-   • Статуси заявок
-   • Відповіді державних органів
-   • Перегляд конкретної заявки
-   • Копіювання номера заявки
+   • Пароль
+   • Авторизация гражданина
+   • Автоматическое восстановление сессии
+   • Профиль гражданина
+   • Аватар
+   • Предпросмотр аватара
+   • Сохранение аватара
+   • Удаление аватара
+   • Google Drive
+   • Все заявки гражданина
+   • Статусы
+   • Ответы государственных органов
    • Статистика
-   • Вихід
-   • Toast
-   • Loading
-   • Сумісність зі старим HTML
-
-   OLYMP GOVERNMENT 4.0
+   • Просмотр заявки
+   • Копирование
+   • Выход
 ========================================================= */
 
 
 /* =========================================================
-   НАСТРОЙКИ
+   CONFIG
 ========================================================= */
 
 const API_URL =
@@ -39,13 +36,8 @@ const STORAGE_KEY =
 
 
 const CABINET_VERSION =
-    "4.0";
+    "5.0";
 
-
-/*
-   Максимальний час сесії:
-   30 днів
-*/
 
 const SESSION_MAX_AGE =
     30 * 24 * 60 * 60 * 1000;
@@ -58,41 +50,55 @@ const SESSION_MAX_AGE =
 const loginSection =
     document.getElementById("loginSection");
 
-
 const cabinetSection =
     document.getElementById("cabinetSection");
-
 
 const loginForm =
     document.getElementById("loginForm");
 
-
 const loginButton =
     document.getElementById("loginButton");
-
 
 const loginButtonText =
     document.getElementById("loginButtonText");
 
-
 const loginError =
     document.getElementById("loginError");
-
 
 const logoutButton =
     document.getElementById("logoutButton");
 
-
 const loadingOverlay =
     document.getElementById("loadingOverlay");
-
 
 const toast =
     document.getElementById("toast");
 
-
 const copyNumberButton =
     document.getElementById("copyNumberButton");
+
+
+/* =========================================================
+   AVATAR DOM
+========================================================= */
+
+const avatarInput =
+    document.getElementById("avatarInput");
+
+const saveAvatarButton =
+    document.getElementById("saveAvatarButton");
+
+const removeAvatarButton =
+    document.getElementById("removeAvatarButton");
+
+const avatarPreviewBox =
+    document.getElementById("avatarPreviewBox");
+
+const avatarPreview =
+    document.getElementById("avatarPreview");
+
+const profileAvatar =
+    document.getElementById("profileAvatar");
 
 
 /* =========================================================
@@ -104,6 +110,8 @@ let currentCitizen = null;
 let currentApplications = [];
 
 let currentApplication = null;
+
+let selectedAvatarData = "";
 
 let toastTimer = null;
 
@@ -137,9 +145,8 @@ function initCabinet() {
 
 function setupEvents() {
 
-    /* -----------------------------------------------------
-       LOGIN
-    ----------------------------------------------------- */
+
+    /* LOGIN */
 
     if (loginForm) {
 
@@ -151,9 +158,7 @@ function setupEvents() {
     }
 
 
-    /* -----------------------------------------------------
-       LOGOUT
-    ----------------------------------------------------- */
+    /* LOGOUT */
 
     if (logoutButton) {
 
@@ -165,9 +170,7 @@ function setupEvents() {
     }
 
 
-    /* -----------------------------------------------------
-       COPY NUMBER
-    ----------------------------------------------------- */
+    /* COPY */
 
     if (copyNumberButton) {
 
@@ -179,9 +182,39 @@ function setupEvents() {
     }
 
 
-    /* -----------------------------------------------------
-       ID ГРОМАДЯНИНА
-    ----------------------------------------------------- */
+    /* AVATAR */
+
+    if (avatarInput) {
+
+        avatarInput.addEventListener(
+            "change",
+            handleAvatarSelect
+        );
+
+    }
+
+
+    if (saveAvatarButton) {
+
+        saveAvatarButton.addEventListener(
+            "click",
+            saveAvatar
+        );
+
+    }
+
+
+    if (removeAvatarButton) {
+
+        removeAvatarButton.addEventListener(
+            "click",
+            removeAvatar
+        );
+
+    }
+
+
+    /* ID */
 
     const citizenIdInput =
         document.getElementById(
@@ -206,64 +239,7 @@ function setupEvents() {
     }
 
 
-    /* -----------------------------------------------------
-       НОВИЙ olympId
-       ДЛЯ СУМІСНОСТІ
-    ----------------------------------------------------- */
-
-    const olympIdInput =
-        document.getElementById(
-            "olympId"
-        );
-
-
-    if (olympIdInput) {
-
-        olympIdInput.addEventListener(
-            "input",
-            function () {
-
-                this.value =
-                    normalizeOlympId(
-                        this.value
-                    );
-
-            }
-        );
-
-    }
-
-
-    /* -----------------------------------------------------
-       СТАРЕ applicationNumber
-    ----------------------------------------------------- */
-
-    const applicationNumberInput =
-        document.getElementById(
-            "applicationNumber"
-        );
-
-
-    if (applicationNumberInput) {
-
-        applicationNumberInput.addEventListener(
-            "input",
-            function () {
-
-                this.value =
-                    normalizeOlympId(
-                        this.value
-                    );
-
-            }
-        );
-
-    }
-
-
-    /* -----------------------------------------------------
-       PASSWORD
-    ----------------------------------------------------- */
+    /* PASSWORD */
 
     const citizenPasswordInput =
         document.getElementById(
@@ -288,63 +264,7 @@ function setupEvents() {
     }
 
 
-    /* -----------------------------------------------------
-       password
-    ----------------------------------------------------- */
-
-    const passwordInput =
-        document.getElementById(
-            "password"
-        );
-
-
-    if (passwordInput) {
-
-        passwordInput.addEventListener(
-            "input",
-            function () {
-
-                this.value =
-                    cleanPassword(
-                        this.value
-                    );
-
-            }
-        );
-
-    }
-
-
-    /* -----------------------------------------------------
-       СТАРИЙ ACCESS CODE
-    ----------------------------------------------------- */
-
-    const accessCodeInput =
-        document.getElementById(
-            "accessCode"
-        );
-
-
-    if (accessCodeInput) {
-
-        accessCodeInput.addEventListener(
-            "input",
-            function () {
-
-                this.value =
-                    cleanPassword(
-                        this.value
-                    );
-
-            }
-        );
-
-    }
-
-
-    /* -----------------------------------------------------
-       ESC
-    ----------------------------------------------------- */
+    /* ESC */
 
     document.addEventListener(
         "keydown",
@@ -375,224 +295,33 @@ async function handleLogin(event) {
     clearLoginError();
 
 
-    /*
-       =====================================================
-       ВАЖЛИВО
-
-       Твій поточний cabinet.html має:
-
-       id="citizenId"
-
-       id="citizenPassword"
-
-       Саме їх використовуємо першими.
-       =====================================================
-    */
-
-
     const citizenIdInput =
         document.getElementById(
             "citizenId"
         );
 
 
-    const olympIdInput =
-        document.getElementById(
-            "olympId"
-        );
-
-
-    const applicationNumberInput =
-        document.getElementById(
-            "applicationNumber"
-        );
-
-
-    const citizenPasswordInput =
+    const passwordInput =
         document.getElementById(
             "citizenPassword"
         );
 
 
-    const passwordInput =
-        document.getElementById(
-            "password"
+    let olympId =
+        normalizeOlympId(
+            citizenIdInput
+                ? citizenIdInput.value
+                : ""
         );
 
 
-    const accessCodeInput =
-        document.getElementById(
-            "accessCode"
+    const password =
+        cleanPassword(
+            passwordInput
+                ? passwordInput.value
+                : ""
         );
 
-
-    let olympId = "";
-
-    let password = "";
-
-
-    /* =====================================================
-       ПОЛУЧАЕМ OLYMP-ID
-    ===================================================== */
-
-
-    /*
-       1. Основное поле текущего HTML
-    */
-
-    if (citizenIdInput) {
-
-        olympId =
-            normalizeOlympId(
-                citizenIdInput.value
-            );
-
-    }
-
-
-    /*
-       2. Дополнительная совместимость
-    */
-
-    if (
-        !olympId &&
-        olympIdInput
-    ) {
-
-        olympId =
-            normalizeOlympId(
-                olympIdInput.value
-            );
-
-    }
-
-
-    /*
-       3. Старый HTML
-    */
-
-    if (
-        !olympId &&
-        applicationNumberInput
-    ) {
-
-        olympId =
-            normalizeOlympId(
-                applicationNumberInput.value
-            );
-
-    }
-
-
-    /* =====================================================
-       ПОЛУЧАЕМ ПАРОЛЬ
-    ===================================================== */
-
-
-    /*
-       1. Основное поле текущего HTML
-    */
-
-    if (citizenPasswordInput) {
-
-        password =
-            cleanPassword(
-                citizenPasswordInput.value
-            );
-
-    }
-
-
-    /*
-       2. Совместимость
-    */
-
-    if (
-        !password &&
-        passwordInput
-    ) {
-
-        password =
-            cleanPassword(
-                passwordInput.value
-            );
-
-    }
-
-
-    /*
-       3. Старый accessCode
-    */
-
-    if (
-        !password &&
-        accessCodeInput
-    ) {
-
-        password =
-            cleanPassword(
-                accessCodeInput.value
-            );
-
-    }
-
-
-    /* =====================================================
-       DEBUG
-    ===================================================== */
-
-    console.log(
-        "OLYMP LOGIN:",
-        {
-            olympId: olympId,
-            passwordEntered: !!password
-        }
-    );
-
-
-    /* =====================================================
-       VALIDATION
-    ===================================================== */
-
-    if (!olympId) {
-
-        showLoginError(
-            "Вкажіть OLYMP-ID."
-        );
-
-
-        if (citizenIdInput) {
-
-            citizenIdInput.focus();
-
-        } else if (olympIdInput) {
-
-            olympIdInput.focus();
-
-        } else if (applicationNumberInput) {
-
-            applicationNumberInput.focus();
-
-        }
-
-
-        return;
-
-    }
-
-
-    /*
-       Проверяем формат.
-
-       Разрешаем:
-
-       OLYMP-000001
-       olymp-000001
-       OLYMP000001
-
-       Последний вариант автоматически
-       превращается в OLYMP-000001.
-    */
 
     olympId =
         formatOlympId(
@@ -610,13 +339,11 @@ async function handleLogin(event) {
             "Невірний формат OLYMP-ID. Приклад: OLYMP-000001"
         );
 
-
         if (citizenIdInput) {
 
             citizenIdInput.focus();
 
         }
-
 
         return;
 
@@ -629,26 +356,16 @@ async function handleLogin(event) {
             "Вкажіть пароль."
         );
 
-
-        if (citizenPasswordInput) {
-
-            citizenPasswordInput.focus();
-
-        } else if (passwordInput) {
+        if (passwordInput) {
 
             passwordInput.focus();
 
         }
 
-
         return;
 
     }
 
-
-    /* =====================================================
-       LOADING
-    ===================================================== */
 
     setLoginLoading(true);
 
@@ -667,10 +384,10 @@ async function handleLogin(event) {
                     olympId:
                         olympId,
 
-                    idNumber:
+                    citizenId:
                         olympId,
 
-                    citizenId:
+                    idNumber:
                         olympId,
 
                     password:
@@ -678,12 +395,6 @@ async function handleLogin(event) {
 
                 }
             );
-
-
-        console.log(
-            "LOGIN RESPONSE:",
-            response
-        );
 
 
         if (
@@ -709,102 +420,30 @@ async function handleLogin(event) {
         }
 
 
-        /* =================================================
-           CITIZEN
-        ================================================= */
-
         currentCitizen =
             normalizeCitizen(
                 response.citizen ||
                 response.profile ||
                 response.user ||
-                response.data ||
                 null
             );
 
 
-        /* =================================================
-           APPLICATIONS
-        ================================================= */
-
         currentApplications =
             normalizeApplications(
                 response.applications ||
-                response.requests ||
-                response.myApplications ||
-                response.data?.applications ||
                 []
             );
 
 
-        /*
-           Якщо API повернув тільки одну заявку
-        */
-
-        if (
-            currentApplications.length === 0 &&
-            response.application
-        ) {
-
-            currentApplications =
-                normalizeApplications(
-                    [
-                        response.application
-                    ]
-                );
-
-        }
-
-
-        /*
-           Якщо профіль не повернувся,
-           створюємо мінімальний профіль
-           з OLYMP-ID.
-        */
-
         if (!currentCitizen) {
 
-            currentCitizen = {
-
-                olympId:
-                    olympId,
-
-                fullName:
-                    response.fullName ||
-                    "",
-
-                birthDate:
-                    response.birthDate ||
-                    "",
-
-                phone:
-                    response.phone ||
-                    "",
-
-                email:
-                    response.email ||
-                    "",
-
-                discord:
-                    response.discord ||
-                    "",
-
-                contact:
-                    response.contact ||
-                    "",
-
-                registrationDate:
-                    response.registrationDate ||
-                    ""
-
-            };
+            throw new Error(
+                "Профіль громадянина не отримано."
+            );
 
         }
 
-
-        /* =================================================
-           SAVE SESSION
-        ================================================= */
 
         saveSession(
             olympId,
@@ -812,13 +451,11 @@ async function handleLogin(event) {
         );
 
 
-        /* =================================================
-           RENDER
-        ================================================= */
-
         renderCabinet();
 
+
         hideLoading();
+
 
         showToast(
             "Вхід успішно виконано.",
@@ -873,10 +510,6 @@ async function restoreSession() {
     }
 
 
-    /* =====================================================
-       SESSION AGE
-    ===================================================== */
-
     if (
         session.savedAt &&
         Date.now() -
@@ -888,26 +521,10 @@ async function restoreSession() {
 
         showLogin();
 
-
         showToast(
             "Сесія завершилася. Увійдіть повторно.",
             "error"
         );
-
-
-        return;
-
-    }
-
-
-    if (
-        !session.olympId ||
-        !session.password
-    ) {
-
-        clearSession();
-
-        showLogin();
 
         return;
 
@@ -929,10 +546,10 @@ async function restoreSession() {
                     olympId:
                         session.olympId,
 
-                    idNumber:
+                    citizenId:
                         session.olympId,
 
-                    citizenId:
+                    idNumber:
                         session.olympId,
 
                     password:
@@ -940,12 +557,6 @@ async function restoreSession() {
 
                 }
             );
-
-
-        console.log(
-            "PROFILE RESPONSE:",
-            response
-        );
 
 
         if (
@@ -956,13 +567,9 @@ async function restoreSession() {
             throw new Error(
                 response &&
                 response.message
-
                     ?
-
                 response.message
-
                     :
-
                 "Сесія недійсна."
             );
 
@@ -974,7 +581,6 @@ async function restoreSession() {
                 response.citizen ||
                 response.profile ||
                 response.user ||
-                response.data ||
                 null
             );
 
@@ -982,68 +588,18 @@ async function restoreSession() {
         currentApplications =
             normalizeApplications(
                 response.applications ||
-                response.requests ||
-                response.myApplications ||
-                response.data?.applications ||
                 []
             );
 
 
-        if (
-            currentApplications.length === 0 &&
-            response.application
-        ) {
-
-            currentApplications =
-                normalizeApplications(
-                    [
-                        response.application
-                    ]
-                );
-
-        }
-
-
-        /*
-           Fallback
-        */
-
         if (!currentCitizen) {
 
-            currentCitizen = {
-
-                olympId:
-                    session.olympId,
-
-                fullName:
-                    "",
-
-                birthDate:
-                    "",
-
-                phone:
-                    "",
-
-                email:
-                    "",
-
-                discord:
-                    "",
-
-                contact:
-                    "",
-
-                registrationDate:
-                    ""
-
-            };
+            throw new Error(
+                "Профіль не отримано."
+            );
 
         }
 
-
-        /*
-           Оновлюємо час сесії
-        */
 
         saveSession(
             session.olympId,
@@ -1060,28 +616,20 @@ async function restoreSession() {
     } catch (error) {
 
         console.warn(
-            "SESSION RESTORE ERROR:",
+            "SESSION ERROR:",
             error
         );
 
 
         clearSession();
 
+        currentCitizen = null;
 
-        currentCitizen =
-            null;
+        currentApplications = [];
 
-
-        currentApplications =
-            [];
-
-
-        currentApplication =
-            null;
-
+        currentApplication = null;
 
         hideLoading();
-
 
         showLogin();
 
@@ -1091,7 +639,7 @@ async function restoreSession() {
 
 
 /* =========================================================
-   API REQUEST
+   API
 ========================================================= */
 
 async function apiRequest(
@@ -1101,9 +649,7 @@ async function apiRequest(
 
     if (
         !API_URL ||
-        API_URL.includes(
-            "ВСТАВЬ"
-        )
+        API_URL.includes("ВСТАВЬ")
     ) {
 
         throw new Error(
@@ -1123,9 +669,7 @@ async function apiRequest(
     );
 
 
-    Object.keys(
-        params
-    ).forEach(
+    Object.keys(params).forEach(
         function (key) {
 
             const value =
@@ -1152,12 +696,6 @@ async function apiRequest(
         API_URL +
         "?" +
         query.toString();
-
-
-    console.log(
-        "API REQUEST:",
-        action
-    );
 
 
     let response;
@@ -1189,7 +727,6 @@ async function apiRequest(
             error
         );
 
-
         throw new Error(
             "Не вдалося підключитися до сервера."
         );
@@ -1220,15 +757,11 @@ async function apiRequest(
     }
 
 
-    let data;
-
-
     try {
 
-        data =
-            JSON.parse(
-                text
-            );
+        return JSON.parse(
+            text
+        );
 
     } catch (error) {
 
@@ -1237,21 +770,17 @@ async function apiRequest(
             text
         );
 
-
         throw new Error(
             "Сервер повернув некоректну відповідь."
         );
 
     }
 
-
-    return data;
-
 }
 
 
 /* =========================================================
-   RENDER CABINET
+   CABINET
 ========================================================= */
 
 function renderCabinet() {
@@ -1276,19 +805,12 @@ function renderCabinet() {
     );
 
 
-    /*
-       Перша заявка
-       автоматично показується
-       тільки для сумісності
-    */
-
     if (
         currentApplications.length > 0
     ) {
 
         currentApplication =
             currentApplications[0];
-
 
         renderSingleApplication(
             currentApplication
@@ -1299,7 +821,6 @@ function renderCabinet() {
         currentApplication =
             null;
 
-
         clearSingleApplication();
 
     }
@@ -1308,7 +829,7 @@ function renderCabinet() {
 
 
 /* =========================================================
-   RENDER CITIZEN
+   PROFILE
 ========================================================= */
 
 function renderCitizenProfile(
@@ -1326,7 +847,6 @@ function renderCitizenProfile(
         citizen.olympId ||
         citizen.idNumber ||
         citizen.citizenId ||
-        citizen.number ||
         "";
 
 
@@ -1337,78 +857,11 @@ function renderCitizenProfile(
         "";
 
 
-    const birthDate =
-        citizen.birthDate ||
-        citizen.dateOfBirth ||
-        "";
-
-
-    const phone =
-        citizen.phone ||
-        "";
-
-
-    const email =
-        citizen.email ||
-        "";
-
-
-    const discord =
-        citizen.discord ||
-        "";
-
-
-    const contact =
-        citizen.contact ||
-        citizen.preferredContact ||
-        "";
-
-
-    const registrationDate =
-        citizen.registrationDate ||
-        citizen.createdAt ||
-        "";
-
-
-    /* =====================================================
-       ID
-
-       ТВОЙ HTML:
-
-       profileCitizenId
-    ===================================================== */
-
     setText(
         "profileCitizenId",
-        olympId || "—"
-    );
-
-
-    /*
-       Дополнительная совместимость
-    */
-
-    setTextIfExists(
-        "profileOlympId",
         olympId
     );
 
-
-    setTextIfExists(
-        "profileOlympID",
-        olympId
-    );
-
-
-    setTextIfExists(
-        "citizenId",
-        olympId
-    );
-
-
-    /* =====================================================
-       FULL NAME
-    ===================================================== */
 
     setText(
         "profileFullName",
@@ -1416,77 +869,820 @@ function renderCitizenProfile(
     );
 
 
-    /* =====================================================
-       BIRTH DATE
-    ===================================================== */
-
     setText(
         "profileBirthDate",
         formatDate(
-            birthDate
+            citizen.birthDate
         )
     );
 
 
-    /* =====================================================
-       PHONE
-    ===================================================== */
-
     setText(
         "profilePhone",
-        phone
+        citizen.phone
     );
 
-
-    /* =====================================================
-       EMAIL
-    ===================================================== */
 
     setText(
         "profileEmail",
-        email
+        citizen.email
     );
 
-
-    /* =====================================================
-       DISCORD
-    ===================================================== */
 
     setText(
         "profileDiscord",
-        discord
+        citizen.discord
     );
 
-
-    /* =====================================================
-       CONTACT
-    ===================================================== */
 
     setText(
         "profileContact",
-        contact
+        citizen.contact
     );
 
-
-    /* =====================================================
-       REGISTRATION DATE
-    ===================================================== */
 
     setText(
         "profileCreatedAt",
         formatDateTime(
-            registrationDate
+            citizen.registrationDate
         )
     );
 
 
-    /* =====================================================
-       AVATAR
-    ===================================================== */
+    renderAvatar(
+        citizen
+    );
 
-    updateAvatar(
+}
+
+
+/* =========================================================
+   AVATAR RENDER
+========================================================= */
+
+function renderAvatar(
+    citizen
+) {
+
+    if (!profileAvatar) {
+
+        return;
+
+    }
+
+
+    const avatarUrl =
+        clean(
+            citizen.avatarUrl ||
+            citizen.avatar ||
+            citizen.photo ||
+            ""
+        );
+
+
+    const fullName =
+        clean(
+            citizen.fullName
+        );
+
+
+    if (avatarUrl) {
+
+        profileAvatar.innerHTML = "";
+
+
+        const img =
+            document.createElement(
+                "img"
+            );
+
+
+        img.src =
+            avatarUrl;
+
+
+        img.alt =
+            "Аватар громадянина";
+
+
+        img.className =
+            "profile-avatar-image";
+
+
+        img.onerror =
+            function () {
+
+                showInitialsAvatar(
+                    fullName
+                );
+
+            };
+
+
+        profileAvatar.appendChild(
+            img
+        );
+
+
+        if (removeAvatarButton) {
+
+            removeAvatarButton.classList.remove(
+                "hidden"
+            );
+
+        }
+
+        return;
+
+    }
+
+
+    showInitialsAvatar(
         fullName
     );
+
+
+    if (removeAvatarButton) {
+
+        removeAvatarButton.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   INITIALS
+========================================================= */
+
+function showInitialsAvatar(
+    fullName
+) {
+
+    if (!profileAvatar) {
+
+        return;
+
+    }
+
+
+    const name =
+        clean(
+            fullName
+        );
+
+
+    if (!name) {
+
+        profileAvatar.textContent =
+            "👤";
+
+        return;
+
+    }
+
+
+    const words =
+        name.split(
+            " "
+        );
+
+
+    let initials =
+        "";
+
+
+    if (words[0]) {
+
+        initials +=
+            words[0]
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+
+    if (words[1]) {
+
+        initials +=
+            words[1]
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+
+    profileAvatar.textContent =
+        initials ||
+        "👤";
+
+}
+
+
+/* =========================================================
+   AVATAR SELECT
+========================================================= */
+
+async function handleAvatarSelect(
+    event
+) {
+
+    const file =
+        event.target.files &&
+        event.target.files[0];
+
+
+    if (!file) {
+
+        return;
+
+    }
+
+
+    const allowed =
+        [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+
+    if (
+        !allowed.includes(
+            file.type
+        )
+    ) {
+
+        showToast(
+            "Дозволені JPG, PNG або WEBP.",
+            "error"
+        );
+
+        avatarInput.value = "";
+
+        return;
+
+    }
+
+
+    if (
+        file.size >
+        8 * 1024 * 1024
+    ) {
+
+        showToast(
+            "Максимальний розмір фото — 8 МБ.",
+            "error"
+        );
+
+        avatarInput.value = "";
+
+        return;
+
+    }
+
+
+    showLoading(
+        "Підготовка аватара..."
+    );
+
+
+    try {
+
+        selectedAvatarData =
+            await compressImage(
+                file
+            );
+
+
+        if (
+            !selectedAvatarData
+        ) {
+
+            throw new Error(
+                "Не вдалося обробити зображення."
+            );
+
+        }
+
+
+        if (avatarPreview) {
+
+            avatarPreview.src =
+                selectedAvatarData;
+
+        }
+
+
+        if (avatarPreviewBox) {
+
+            avatarPreviewBox.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+        if (saveAvatarButton) {
+
+            saveAvatarButton.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+        hideLoading();
+
+
+        showToast(
+            "Фото підготовлено. Натисніть «Зберегти аватар».",
+            "success"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+        hideLoading();
+
+        showToast(
+            "Не вдалося підготувати фото.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   COMPRESS IMAGE
+========================================================= */
+
+function compressImage(
+    file
+) {
+
+    return new Promise(
+        function (
+            resolve,
+            reject
+        ) {
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                function () {
+
+                    const image =
+                        new Image();
+
+
+                    image.onload =
+                        function () {
+
+                            const maxSize =
+                                500;
+
+
+                            let width =
+                                image.width;
+
+
+                            let height =
+                                image.height;
+
+
+                            if (
+                                width >
+                                height
+                            ) {
+
+                                if (
+                                    width >
+                                    maxSize
+                                ) {
+
+                                    height =
+                                        Math.round(
+                                            height *
+                                            maxSize /
+                                            width
+                                        );
+
+                                    width =
+                                        maxSize;
+
+                                }
+
+                            } else {
+
+                                if (
+                                    height >
+                                    maxSize
+                                ) {
+
+                                    width =
+                                        Math.round(
+                                            width *
+                                            maxSize /
+                                            height
+                                        );
+
+                                    height =
+                                        maxSize;
+
+                                }
+
+                            }
+
+
+                            const canvas =
+                                document.createElement(
+                                    "canvas"
+                                );
+
+
+                            canvas.width =
+                                width;
+
+
+                            canvas.height =
+                                height;
+
+
+                            const context =
+                                canvas.getContext(
+                                    "2d"
+                                );
+
+
+                            context.drawImage(
+                                image,
+                                0,
+                                0,
+                                width,
+                                height
+                            );
+
+
+                            resolve(
+                                canvas.toDataURL(
+                                    "image/jpeg",
+                                    0.72
+                                )
+                            );
+
+                        };
+
+
+                    image.onerror =
+                        reject;
+
+
+                    image.src =
+                        reader.result;
+
+                };
+
+
+            reader.onerror =
+                reject;
+
+
+            reader.readAsDataURL(
+                file
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SAVE AVATAR
+========================================================= */
+
+async function saveAvatar() {
+
+    if (
+        !currentCitizen
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !selectedAvatarData
+    ) {
+
+        showToast(
+            "Спочатку виберіть фото.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const session =
+        loadSession();
+
+
+    if (!session) {
+
+        showToast(
+            "Сесія завершилася. Увійдіть повторно.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    showLoading(
+        "Збереження аватара..."
+    );
+
+
+    if (saveAvatarButton) {
+
+        saveAvatarButton.disabled =
+            true;
+
+    }
+
+
+    try {
+
+        /*
+           ВАЖЛИВО:
+
+           Фото вже стиснуте до приблизно
+           500px і JPEG 0.72.
+        */
+
+        const response =
+            await apiRequest(
+                "saveAvatar",
+                {
+
+                    olympId:
+                        session.olympId,
+
+                    citizenId:
+                        session.olympId,
+
+                    password:
+                        session.password,
+
+                    image:
+                        selectedAvatarData
+
+                }
+            );
+
+
+        if (
+            !response ||
+            response.success !== true
+        ) {
+
+            throw new Error(
+
+                response &&
+                response.message
+
+                    ?
+
+                response.message
+
+                    :
+
+                "Не вдалося зберегти аватар."
+
+            );
+
+        }
+
+
+        if (
+            response.avatarUrl
+        ) {
+
+            currentCitizen.avatarUrl =
+                response.avatarUrl;
+
+        }
+
+
+        selectedAvatarData =
+            "";
+
+
+        if (avatarInput) {
+
+            avatarInput.value =
+                "";
+
+        }
+
+
+        if (avatarPreviewBox) {
+
+            avatarPreviewBox.classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        if (saveAvatarButton) {
+
+            saveAvatarButton.classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        renderAvatar(
+            currentCitizen
+        );
+
+
+        hideLoading();
+
+
+        showToast(
+            "Аватар успішно збережено.",
+            "success"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "SAVE AVATAR ERROR:",
+            error
+        );
+
+
+        hideLoading();
+
+
+        showToast(
+            error.message ||
+            "Не вдалося зберегти аватар.",
+            "error"
+        );
+
+
+    } finally {
+
+        if (saveAvatarButton) {
+
+            saveAvatarButton.disabled =
+                false;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   REMOVE AVATAR
+========================================================= */
+
+async function removeAvatar() {
+
+    if (!currentCitizen) {
+
+        return;
+
+    }
+
+
+    const confirmed =
+        window.confirm(
+            "Видалити поточний аватар?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    const session =
+        loadSession();
+
+
+    if (!session) {
+
+        return;
+
+    }
+
+
+    showLoading(
+        "Видалення аватара..."
+    );
+
+
+    try {
+
+        const response =
+            await apiRequest(
+                "removeAvatar",
+                {
+
+                    olympId:
+                        session.olympId,
+
+                    citizenId:
+                        session.olympId,
+
+                    password:
+                        session.password
+
+                }
+            );
+
+
+        if (
+            !response ||
+            response.success !== true
+        ) {
+
+            throw new Error(
+
+                response &&
+                response.message
+
+                    ?
+
+                response.message
+
+                    :
+
+                "Не вдалося видалити аватар."
+
+            );
+
+        }
+
+
+        currentCitizen.avatarUrl =
+            "";
+
+
+        selectedAvatarData =
+            "";
+
+
+        renderAvatar(
+            currentCitizen
+        );
+
+
+        hideLoading();
+
+
+        showToast(
+            "Аватар видалено.",
+            "success"
+        );
+
+
+    } catch (error) {
+
+        hideLoading();
+
+        showToast(
+            error.message ||
+            "Помилка видалення аватара.",
+            "error"
+        );
+
+    }
 
 }
 
@@ -1499,14 +1695,10 @@ function renderApplications(
     applications
 ) {
 
-    const normalized =
+    currentApplications =
         normalizeApplications(
             applications
         );
-
-
-    currentApplications =
-        normalized;
 
 
     const container =
@@ -1527,10 +1719,6 @@ function renderApplications(
         );
 
 
-    /*
-       Скрываем loading
-    */
-
     if (loading) {
 
         loading.classList.add(
@@ -1540,14 +1728,10 @@ function renderApplications(
     }
 
 
-    /*
-       Если контейнер отсутствует
-    */
-
     if (!container) {
 
         updateApplicationsCounter(
-            normalized
+            currentApplications
         );
 
         return;
@@ -1555,32 +1739,21 @@ function renderApplications(
     }
 
 
-    /*
-       Удаляем старые динамические карточки,
-       но сохраняем loading / empty
-    */
-
-    const oldCards =
-        container.querySelectorAll(
+    container
+        .querySelectorAll(
             ".application-history-card"
+        )
+        .forEach(
+            function (card) {
+
+                card.remove();
+
+            }
         );
 
 
-    oldCards.forEach(
-        function (card) {
-
-            card.remove();
-
-        }
-    );
-
-
-    /*
-       EMPTY
-    */
-
     if (
-        normalized.length === 0
+        currentApplications.length === 0
     ) {
 
         if (empty) {
@@ -1593,18 +1766,13 @@ function renderApplications(
 
 
         updateApplicationsCounter(
-            normalized
+            currentApplications
         );
-
 
         return;
 
     }
 
-
-    /*
-       Есть заявки
-    */
 
     if (empty) {
 
@@ -1615,21 +1783,17 @@ function renderApplications(
     }
 
 
-    normalized.forEach(
+    currentApplications.forEach(
         function (
             application,
             index
         ) {
 
-            const card =
+            container.appendChild(
                 createApplicationCard(
                     application,
                     index
-                );
-
-
-            container.appendChild(
-                card
+                )
             );
 
         }
@@ -1637,19 +1801,18 @@ function renderApplications(
 
 
     updateApplicationsCounter(
-        normalized
+        currentApplications
     );
 
 }
 
 
 /* =========================================================
-   CREATE APPLICATION CARD
+   APPLICATION CARD
 ========================================================= */
 
 function createApplicationCard(
-    application,
-    index
+    application
 ) {
 
     const card =
@@ -1662,15 +1825,6 @@ function createApplicationCard(
         "application-history-card";
 
 
-    card.dataset.number =
-        application.number ||
-        "";
-
-
-    /* =====================================================
-       TOP
-    ===================================================== */
-
     const top =
         document.createElement(
             "div"
@@ -1680,10 +1834,6 @@ function createApplicationCard(
     top.className =
         "application-history-top";
 
-
-    /* =====================================================
-       NUMBER
-    ===================================================== */
 
     const numberBlock =
         document.createElement(
@@ -1695,13 +1845,13 @@ function createApplicationCard(
         "application-history-number";
 
 
-    const numberLabel =
+    const label =
         document.createElement(
             "span"
         );
 
 
-    numberLabel.textContent =
+    label.textContent =
         "НОМЕР ЗАЯВКИ";
 
 
@@ -1717,7 +1867,7 @@ function createApplicationCard(
 
 
     numberBlock.appendChild(
-        numberLabel
+        label
     );
 
 
@@ -1725,10 +1875,6 @@ function createApplicationCard(
         number
     );
 
-
-    /* =====================================================
-       STATUS
-    ===================================================== */
 
     const status =
         document.createElement(
@@ -1762,10 +1908,6 @@ function createApplicationCard(
         top
     );
 
-
-    /* =====================================================
-       GRID
-    ===================================================== */
 
     const grid =
         document.createElement(
@@ -1805,10 +1947,6 @@ function createApplicationCard(
         grid
     );
 
-
-    /* =====================================================
-       MESSAGE
-    ===================================================== */
 
     const messageBlock =
         document.createElement(
@@ -1859,10 +1997,6 @@ function createApplicationCard(
     );
 
 
-    /* =====================================================
-       ACTIONS
-    ===================================================== */
-
     const actions =
         document.createElement(
             "div"
@@ -1872,10 +2006,6 @@ function createApplicationCard(
     actions.className =
         "application-history-actions";
 
-
-    /* =====================================================
-       VIEW
-    ===================================================== */
 
     const viewButton =
         document.createElement(
@@ -1911,10 +2041,6 @@ function createApplicationCard(
         viewButton
     );
 
-
-    /* =====================================================
-       COPY
-    ===================================================== */
 
     const copyButton =
         document.createElement(
@@ -1963,7 +2089,7 @@ function createApplicationCard(
 
 
 /* =========================================================
-   ADD APPLICATION INFO
+   ADD INFO
 ========================================================= */
 
 function addApplicationInfo(
@@ -2086,7 +2212,7 @@ function openApplication(
 
 
 /* =========================================================
-   RENDER SINGLE APPLICATION
+   SINGLE APPLICATION
 ========================================================= */
 
 function renderSingleApplication(
@@ -2129,8 +2255,7 @@ function renderSingleApplication(
 
     setText(
         "applicationAccessCode",
-        application.accessCode ||
-        "—"
+        application.accessCode
     );
 
 
@@ -2156,7 +2281,7 @@ function renderSingleApplication(
 
 
 /* =========================================================
-   CLEAR SINGLE APPLICATION
+   CLEAR APPLICATION
 ========================================================= */
 
 function clearSingleApplication() {
@@ -2166,42 +2291,35 @@ function clearSingleApplication() {
         "—"
     );
 
-
     setText(
         "applicationDate",
         "—"
     );
-
 
     setText(
         "applicationService",
         "—"
     );
 
-
     setText(
         "applicationResponsible",
         "—"
     );
-
 
     setText(
         "applicationAccessCode",
         "—"
     );
 
-
     setText(
         "applicationMessage",
         "Заявок поки немає."
     );
 
-
     setText(
         "applicationComment",
         "Відповідь ще не надана."
     );
-
 
     updateStatus(
         "🟡 На розгляді"
@@ -2234,72 +2352,53 @@ function updateApplicationsCounter(
 
     const pending =
         list.filter(
-            function (item) {
-
-                return statusContains(
+            item =>
+                statusContains(
                     item.status,
                     "На розгляді"
-                );
-
-            }
+                )
         ).length;
 
 
     const accepted =
         list.filter(
-            function (item) {
-
-                return statusContains(
+            item =>
+                statusContains(
                     item.status,
                     "Прийнято"
-                );
-
-            }
+                )
         ).length;
 
 
     const completed =
         list.filter(
-            function (item) {
-
-                return statusContains(
+            item =>
+                statusContains(
                     item.status,
                     "Виконано"
-                );
-
-            }
+                )
         ).length;
 
 
     const rejected =
         list.filter(
-            function (item) {
-
-                return statusContains(
+            item =>
+                statusContains(
                     item.status,
                     "Відхилено"
-                );
-
-            }
+                )
         ).length;
 
 
     const closed =
         list.filter(
-            function (item) {
-
-                return statusContains(
+            item =>
+                statusContains(
                     item.status,
                     "Закрито"
-                );
-
-            }
+                )
         ).length;
 
-
-    /* =====================================================
-       HTML IDS ИЗ ТВОЕГО CABINET.HTML
-    ===================================================== */
 
     setText(
         "statTotal",
@@ -2333,52 +2432,6 @@ function updateApplicationsCounter(
 
     setText(
         "statClosed",
-        closed
-    );
-
-
-    /* =====================================================
-       СТАРЫЕ IDS
-    ===================================================== */
-
-    setTextIfExists(
-        "applicationsCount",
-        total
-    );
-
-
-    setTextIfExists(
-        "totalApplications",
-        total
-    );
-
-
-    setTextIfExists(
-        "pendingApplications",
-        pending
-    );
-
-
-    setTextIfExists(
-        "acceptedApplications",
-        accepted
-    );
-
-
-    setTextIfExists(
-        "completedApplications",
-        completed
-    );
-
-
-    setTextIfExists(
-        "rejectedApplications",
-        rejected
-    );
-
-
-    setTextIfExists(
-        "closedApplications",
         closed
     );
 
@@ -2418,14 +2471,10 @@ function updateStatus(
 
 
     element.className =
-        "status-badge";
-
-
-    element.classList.add(
+        "status-badge " +
         getStatusClass(
             value
-        )
-    );
+        );
 
 }
 
@@ -2441,18 +2490,8 @@ function getStatusClass(
     const value =
         clean(
             status
-        ).toLowerCase();
-
-
-    if (
-        value.includes(
-            "на розгляді"
         )
-    ) {
-
-        return "status-pending";
-
-    }
+        .toLowerCase();
 
 
     if (
@@ -2516,11 +2555,11 @@ function statusContains(
     return clean(
         status
     )
+    .toLowerCase()
+    .includes(
+        String(text)
         .toLowerCase()
-        .includes(
-            String(text)
-                .toLowerCase()
-        );
+    );
 
 }
 
@@ -2531,13 +2570,11 @@ function statusContains(
 
 function logout() {
 
-    const confirmed =
-        window.confirm(
+    if (
+        !window.confirm(
             "Ви дійсно хочете вийти з особистого кабінету?"
-        );
-
-
-    if (!confirmed) {
+        )
+    ) {
 
         return;
 
@@ -2557,6 +2594,10 @@ function logout() {
 
     currentApplication =
         null;
+
+
+    selectedAvatarData =
+        "";
 
 
     showLogin();
@@ -2585,7 +2626,7 @@ function logout() {
 
 
 /* =========================================================
-   SAVE SESSION
+   SESSION
 ========================================================= */
 
 function saveSession(
@@ -2593,45 +2634,29 @@ function saveSession(
     password
 ) {
 
-    if (
-        !olympId ||
-        !password
-    ) {
-
-        return;
-
-    }
-
-
-    const session = {
-
-        version:
-            CABINET_VERSION,
-
-        olympId:
-            formatOlympId(
-                olympId
-            ),
-
-        password:
-            password,
-
-        savedAt:
-            Date.now()
-
-    };
-
-
     try {
 
         localStorage.setItem(
-
             STORAGE_KEY,
-
             JSON.stringify(
-                session
-            )
+                {
 
+                    version:
+                        CABINET_VERSION,
+
+                    olympId:
+                        formatOlympId(
+                            olympId
+                        ),
+
+                    password:
+                        password,
+
+                    savedAt:
+                        Date.now()
+
+                }
+            )
         );
 
     } catch (error) {
@@ -2645,10 +2670,6 @@ function saveSession(
 
 }
 
-
-/* =========================================================
-   LOAD SESSION
-========================================================= */
 
 function loadSession() {
 
@@ -2694,22 +2715,12 @@ function loadSession() {
 
     } catch (error) {
 
-        console.error(
-            "LOAD SESSION ERROR:",
-            error
-        );
-
-
         return null;
 
     }
 
 }
 
-
-/* =========================================================
-   CLEAR SESSION
-========================================================= */
 
 function clearSession() {
 
@@ -2722,7 +2733,6 @@ function clearSession() {
     } catch (error) {
 
         console.error(
-            "CLEAR SESSION ERROR:",
             error
         );
 
@@ -2732,7 +2742,7 @@ function clearSession() {
 
 
 /* =========================================================
-   SHOW LOGIN
+   LOGIN / CABINET
 ========================================================= */
 
 function showLogin() {
@@ -2757,10 +2767,6 @@ function showLogin() {
 }
 
 
-/* =========================================================
-   SHOW CABINET
-========================================================= */
-
 function showCabinet() {
 
     if (loginSection) {
@@ -2784,7 +2790,7 @@ function showCabinet() {
 
 
 /* =========================================================
-   RESET LOGIN
+   RESET
 ========================================================= */
 
 function resetLoginForm() {
@@ -2802,7 +2808,7 @@ function resetLoginForm() {
 
 
 /* =========================================================
-   LOGIN ERROR
+   ERROR
 ========================================================= */
 
 function showLoginError(
@@ -2826,10 +2832,6 @@ function showLoginError(
 
 }
 
-
-/* =========================================================
-   CLEAR LOGIN ERROR
-========================================================= */
 
 function clearLoginError() {
 
@@ -2880,9 +2882,7 @@ function setLoginLoading(
     if (loading) {
 
         loginButtonText.innerHTML =
-
-            '<span class="button-loader"></span>' +
-            'Перевірка...';
+            '<span class="button-loader"></span> Перевірка...';
 
     } else {
 
@@ -2931,10 +2931,6 @@ function showLoading(
 }
 
 
-/* =========================================================
-   HIDE LOADING
-========================================================= */
-
 function hideLoading() {
 
     if (!loadingOverlay) {
@@ -2952,7 +2948,7 @@ function hideLoading() {
 
 
 /* =========================================================
-   COPY APPLICATION NUMBER
+   COPY
 ========================================================= */
 
 async function copyApplicationNumber() {
@@ -2967,26 +2963,18 @@ async function copyApplicationNumber() {
             "error"
         );
 
-
         return;
 
     }
 
 
     await copyText(
-
         currentApplication.number,
-
         "Номер заявки скопійовано."
-
     );
 
 }
 
-
-/* =========================================================
-   COPY TEXT
-========================================================= */
 
 async function copyText(
     value,
@@ -3013,9 +3001,7 @@ async function copyText(
 
         } else {
 
-            throw new Error(
-                "Clipboard unavailable"
-            );
+            throw new Error();
 
         }
 
@@ -3026,12 +3012,7 @@ async function copyText(
             "success"
         );
 
-
     } catch (error) {
-
-        /*
-           Fallback
-        */
 
         const textarea =
             document.createElement(
@@ -3051,20 +3032,10 @@ async function copyText(
             "-9999px";
 
 
-        textarea.style.top =
-            "0";
-
-
-        textarea.style.opacity =
-            "0";
-
-
         document.body.appendChild(
             textarea
         );
 
-
-        textarea.focus();
 
         textarea.select();
 
@@ -3080,9 +3051,7 @@ async function copyText(
                     "copy"
                 );
 
-        } catch (
-            copyError
-        ) {
+        } catch (e) {
 
             success =
                 false;
@@ -3090,104 +3059,24 @@ async function copyText(
         }
 
 
-        document.body.removeChild(
-            textarea
+        textarea.remove();
+
+
+        showToast(
+            success
+                ?
+            successMessage ||
+            "Скопійовано."
+                :
+            "Не вдалося скопіювати.",
+            success
+                ?
+            "success"
+                :
+            "error"
         );
 
-
-        if (success) {
-
-            showToast(
-                successMessage ||
-                "Скопійовано.",
-                "success"
-            );
-
-        } else {
-
-            showToast(
-                "Не вдалося скопіювати.",
-                "error"
-            );
-
-        }
-
     }
-
-}
-
-
-/* =========================================================
-   AVATAR
-========================================================= */
-
-function updateAvatar(
-    fullName
-) {
-
-    const avatar =
-        document.getElementById(
-            "profileAvatar"
-        );
-
-
-    if (!avatar) {
-
-        return;
-
-    }
-
-
-    const name =
-        clean(
-            fullName
-        );
-
-
-    if (!name) {
-
-        avatar.textContent =
-            "👤";
-
-
-        return;
-
-    }
-
-
-    const words =
-        name.split(
-            " "
-        );
-
-
-    let initials =
-        "";
-
-
-    if (words[0]) {
-
-        initials +=
-            words[0]
-                .charAt(0)
-                .toUpperCase();
-
-    }
-
-
-    if (words[1]) {
-
-        initials +=
-            words[1]
-                .charAt(0)
-                .toUpperCase();
-
-    }
-
-
-    avatar.textContent =
-        initials ||
-        "👤";
 
 }
 
@@ -3213,11 +3102,10 @@ function normalizeCitizen(
     return {
 
         olympId:
-            normalizeOlympId(
+            formatOlympId(
                 citizen.olympId ||
                 citizen.idNumber ||
                 citizen.citizenId ||
-                citizen.number ||
                 ""
             ),
 
@@ -3250,7 +3138,7 @@ function normalizeCitizen(
             clean(
                 citizen.email ||
                 ""
-            ).toLowerCase(),
+            ),
 
 
         discord:
@@ -3268,18 +3156,19 @@ function normalizeCitizen(
             ),
 
 
-        status:
-            clean(
-                citizen.status ||
-                "Активний"
-            ),
-
-
         registrationDate:
             clean(
                 citizen.registrationDate ||
                 citizen.createdAt ||
-                citizen.registration ||
+                ""
+            ),
+
+
+        avatarUrl:
+            clean(
+                citizen.avatarUrl ||
+                citizen.avatar ||
+                citizen.photo ||
                 ""
             )
 
@@ -3309,20 +3198,10 @@ function normalizeApplications(
 
     return applications
         .map(
-            function (application) {
-
-                return normalizeApplication(
-                    application
-                );
-
-            }
+            normalizeApplication
         )
         .filter(
-            function (application) {
-
-                return !!application;
-
-            }
+            Boolean
         );
 
 }
@@ -3353,13 +3232,22 @@ function normalizeApplication(
                 application.number ||
                 application.applicationNumber ||
                 application.requestNumber ||
-                application.id ||
                 ""
-            ).toUpperCase(),
+            )
+            .toUpperCase(),
+
+
+        accessCode:
+            clean(
+                application.accessCode ||
+                application.code ||
+                ""
+            )
+            .toUpperCase(),
 
 
         olympId:
-            normalizeOlympId(
+            formatOlympId(
                 application.olympId ||
                 application.idNumber ||
                 application.citizenId ||
@@ -3371,7 +3259,6 @@ function normalizeApplication(
             clean(
                 application.date ||
                 application.createdAt ||
-                application.timestamp ||
                 ""
             ),
 
@@ -3388,7 +3275,6 @@ function normalizeApplication(
         birthDate:
             clean(
                 application.birthDate ||
-                application.dateOfBirth ||
                 ""
             ),
 
@@ -3426,7 +3312,6 @@ function normalizeApplication(
         contact:
             clean(
                 application.contact ||
-                application.preferredContact ||
                 ""
             ),
 
@@ -3463,15 +3348,7 @@ function normalizeApplication(
                 application.response ||
                 application.adminComment ||
                 ""
-            ),
-
-
-        accessCode:
-            clean(
-                application.accessCode ||
-                application.code ||
-                ""
-            ).toUpperCase()
+            )
 
     };
 
@@ -3479,7 +3356,7 @@ function normalizeApplication(
 
 
 /* =========================================================
-   NORMALIZE OLYMP ID
+   ID
 ========================================================= */
 
 function normalizeOlympId(
@@ -3498,16 +3375,6 @@ function normalizeOlympId(
         );
 
 
-    /*
-       Если пользователь ввёл:
-
-       OLYMP000001
-
-       превращаем в:
-
-       OLYMP-000001
-    */
-
     if (
         /^OLYMP\d{6}$/.test(
             result
@@ -3515,28 +3382,18 @@ function normalizeOlympId(
     ) {
 
         result =
-            result.replace(
-                /^OLYMP/,
-                "OLYMP-"
+            "OLYMP-" +
+            result.substring(
+                5
             );
 
     }
 
 
-    /*
-       Если пользователь ввёл:
-
-       OLYMP-000001
-    */
-
     return result;
 
 }
 
-
-/* =========================================================
-   FORMAT OLYMP ID
-========================================================= */
 
 function formatOlympId(
     value
@@ -3548,21 +3405,12 @@ function formatOlympId(
         );
 
 
-    /*
-       Удаляем возможные
-       двойные дефисы
-    */
-
     result =
         result.replace(
             /-+/g,
             "-"
         );
 
-
-    /*
-       OLYMP000001
-    */
 
     if (
         /^OLYMP\d{6}$/.test(
@@ -3605,18 +3453,14 @@ function clean(
     return String(
         value
     )
-        .trim()
-        .replace(
-            /\s+/g,
-            " "
-        );
+    .trim()
+    .replace(
+        /\s+/g,
+        " "
+    );
 
 }
 
-
-/* =========================================================
-   CLEAN PASSWORD
-========================================================= */
 
 function cleanPassword(
     value
@@ -3635,17 +3479,17 @@ function cleanPassword(
     return String(
         value
     )
-        .trim()
-        .replace(
-            /\s+/g,
-            ""
-        );
+    .trim()
+    .replace(
+        /\s+/g,
+        ""
+    );
 
 }
 
 
 /* =========================================================
-   SET TEXT
+   TEXT
 ========================================================= */
 
 function setText(
@@ -3666,7 +3510,7 @@ function setText(
     }
 
 
-    const text =
+    element.textContent =
         value !== undefined &&
         value !== null &&
         String(value).trim() !== ""
@@ -3679,57 +3523,11 @@ function setText(
 
         "—";
 
-
-    element.textContent =
-        text;
-
 }
 
 
 /* =========================================================
-   SET TEXT IF EXISTS
-========================================================= */
-
-function setTextIfExists(
-    id,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if (!element) {
-
-        return;
-
-    }
-
-
-    const text =
-        value !== undefined &&
-        value !== null &&
-        String(value).trim() !== ""
-
-            ?
-
-        String(value)
-
-            :
-
-        "—";
-
-
-    element.textContent =
-        text;
-
-}
-
-
-/* =========================================================
-   FORMAT DATE
+   DATES
 ========================================================= */
 
 function formatDate(
@@ -3780,10 +3578,6 @@ function formatDate(
 
 }
 
-
-/* =========================================================
-   FORMAT DATE TIME
-========================================================= */
 
 function formatDateTime(
     value
@@ -3922,10 +3716,6 @@ function showToast(
 }
 
 
-/* =========================================================
-   HIDE TOAST
-========================================================= */
-
 function hideToast() {
 
     if (!toast) {
@@ -3954,7 +3744,7 @@ console.log(
 
 
 /* =========================================================
-   GLOBAL DEBUG
+   GLOBAL
 ========================================================= */
 
 window.OlympCabinet = {
