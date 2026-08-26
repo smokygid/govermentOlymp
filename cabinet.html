@@ -274,22 +274,51 @@
         <div class="cabinet-title-row">
 
 
-            <div>
+            <div class="cabinet-welcome">
 
-                <div class="section-label">
-                    ОСОБИСТИЙ КАБІНЕТ
+
+                <!-- SMALL AVATAR -->
+
+                <div
+                    id="cabinetHeaderAvatar"
+                    class="cabinet-header-avatar"
+                >
+
+                    <span
+                        id="cabinetHeaderAvatarPlaceholder"
+                    >
+                        👤
+                    </span>
+
+                    <img
+                        id="cabinetHeaderAvatarImage"
+                        src=""
+                        alt="Аватар профілю"
+                        style="display:none;"
+                    >
+
                 </div>
 
 
-                <h1>
-                    Вітаємо у вашому кабінеті
-                </h1>
+                <div>
+
+                    <div class="section-label">
+                        ОСОБИСТИЙ КАБІНЕТ
+                    </div>
 
 
-                <p>
-                    Тут зберігається ваша особиста
-                    інформація та історія державних звернень.
-                </p>
+                    <h1>
+                        Вітаємо у вашому кабінеті
+                    </h1>
+
+
+                    <p>
+                        Тут зберігається ваша особиста
+                        інформація та історія державних звернень.
+                    </p>
+
+                </div>
+
 
             </div>
 
@@ -332,11 +361,29 @@
                 </div>
 
 
+                <!-- =================================================
+                     PROFILE AVATAR
+                ================================================== -->
+
                 <div
                     id="profileAvatar"
                     class="profile-avatar"
+                    title="Аватар профілю"
                 >
-                    👤
+
+                    <span
+                        id="profileAvatarPlaceholder"
+                    >
+                        👤
+                    </span>
+
+                    <img
+                        id="profileAvatarImage"
+                        src=""
+                        alt="Аватар профілю"
+                        style="display:none;"
+                    >
+
                 </div>
 
 
@@ -344,7 +391,9 @@
 
 
 
-            <!-- PROFILE GRID -->
+            <!-- =================================================
+                 PROFILE GRID
+            ================================================== -->
 
             <div class="profile-grid">
 
@@ -451,18 +500,18 @@
                 </div>
 
 
-                <!-- CONTACT -->
+                <!-- AVATAR -->
 
                 <div class="info-item">
 
                     <span>
-                        Бажаний спосіб зв'язку
+                        Аватар профілю
                     </span>
 
                     <strong
-                        id="profileContact"
+                        id="profileAvatarUrl"
                     >
-                        —
+                        Не встановлено
                     </strong>
 
                 </div>
@@ -484,6 +533,127 @@
 
                 </div>
 
+
+                <!-- STATUS -->
+
+                <div class="info-item">
+
+                    <span>
+                        Статус облікового запису
+                    </span>
+
+                    <strong
+                        id="profileStatus"
+                    >
+                        —
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 AVATAR SETTINGS
+            ================================================== -->
+
+            <div
+                class="profile-avatar-settings"
+                id="avatarSettings"
+            >
+
+                <div class="avatar-settings-header">
+
+                    <div>
+
+                        <div class="card-label">
+                            НАЛАШТУВАННЯ ПРОФІЛЮ
+                        </div>
+
+                        <h3>
+                            Аватар профілю
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <p class="avatar-description">
+
+                    Вкажіть пряме посилання на зображення,
+                    яке буде використовуватися як ваш аватар.
+
+                </p>
+
+
+                <div class="avatar-form">
+
+
+                    <div class="form-group">
+
+                        <label for="avatarUrlInput">
+                            Посилання на аватар
+                        </label>
+
+                        <input
+                            type="url"
+                            id="avatarUrlInput"
+                            name="avatar"
+                            placeholder="https://example.com/avatar.png"
+                            autocomplete="off"
+                        >
+
+                        <small>
+                            Використовуйте пряме посилання
+                            на зображення JPG, PNG або WEBP.
+                        </small>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="saveAvatarButton"
+                        class="primary-button"
+                    >
+
+                        Зберегти аватар
+
+                    </button>
+
+
+                </div>
+
+
+                <!-- AVATAR PREVIEW -->
+
+                <div
+                    id="avatarPreview"
+                    class="avatar-preview"
+                    style="display:none;"
+                >
+
+                    <span>
+                        Попередній перегляд
+                    </span>
+
+                    <img
+                        id="avatarPreviewImage"
+                        src=""
+                        alt="Попередній перегляд аватара"
+                    >
+
+                </div>
+
+
+                <!-- AVATAR ERROR -->
+
+                <div
+                    id="avatarError"
+                    class="form-error"
+                ></div>
 
             </div>
 
