@@ -1961,4 +1961,449 @@ input:focus-visible {
         max-height: 130px !important;
     }
 
+   /* =========================================================
+   МОИ ЗАЯВКИ — КАРТОЧКИ
+========================================================= */
+
+.applications-list {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 20px;
+
+    width: 100%;
+
+    margin-top: 24px;
+
+}
+
+
+/* =========================================================
+   КАРТОЧКА ЗАЯВКИ
+========================================================= */
+
+.application-history-card {
+
+    position: relative;
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-width: 0;
+
+    padding: 22px;
+
+    background: #ffffff;
+
+    border: 1px solid #e7ebf0;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 4px 16px rgba(15, 23, 42, 0.05);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+
+}
+
+
+.application-history-card:hover {
+
+    transform: translateY(-3px);
+
+    border-color: #cbd5e1;
+
+    box-shadow:
+        0 10px 30px rgba(15, 23, 42, 0.09);
+
+}
+
+
+/* =========================================================
+   ВЕРХ КАРТОЧКИ
+========================================================= */
+
+.application-history-top {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 18px;
+
+}
+
+
+/* =========================================================
+   НОМЕР
+========================================================= */
+
+.application-history-number {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+}
+
+
+.application-history-number span {
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+
+    color: #94a3b8;
+
+}
+
+
+.application-history-number strong {
+
+    font-size: 16px;
+
+    color: #182235;
+
+    word-break: break-word;
+
+}
+
+
+/* =========================================================
+   СТАТУС
+========================================================= */
+
+.application-history-status {
+
+    flex-shrink: 0;
+
+    padding: 7px 10px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   ИНФОРМАЦИЯ
+========================================================= */
+
+.application-history-info {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    margin-bottom: 18px;
+
+}
+
+
+.application-history-info-item {
+
+    min-width: 0;
+
+    padding: 12px;
+
+    background: #f8fafc;
+
+    border-radius: 10px;
+
+}
+
+
+.application-history-info-item span {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.04em;
+
+    color: #94a3b8;
+
+}
+
+
+.application-history-info-item strong {
+
+    display: block;
+
+    font-size: 13px;
+
+    color: #334155;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   ОПИСАНИЕ
+========================================================= */
+
+.application-history-message {
+
+    flex: 1;
+
+    margin-bottom: 18px;
+
+    padding: 13px 14px;
+
+    background: #fafbfc;
+
+    border-left: 3px solid #d7dee8;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+    color: #64748b;
+
+    display: -webkit-box;
+
+    -webkit-line-clamp: 3;
+
+    -webkit-box-orient: vertical;
+
+    overflow: hidden;
+
+}
+
+
+/* =========================================================
+   НИЖНЯЯ ЧАСТЬ
+========================================================= */
+
+.application-history-bottom {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding-top: 16px;
+
+    border-top: 1px solid #eef1f5;
+
+}
+
+
+.application-history-date {
+
+    font-size: 12px;
+
+    color: #94a3b8;
+
+}
+
+
+/* =========================================================
+   КНОПКА
+========================================================= */
+
+.application-history-button {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    min-height: 38px;
+
+    padding: 8px 14px;
+
+    border: 1px solid #d7dee8;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: #182235;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+
+}
+
+
+.application-history-button:hover {
+
+    background: #182235;
+
+    color: #ffffff;
+
+    border-color: #182235;
+
+}
+
+
+/* =========================================================
+   ПУСТОЙ СПИСОК
+========================================================= */
+
+.applications-list .history-empty {
+
+    grid-column: 1 / -1;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+}
+
+
+/* =========================================================
+   ЗАГРУЗКА
+========================================================= */
+
+.applications-list .applications-loading {
+
+    grid-column: 1 / -1;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    min-height: 160px;
+
+}
+
+
+/* =========================================================
+   АДАПТИВ — ПЛАНШЕТ
+========================================================= */
+
+@media (max-width: 1100px) {
+
+    .applications-list {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+}
+
+
+/* =========================================================
+   АДАПТИВ — ТЕЛЕФОН
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .applications-list {
+
+        grid-template-columns: 1fr;
+
+        gap: 15px;
+
+    }
+
+
+    .application-history-card {
+
+        padding: 18px;
+
+    }
+
+
+    .application-history-top {
+
+        flex-direction: column;
+
+    }
+
+
+    .application-history-status {
+
+        align-self: flex-start;
+
+    }
+
+}
+
+
+/* =========================================================
+   ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ
+========================================================= */
+
+@media (max-width: 420px) {
+
+    .application-history-info {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .application-history-bottom {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+
+    .application-history-button {
+
+        width: 100%;
+
+    }
+
+}
+
 }
