@@ -19,6 +19,7 @@ const OLYMP_API_URL =
 
 let currentUser = null;
 let currentSessionToken = null;
+let currentCitizenSession = null;
 
 
 /* =========================================================
@@ -29,22 +30,122 @@ function loadSession() {
 
     try {
 
+        /* =====================================================
+           СТАРА СИСТЕМА SESSION TOKEN
+        ===================================================== */
+
         currentSessionToken =
             localStorage.getItem(
                 "olymp_session_token"
             );
+
+
+        /* =====================================================
+           ПОЛЬЗОВАТЕЛЬ
+        ===================================================== */
 
         const savedUser =
             localStorage.getItem(
                 "olymp_user"
             );
 
+
         if (savedUser) {
 
-            currentUser =
-                JSON.parse(savedUser);
+            try {
+
+                currentUser =
+                    JSON.parse(
+                        savedUser
+                    );
+
+            } catch (e) {
+
+                currentUser = null;
+
+            }
 
         }
+
+
+        /* =====================================================
+           СЕССИЯ ЛИЧНОГО КАБИНЕТА
+           
+           cabinet.js сохраняет:
+           olympCitizenSession
+        ===================================================== */
+
+        const citizenSessionRaw =
+            localStorage.getItem(
+                "olympCitizenSession"
+            );
+
+
+        if (citizenSessionRaw) {
+
+            try {
+
+                currentCitizenSession =
+                    JSON.parse(
+                        citizenSessionRaw
+                    );
+
+            } catch (e) {
+
+                currentCitizenSession =
+                    null;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           ЕСЛИ ЕСТЬ СЕССИЯ КАБИНЕТА,
+           СОЗДАЁМ CURRENT USER
+        ===================================================== */
+
+        if (
+            currentCitizenSession &&
+            currentCitizenSession.olympId
+        ) {
+
+            if (!currentUser) {
+
+                currentUser = {
+
+                    olympId:
+                        currentCitizenSession.olympId
+
+                };
+
+            }
+
+        }
+
+
+        console.log(
+            "OLYMP SESSION:",
+            {
+
+                token:
+                    currentSessionToken
+                        ? "FOUND"
+                        : "NOT FOUND",
+
+                citizenSession:
+                    currentCitizenSession
+                        ? "FOUND"
+                        : "NOT FOUND",
+
+                olympId:
+                    currentCitizenSession
+                        ? currentCitizenSession.olympId
+                        : null
+
+            }
+        );
+
 
     } catch (error) {
 
@@ -53,8 +154,12 @@ function loadSession() {
             error
         );
 
+
         currentSessionToken = null;
+
         currentUser = null;
+
+        currentCitizenSession = null;
 
     }
 
@@ -353,46 +458,215 @@ async function requireLogin() {
     loadSession();
 
 
-    if (!currentSessionToken) {
+    /* =====================================================
+       ВАРИАНТ 1
+       НОВАЯ СИСТЕМА SESSION TOKEN
+    ===================================================== */
 
-        alert(
-            "Для подання заявки необхідно увійти до особистого кабінету."
-        );
+    if (currentSessionToken) {
 
-        window.location.href =
-            "cabinet.html";
+        const valid =
+            await validateCurrentSession();
 
-        return false;
+
+        if (!valid) {
+
+            alert(
+                "Ваша сесія завершена. Увійдіть до особистого кабінету повторно."
+            );
+
+
+            window.location.href =
+                "cabinet.html";
+
+
+            return false;
+
+        }
+
+
+        if (!currentUser) {
+
+            await loadCurrentProfile();
+
+        }
+
+
+        return true;
 
     }
 
 
-    const valid =
-        await validateCurrentSession();
+    /* =====================================================
+       ВАРИАНТ 2
+       ТВОЯ ТЕКУЩАЯ СИСТЕМА CABINET
+       
+       olympCitizenSession
+    ===================================================== */
+
+    if (
+        currentCitizenSession &&
+        currentCitizenSession.olympId &&
+        currentCitizenSession.password
+    ) {
+
+        const olympId =
+            currentCitizenSession.olympId;
 
 
-    if (!valid) {
+        const password =
+            currentCitizenSession.password;
 
-        alert(
-            "Ваша сесія завершена. Увійдіть до особистого кабінету повторно."
-        );
 
-        window.location.href =
-            "cabinet.html";
+        try {
 
-        return false;
+            const result =
+                await fetch(
+                    OLYMP_API_URL +
+                    "?" +
+                    new URLSearchParams({
+
+                        action:
+                            "profile",
+
+                        olympId:
+                            olympId,
+
+                        citizenId:
+                            olympId,
+
+                        idNumber:
+                            olympId,
+
+                        password:
+                            password
+
+                    }).toString(),
+
+                    {
+
+                        method:
+                            "GET",
+
+                        cache:
+                            "no-store",
+
+                        redirect:
+                            "follow"
+
+                    }
+                );
+
+
+            if (!result.ok) {
+
+                throw new Error(
+                    "HTTP " +
+                    result.status
+                );
+
+            }
+
+
+            const profile =
+                await result.json();
+
+
+            console.log(
+                "CABINET PROFILE CHECK:",
+                profile
+            );
+
+
+            if (
+                !profile ||
+                profile.success !== true
+            ) {
+
+                alert(
+                    profile &&
+                    profile.message
+                        ? profile.message
+                        : "Сесію завершено. Увійдіть повторно."
+                );
+
+
+                localStorage.removeItem(
+                    "olympCitizenSession"
+                );
+
+
+                window.location.href =
+                    "cabinet.html";
+
+
+                return false;
+
+            }
+
+
+            currentUser =
+                profile.citizen ||
+                profile.profile ||
+                profile.user ||
+                {
+
+                    olympId:
+                        olympId
+
+                };
+
+
+            localStorage.setItem(
+                "olymp_user",
+                JSON.stringify(
+                    currentUser
+                )
+            );
+
+
+            console.log(
+                "Авторизація через olympCitizenSession успішна."
+            );
+
+
+            return true;
+
+
+        } catch (error) {
+
+            console.error(
+                "CABINET SESSION ERROR:",
+                error
+            );
+
+
+            alert(
+                "Не вдалося перевірити авторизацію."
+            );
+
+
+            return false;
+
+        }
 
     }
 
 
-    if (!currentUser) {
+    /* =====================================================
+       НЕТ НИКАКОЙ СЕССИИ
+    ===================================================== */
 
-        await loadCurrentProfile();
+    alert(
+        "Для подання заявки необхідно увійти до особистого кабінету."
+    );
 
-    }
+
+    window.location.href =
+        "cabinet.html";
 
 
-    return true;
+    return false;
 
 }
 
@@ -1113,8 +1387,14 @@ if (applicationForm) {
                             olympId:
                                 currentUser.olympId,
 
-                            sessionToken:
-                                currentSessionToken,
+sessionToken:
+    currentSessionToken ||
+    "",
+
+password:
+    currentCitizenSession
+        ? currentCitizenSession.password
+        : "",
 
                             service:
                                 service,
