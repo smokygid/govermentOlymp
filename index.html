@@ -1,1921 +1,741 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+/* =========================================================
+   OLYMP GOVERNMENT
+   MAIN SCRIPT
+========================================================= */
 
-    <title>Уряд штату Olymp | Державні послуги</title>
 
-    <meta
-        name="description"
-        content="Офіційний портал Уряду штату Olymp. Державні послуги, законодавство, звернення громадян та новини."
-    >
+/* =========================================================
+   MOBILE MENU
+========================================================= */
 
-    <link rel="stylesheet" href="style.css">
-</head>
+const menuButton = document.getElementById("menuButton");
+const menu = document.querySelector(".menu");
 
-<body>
+if (menuButton && menu) {
 
-<!-- =====================================================
-     HEADER
-===================================================== -->
+    menuButton.addEventListener("click", () => {
+        menu.classList.toggle("active");
+    });
 
-<header class="header" id="header">
+}
 
-    <div class="container nav">
 
-        <a href="#home" class="logo">
+/* Закрытие мобильного меню */
 
-            <div class="logo-symbol">
-                O
-            </div>
+if (menu) {
 
-            <div class="logo-text">
+    document.querySelectorAll(".menu a").forEach(link => {
 
-                <strong>OLYMP</strong>
+        link.addEventListener("click", () => {
+            menu.classList.remove("active");
+        });
 
-                <span>
-                    STATE GOVERNMENT
-                </span>
+    });
 
-            </div>
+}
 
-        </a>
 
+/* =========================================================
+   SERVICE MODAL
+========================================================= */
 
-        <nav class="menu" id="mainMenu">
+const serviceModal = document.getElementById("serviceModal");
 
-            <a href="#home">
-                Головна
-            </a>
+const modalTitle =
+    document.getElementById("modalTitle");
 
-            <a href="#government">
-                Уряд
-            </a>
+const modalDescription =
+    document.getElementById("modalDescription");
 
-            <a href="#services">
-                Послуги
-            </a>
+const modalRequirements =
+    document.getElementById("modalRequirements");
 
-            <a href="services.html">
-    Державні служби
-</a>
+const modalIcon =
+    document.getElementById("modalIcon");
 
-            <a href="#laws">
-                Законодавство
-            </a>
+const modalCategory =
+    document.getElementById("modalCategory");
 
-            <a href="#news">
-                Новини
-            </a>
+const applyFromService =
+    document.getElementById("applyFromService");
 
-            <a href="#contacts">
-                Контакти
-            </a>
 
-            <a href="cabinet.html">
-        Кабінет
-    </a>
+/*
+   Текущая выбранная услуга
+*/
 
-        </nav>
+let selectedService = "";
 
 
-        <button
-            class="menu-button"
-            id="menuButton"
-            aria-label="Відкрити меню">
+/*
+   Открытие информации об услуге
+*/
 
-            ☰
+window.openService = function (button) {
 
-        </button>
+    if (!serviceModal) {
+        console.error("serviceModal не найден");
+        return;
+    }
 
-    </div>
 
-</header>
+    /*
+       Получаем карточку услуги
+    */
 
+    const card = button.closest(".service-item");
 
-<!-- =====================================================
-     HERO
-===================================================== -->
+    if (!card) {
 
-<section class="hero" id="home">
+        console.error(
+            "Карточка услуги не найдена"
+        );
 
-    <div class="hero-overlay"></div>
+        return;
+    }
 
-    <div class="container hero-content">
 
-        <div class="hero-label">
-            ОФІЦІЙНИЙ ПОРТАЛ
-        </div>
+    /*
+       Получаем данные из data-атрибутов
+    */
 
+    const title =
+        card.dataset.title || "Державна послуга";
 
-        <h1>
+    const description =
+        card.dataset.description || "";
 
-            УРЯД ШТАТУ
+    const requirements =
+        card.dataset.requirements || "—";
 
-            <span>
-                OLYMP
-            </span>
 
-        </h1>
+    selectedService = title;
 
 
-        <p>
+    /*
+       Заполняем модальное окно
+    */
 
-            Єдиний державний портал
-            послуг, інформації та звернень
-            громадян.
+    if (modalTitle) {
+        modalTitle.textContent = title;
+    }
 
-        </p>
+    if (modalDescription) {
+        modalDescription.textContent = description;
+    }
 
+    if (modalRequirements) {
+        modalRequirements.textContent = requirements;
+    }
 
-        <div class="hero-buttons">
+    if (modalCategory) {
 
-            <a
-                href="#services"
-                class="btn btn-primary">
+        const category =
+            card.dataset.category || "government";
 
-                Державні послуги
+        const categories = {
 
-            </a>
+            documents: "ДОКУМЕНТИ",
 
+            transport: "ТРАНСПОРТ",
 
-            <button
-                class="btn btn-outline"
-                onclick="openApplicationModal('Звернення громадянина')">
+            business: "БІЗНЕС",
 
-                Подати звернення
+            legal: "ЮРИДИЧНІ",
 
-            </button>
+            government: "УРЯДОВІ"
 
-        </div>
+        };
 
-    </div>
+        modalCategory.textContent =
+            categories[category] ||
+            "ДЕРЖАВНА ПОСЛУГА";
 
-</section>
+    }
 
 
-<!-- =====================================================
-     STATISTICS
-===================================================== -->
+    /*
+       Открываем окно
+    */
 
-<section class="statistics">
+    serviceModal.classList.add("active");
 
-    <div class="container statistics-grid">
+    serviceModal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
 
-        <div class="stat">
+    document.body.style.overflow = "hidden";
 
-            <strong id="serviceCount">
-                12
-            </strong>
+};
 
-            <span>
-                Державних послуг
-            </span>
 
-        </div>
+/*
+   Закрытие окна услуги
+*/
 
+window.closeServiceModal = function () {
 
-        <div class="stat">
+    if (!serviceModal) {
+        return;
+    }
 
-            <strong>
-                24/7
-            </strong>
+    serviceModal.classList.remove("active");
 
-            <span>
-                Доступ до порталу
-            </span>
+    serviceModal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
 
-        </div>
+    document.body.style.overflow = "";
 
+};
 
-        <div class="stat">
 
-            <strong>
-                6
-            </strong>
+/*
+   Совместимость со старым названием
+*/
 
-            <span>
-                Основних напрямків
-            </span>
+window.closeService = function () {
+    window.closeServiceModal();
+};
 
-        </div>
 
+/* Закрытие услуги по фону */
 
-        <div class="stat">
+if (serviceModal) {
 
-            <strong>
-                1
-            </strong>
+    serviceModal.addEventListener("click", event => {
 
-            <span>
-                Єдиний державний портал
-            </span>
+        if (event.target === serviceModal) {
+            window.closeServiceModal();
+        }
 
-        </div>
+    });
 
-    </div>
+}
 
-</section>
 
+/* =========================================================
+   APPLICATION MODAL
+========================================================= */
 
-<!-- =====================================================
-     GOVERNMENT
-===================================================== -->
+const applicationModal =
+    document.getElementById("applicationModal");
 
-<section
-    class="section section-dark"
-    id="government">
+const applicationForm =
+    document.getElementById("applicationForm");
 
-    <div class="container">
+const applicationService =
+    document.getElementById("applicationService");
 
-        <div class="section-heading light">
 
-            <span>
-                ДЕРЖАВНА ВЛАДА
-            </span>
+/*
+   Открытие формы заявки
+*/
 
-            <h2>
-                Керівництво штату
-            </h2>
+window.openApplicationModal = function (serviceName) {
 
-            <p>
-                Інформація про керівництво
-                та державні органи штату Olymp.
-            </p>
+    if (!applicationModal) {
 
-        </div>
+        console.error(
+            "applicationModal не найден"
+        );
 
+        return;
+    }
 
-        <div class="government-grid">
 
-            <div class="government-card">
+    /*
+       Если передали услугу —
+       автоматически выбираем её
+    */
 
-                <div class="person-placeholder">
-                    👑
-                </div>
+    if (
+        serviceName &&
+        applicationService
+    ) {
 
-                <div class="person-info">
+        let optionExists = false;
 
-                    <small>
-                        ГУБЕРНАТОР ШТАТУ
-                    </small>
+        for (
+            const option
+            of applicationService.options
+        ) {
 
-                    <h3>
-                        Ім'я Прізвище
-                    </h3>
+            if (
+                option.textContent.trim() ===
+                serviceName.trim()
+            ) {
 
-                    <p>
-                        Глава виконавчої влади
-                        штату Olymp.
-                    </p>
+                optionExists = true;
+                break;
+            }
 
-                    <a
-                        href="#"
-                        class="text-link">
+        }
 
-                        Детальніше →
 
-                    </a>
+        if (optionExists) {
 
-                </div>
+            applicationService.value =
+                serviceName;
 
-            </div>
+        }
 
+    }
 
-            <div class="government-card">
 
-                <div class="person-placeholder">
-                    🏛️
-                </div>
+    /*
+       Открываем модальное окно
+    */
 
-                <div class="person-info">
+    applicationModal.classList.add("active");
 
-                    <small>
-                        ВІЦЕГУБЕРНАТОР
-                    </small>
+    applicationModal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
 
-                    <h3>
-                        Ім'я Прізвище
-                    </h3>
+    document.body.style.overflow = "hidden";
 
-                    <p>
-                        Заступник губернатора
-                        штату Olymp.
-                    </p>
+};
 
-                    <a
-                        href="#"
-                        class="text-link">
 
-                        Детальніше →
+/*
+   Закрытие формы заявки
+*/
 
-                    </a>
+window.closeApplicationModal = function () {
 
-                </div>
+    if (!applicationModal) {
+        return;
+    }
 
-            </div>
+    applicationModal.classList.remove("active");
 
+    applicationModal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
 
-            <div class="government-card">
+    document.body.style.overflow = "";
 
-                <div class="person-placeholder">
-                    🏢
-                </div>
+};
 
-                <div class="person-info">
 
-                    <small>
-                        МЕРІЯ
-                    </small>
+/*
+   Закрытие по фону
+*/
 
-                    <h3>
-                        Адміністрація міста
-                    </h3>
+if (applicationModal) {
 
-                    <p>
-                        Муніципальні послуги
-                        та робота з громадянами.
-                    </p>
+    applicationModal.addEventListener(
+        "click",
+        event => {
 
-                    <a
-                        href="#"
-                        class="text-link">
+            if (
+                event.target ===
+                applicationModal
+            ) {
 
-                        Детальніше →
+                window.closeApplicationModal();
 
-                    </a>
+            }
 
-                </div>
+        }
+    );
 
-            </div>
+}
 
-        </div>
 
-    </div>
+/* =========================================================
+   ПОДАТИ ЗАЯВКУ З КАРТКИ ПОСЛУГИ
+========================================================= */
 
-</section>
+if (applyFromService) {
 
+    applyFromService.addEventListener(
+        "click",
+        () => {
 
-<!-- =====================================================
-     SERVICES
-===================================================== -->
+            window.closeServiceModal();
 
-<section
-    class="section services-section"
-    id="services">
+            window.openApplicationModal(
+                selectedService
+            );
 
-    <div class="container">
+        }
+    );
 
-        <div class="section-heading">
+}
 
-            <span>
-                ДЕРЖАВНІ ПОСЛУГИ
-            </span>
 
-            <h2>
-                Послуги для громадян
-            </h2>
+/* =========================================================
+   APPLICATION FORM
+========================================================= */
 
-            <p>
-                Оберіть необхідну послугу
-                або скористайтеся пошуком.
-            </p>
+if (applicationForm) {
 
-        </div>
+    applicationForm.addEventListener(
+        "submit",
+        event => {
 
+            /*
+               Пока только предотвращаем
+               перезагрузку страницы.
+            */
 
-        <!-- SEARCH -->
+            event.preventDefault();
 
-        <div class="services-search">
+            console.log(
+                "Форма заявки отправлена"
+            );
 
-            <div class="search-box">
+        }
+    );
 
-                <span>
-                    🔎
-                </span>
+}
 
-                <input
-                    type="text"
-                    id="serviceSearch"
-                    placeholder="Пошук державної послуги..."
-                    autocomplete="off">
 
-                <button
-                    id="clearSearch"
-                    type="button">
+/* =========================================================
+   ESC
+========================================================= */
 
-                    ×
+document.addEventListener(
+    "keydown",
+    event => {
 
-                </button>
+        if (event.key !== "Escape") {
+            return;
+        }
 
-            </div>
 
+        if (serviceModal) {
 
-            <div class="category-buttons">
+            serviceModal.classList.remove(
+                "active"
+            );
 
-                <button
-                    class="category-btn active"
-                    data-category="all">
+            serviceModal.setAttribute(
+                "aria-hidden",
+                "true"
+            );
 
-                    Усі
+        }
 
-                </button>
 
+        if (applicationModal) {
 
-                <button
-                    class="category-btn"
-                    data-category="documents">
+            applicationModal.classList.remove(
+                "active"
+            );
 
-                    🪪 Документи
+            applicationModal.setAttribute(
+                "aria-hidden",
+                "true"
+            );
 
-                </button>
+        }
 
 
-                <button
-                    class="category-btn"
-                    data-category="transport">
+        document.body.style.overflow = "";
 
-                    🚗 Транспорт
+    }
+);
 
-                </button>
 
+/* =========================================================
+   HEADER SCROLL
+========================================================= */
 
-                <button
-                    class="category-btn"
-                    data-category="business">
+const header =
+    document.querySelector(".header");
 
-                    🏢 Бізнес
+if (header) {
 
-                </button>
+    window.addEventListener(
+        "scroll",
+        () => {
 
+            if (window.scrollY > 50) {
 
-                <button
-                    class="category-btn"
-                    data-category="legal">
+                header.style.boxShadow =
+                    "0 5px 30px rgba(0,0,0,0.25)";
 
-                    ⚖️ Юридичні
+            } else {
 
-                </button>
+                header.style.boxShadow =
+                    "none";
 
+            }
 
-                <button
-                    class="category-btn"
-                    data-category="government">
+        }
+    );
 
-                    🏛️ Урядові
+}
 
-                </button>
 
-            </div>
+/* =========================================================
+   SERVICE SEARCH
+========================================================= */
 
-        </div>
+const serviceSearch =
+    document.getElementById("serviceSearch");
 
+const clearSearch =
+    document.getElementById("clearSearch");
 
-        <!-- SERVICES GRID -->
+const servicesGrid =
+    document.getElementById("servicesGrid");
 
-        <div
-            class="services-grid services-grid-full"
-            id="servicesGrid">
+const noResults =
+    document.getElementById("noResults");
 
+const categoryButtons =
+    document.querySelectorAll(".category-btn");
 
-            <!-- SERVICE 1 -->
+const serviceItems =
+    document.querySelectorAll(".service-item");
 
-            <article
-                class="service-card service-item"
-                data-category="documents"
-                data-title="Отримання посвідчення особи"
-                data-description="Подання заявки на отримання державного посвідчення особи громадянина штату Olymp."
-                data-requirements="ПІБ, дата народження, контактні дані.">
 
-                <div class="service-icon">
-                    🪪
-                </div>
+let currentCategory = "all";
 
-                <div class="service-content">
 
-                    <span class="service-category">
-                        ДОКУМЕНТИ
-                    </span>
+function filterServices() {
 
-                    <h3>
-                        Посвідчення особи
-                    </h3>
+    const searchText =
+        serviceSearch
+            ? serviceSearch.value
+                .toLowerCase()
+                .trim()
+            : "";
 
-                    <p>
-                        Отримання державного
-                        посвідчення особи.
-                    </p>
 
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
+    let visibleCount = 0;
 
-                        Детальніше →
 
-                    </button>
+    serviceItems.forEach(item => {
 
-                </div>
+        const title =
+            (
+                item.dataset.title ||
+                ""
+            ).toLowerCase();
 
-            </article>
+        const description =
+            (
+                item.dataset.description ||
+                ""
+            ).toLowerCase();
 
+        const category =
+            item.dataset.category ||
+            "";
 
-            <!-- SERVICE 2 -->
 
-            <article
-                class="service-card service-item"
-                data-category="documents"
-                data-title="Отримання державної довідки"
-                data-description="Оформлення та отримання державної довідки."
-                data-requirements="ПІБ, номер посвідчення та причина отримання довідки.">
+        const matchesSearch =
+            !searchText ||
+            title.includes(searchText) ||
+            description.includes(searchText);
 
-                <div class="service-icon">
-                    📄
-                </div>
 
-                <div class="service-content">
+        const matchesCategory =
+            currentCategory === "all" ||
+            category === currentCategory;
 
-                    <span class="service-category">
-                        ДОКУМЕНТИ
-                    </span>
 
-                    <h3>
-                        Державні довідки
-                    </h3>
+        if (
+            matchesSearch &&
+            matchesCategory
+        ) {
 
-                    <p>
-                        Оформлення необхідних
-                        державних довідок.
-                    </p>
+            item.style.display = "";
 
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
+            visibleCount++;
 
-                        Детальніше →
+        } else {
 
-                    </button>
+            item.style.display = "none";
 
-                </div>
+        }
 
-            </article>
+    });
 
 
-            <!-- SERVICE 3 -->
+    if (noResults) {
 
-            <article
-                class="service-card service-item"
-                data-category="documents"
-                data-title="Реєстрація місця проживання"
-                data-description="Реєстрація або зміна зареєстрованого місця проживання."
-                data-requirements="Посвідчення особи та документи на нерухомість.">
+        noResults.style.display =
+            visibleCount === 0
+                ? "block"
+                : "none";
 
-                <div class="service-icon">
-                    🏠
-                </div>
+    }
 
-                <div class="service-content">
+}
 
-                    <span class="service-category">
-                        ДОКУМЕНТИ
-                    </span>
 
-                    <h3>
-                        Місце проживання
-                    </h3>
+/*
+   Поиск
+*/
 
-                    <p>
-                        Реєстрація та зміна
-                        місця проживання.
-                    </p>
+if (serviceSearch) {
 
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
+    serviceSearch.addEventListener(
+        "input",
+        filterServices
+    );
 
-                        Детальніше →
+}
 
-                    </button>
 
-                </div>
+/*
+   Очистка поиска
+*/
 
-            </article>
+if (clearSearch) {
 
+    clearSearch.addEventListener(
+        "click",
+        () => {
 
-            <!-- SERVICE 4 -->
+            if (serviceSearch) {
+                serviceSearch.value = "";
+            }
 
-            <article
-                class="service-card service-item"
-                data-category="transport"
-                data-title="Реєстрація транспортного засобу"
-                data-description="Реєстрація транспортного засобу та внесення його до державного реєстру."
-                data-requirements="Посвідчення особи та документи на транспортний засіб.">
+            filterServices();
 
-                <div class="service-icon">
-                    🚗
-                </div>
+        }
+    );
 
-                <div class="service-content">
+}
 
-                    <span class="service-category">
-                        ТРАНСПОРТ
-                    </span>
 
-                    <h3>
-                        Реєстрація авто
-                    </h3>
+/*
+   Категории
+*/
 
-                    <p>
-                        Реєстрація та перереєстрація
-                        транспортних засобів.
-                    </p>
+categoryButtons.forEach(button => {
 
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
+    button.addEventListener(
+        "click",
+        () => {
 
-                        Детальніше →
+            categoryButtons.forEach(
+                btn => {
+                    btn.classList.remove(
+                        "active"
+                    );
+                }
+            );
 
-                    </button>
 
-                </div>
+            button.classList.add("active");
 
-            </article>
 
+            currentCategory =
+                button.dataset.category ||
+                "all";
 
-            <!-- SERVICE 5 -->
 
-            <article
-                class="service-card service-item"
-                data-category="transport"
-                data-title="Транспортна ліцензія"
-                data-description="Оформлення державної ліцензії для здійснення комерційної транспортної діяльності."
-                data-requirements="Посвідчення особи, дані підприємства та транспортного засобу.">
+            filterServices();
 
-                <div class="service-icon">
-                    🚕
-                </div>
+        }
+    );
 
-                <div class="service-content">
+});
 
-                    <span class="service-category">
-                        ТРАНСПОРТ
-                    </span>
 
-                    <h3>
-                        Транспортна ліцензія
-                    </h3>
+/* =========================================================
+   SIMPLE SCROLL ANIMATION
+========================================================= */
 
-                    <p>
-                        Отримання ліцензії
-                        на транспортну діяльність.
-                    </p>
+const animatedElements =
+    document.querySelectorAll(
+        ".service-card, " +
+        ".government-card, " +
+        ".news-card, " +
+        ".law-card"
+    );
 
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
 
-                        Детальніше →
+if (
+    "IntersectionObserver"
+    in window
+) {
 
-                    </button>
+    const observer =
+        new IntersectionObserver(
+            entries => {
 
-                </div>
+                entries.forEach(
+                    entry => {
 
-            </article>
+                        if (
+                            entry.isIntersecting
+                        ) {
 
+                            entry.target.style.opacity =
+                                "1";
 
-            <!-- SERVICE 6 -->
+                            entry.target.style.transform =
+                                "translateY(0)";
 
-            <article
-                class="service-card service-item"
-                data-category="transport"
-                data-title="Реєстраційний номер"
-                data-description="Оформлення та отримання реєстраційного номера транспортного засобу."
-                data-requirements="Документи на транспортний засіб.">
+                            observer.unobserve(
+                                entry.target
+                            );
 
-                <div class="service-icon">
-                    🔢
-                </div>
+                        }
 
-                <div class="service-content">
+                    }
+                );
 
-                    <span class="service-category">
-                        ТРАНСПОРТ
-                    </span>
+            },
+            {
+                threshold: 0.1
+            }
+        );
 
-                    <h3>
-                        Реєстраційні знаки
-                    </h3>
 
-                    <p>
-                        Отримання державних
-                        реєстраційних знаків.
-                    </p>
+    animatedElements.forEach(
+        element => {
 
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
+            element.style.opacity = "0";
 
-                        Детальніше →
+            element.style.transform =
+                "translateY(20px)";
 
-                    </button>
+            element.style.transition =
+                "opacity .5s ease, " +
+                "transform .5s ease";
 
-                </div>
+            observer.observe(element);
 
-            </article>
+        }
+    );
 
+} else {
 
-            <!-- SERVICE 7 -->
+    animatedElements.forEach(
+        element => {
 
-            <article
-                class="service-card service-item"
-                data-category="business"
-                data-title="Реєстрація підприємства"
-                data-description="Офіційна реєстрація нового підприємства на території штату Olymp."
-                data-requirements="ПІБ власника, назва підприємства, адреса та вид діяльності.">
+            element.style.opacity = "1";
 
-                <div class="service-icon">
-                    🏢
-                </div>
+            element.style.transform =
+                "translateY(0)";
 
-                <div class="service-content">
+        }
+    );
 
-                    <span class="service-category">
-                        БІЗНЕС
-                    </span>
+}
 
-                    <h3>
-                        Реєстрація підприємства
-                    </h3>
 
-                    <p>
-                        Створення та державна
-                        реєстрація бізнесу.
-                    </p>
+/* =========================================================
+   INITIAL FILTER
+========================================================= */
 
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
+filterServices();
 
-                        Детальніше →
 
-                    </button>
-
-                </div>
-
-            </article>
-
-
-            <!-- SERVICE 8 -->
-
-            <article
-                class="service-card service-item"
-                data-category="business"
-                data-title="Ліцензія на діяльність"
-                data-description="Оформлення державної ліцензії для здійснення окремих видів діяльності."
-                data-requirements="Дані підприємства та опис діяльності.">
-
-                <div class="service-icon">
-                    📜
-                </div>
-
-                <div class="service-content">
-
-                    <span class="service-category">
-                        БІЗНЕС
-                    </span>
-
-                    <h3>
-                        Ліцензія на діяльність
-                    </h3>
-
-                    <p>
-                        Отримання дозволу
-                        на здійснення діяльності.
-                    </p>
-
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
-
-                        Детальніше →
-
-                    </button>
-
-                </div>
-
-            </article>
-
-
-            <!-- SERVICE 9 -->
-
-            <article
-                class="service-card service-item"
-                data-category="business"
-                data-title="Зміна власника підприємства"
-                data-description="Оформлення зміни власника зареєстрованого підприємства."
-                data-requirements="Документи підприємства та дані нового власника.">
-
-                <div class="service-icon">
-                    🔄
-                </div>
-
-                <div class="service-content">
-
-                    <span class="service-category">
-                        БІЗНЕС
-                    </span>
-
-                    <h3>
-                        Зміна власника
-                    </h3>
-
-                    <p>
-                        Оформлення передачі
-                        підприємства іншій особі.
-                    </p>
-
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
-
-                        Детальніше →
-
-                    </button>
-
-                </div>
-
-            </article>
-
-
-            <!-- SERVICE 10 -->
-
-            <article
-                class="service-card service-item"
-                data-category="legal"
-                data-title="Запит на державного адвоката"
-                data-description="Подання заявки на отримання допомоги державного адвоката."
-                data-requirements="ПІБ, номер посвідчення та короткий опис справи.">
-
-                <div class="service-icon">
-                    ⚖️
-                </div>
-
-                <div class="service-content">
-
-                    <span class="service-category">
-                        ЮРИДИЧНІ
-                    </span>
-
-                    <h3>
-                        Державний адвокат
-                    </h3>
-
-                    <p>
-                        Запит на юридичну
-                        допомогу адвоката.
-                    </p>
-
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
-
-                        Детальніше →
-
-                    </button>
-
-                </div>
-
-            </article>
-
-
-            <!-- SERVICE 11 -->
-
-            <article
-                class="service-card service-item"
-                data-category="legal"
-                data-title="Юридична консультація"
-                data-description="Отримання первинної юридичної консультації."
-                data-requirements="ПІБ та опис юридичного питання.">
-
-                <div class="service-icon">
-                    👨‍⚖️
-                </div>
-
-                <div class="service-content">
-
-                    <span class="service-category">
-                        ЮРИДИЧНІ
-                    </span>
-
-                    <h3>
-                        Юридична консультація
-                    </h3>
-
-                    <p>
-                        Консультація з питань
-                        законодавства штату.
-                    </p>
-
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
-
-                        Детальніше →
-
-                    </button>
-
-                </div>
-
-            </article>
-
-
-            <!-- SERVICE 12 -->
-
-            <article
-                class="service-card service-item"
-                data-category="government"
-                data-title="Звернення до губернатора"
-                data-description="Офіційне звернення громадянина до губернатора штату Olymp."
-                data-requirements="ПІБ, контактні дані та текст звернення.">
-
-                <div class="service-icon">
-                    👑
-                </div>
-
-                <div class="service-content">
-
-                    <span class="service-category">
-                        УРЯД
-                    </span>
-
-                    <h3>
-                        Звернення до губернатора
-                    </h3>
-
-                    <p>
-                        Подання офіційного
-                        звернення губернатору.
-                    </p>
-
-                    <button
-                        class="service-button"
-                        onclick="openService(this)">
-
-                        Детальніше →
-
-                    </button>
-
-                </div>
-
-            </article>
-
-
-        </div>
-
-
-        <!-- NO RESULTS -->
-
-        <div
-            class="no-results"
-            id="noResults">
-
-            <div>
-                🔎
-            </div>
-
-            <h3>
-                Послуг не знайдено
-            </h3>
-
-            <p>
-                Спробуйте змінити пошуковий запит
-                або вибрати іншу категорію.
-            </p>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     APPLICATION CTA
-===================================================== -->
-
-<section class="application-banner">
-
-    <div class="container application-banner-content">
-
-        <div>
-
-            <span>
-                НЕ ЗНАЙШЛИ ПОТРІБНОЇ ПОСЛУГИ?
-            </span>
-
-            <h2>
-                Зверніться до Уряду штату
-            </h2>
-
-            <p>
-                Ми допоможемо визначити відповідний
-                державний орган та порядок звернення.
-            </p>
-
-        </div>
-
-
-        <button
-            class="btn btn-primary"
-            onclick="openApplicationModal('Звернення громадянина')">
-
-            Подати звернення
-
-        </button>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     LAWS
-===================================================== -->
-
-<section
-    class="section section-gray"
-    id="laws">
-
-    <div class="container">
-
-        <div class="section-heading">
-
-            <span>
-                ЗАКОНОДАВСТВО
-            </span>
-
-            <h2>
-                Законодавча база
-            </h2>
-
-            <p>
-                Основні нормативні документи
-                штату Olymp.
-            </p>
-
-        </div>
-
-
-        <div class="laws-grid">
-
-            <a href="#" class="law-card">
-
-                <strong>
-                    📕
-                </strong>
-
-                <h3>
-                    Конституція
-                </h3>
-
-                <span>
-                    Переглянути →
-                </span>
-
-            </a>
-
-
-            <a href="#" class="law-card">
-
-                <strong>
-                    ⚖️
-                </strong>
-
-                <h3>
-                    Кримінальний кодекс
-                </h3>
-
-                <span>
-                    Переглянути →
-                </span>
-
-            </a>
-
-
-            <a href="#" class="law-card">
-
-                <strong>
-                    🚔
-                </strong>
-
-                <h3>
-                    Адміністративний кодекс
-                </h3>
-
-                <span>
-                    Переглянути →
-                </span>
-
-            </a>
-
-
-            <a href="#" class="law-card">
-
-                <strong>
-                    🚗
-                </strong>
-
-                <h3>
-                    Правила дорожнього руху
-                </h3>
-
-                <span>
-                    Переглянути →
-                </span>
-
-            </a>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     NEWS
-===================================================== -->
-
-<section
-    class="section"
-    id="news">
-
-    <div class="container">
-
-        <div class="section-heading">
-
-            <span>
-                НОВИНИ
-            </span>
-
-            <h2>
-                Останні новини уряду
-            </h2>
-
-        </div>
-
-
-        <div class="news-grid">
-
-            <article class="news-card">
-
-                <div class="news-date">
-                    23.08.2026
-                </div>
-
-                <h3>
-                    Оновлення державних послуг
-                </h3>
-
-                <p>
-                    Уряд штату розширив перелік
-                    доступних державних послуг.
-                </p>
-
-                <a href="#">
-                    Читати далі →
-                </a>
-
-            </article>
-
-
-            <article class="news-card">
-
-                <div class="news-date">
-                    22.08.2026
-                </div>
-
-                <h3>
-                    Прийом громадян
-                </h3>
-
-                <p>
-                    Адміністрація губернатора
-                    проводить відкритий прийом.
-                </p>
-
-                <a href="#">
-                    Читати далі →
-                </a>
-
-            </article>
-
-
-            <article class="news-card">
-
-                <div class="news-date">
-                    20.08.2026
-                </div>
-
-                <h3>
-                    Нове розпорядження
-                </h3>
-
-                <p>
-                    Опубліковано нове розпорядження
-                    уряду штату.
-                </p>
-
-                <a href="#">
-                    Читати далі →
-                </a>
-
-            </article>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     CONTACTS
-===================================================== -->
-
-<section
-    class="section section-dark"
-    id="contacts">
-
-    <div class="container">
-
-        <div class="section-heading light">
-
-            <span>
-                КОНТАКТИ
-            </span>
-
-            <h2>
-                Зв'язок з Урядом
-            </h2>
-
-            <p>
-                Контактна інформація державних органів
-                та основних служб штату Olymp.
-            </p>
-
-        </div>
-
-
-        <div class="contacts-grid">
-
-
-            <!-- МЕРІЯ -->
-
-            <div class="contact-card">
-
-                <div class="contact-icon">
-                    🏛️
-                </div>
-
-                <h3>
-                    Мерія штату
-                </h3>
-
-                <p>
-                    Прийом громадян, муніципальні
-                    послуги та адміністративні питання.
-                </p>
-
-                <div class="contact-info">
-
-                    <span>
-                        📍 Los Santos City Hall
-                    </span>
-
-                    <span>
-                        🕐 09:00 — 21:00
-                    </span>
-
-                </div>
-
-                <button
-                    class="service-button"
-                    onclick="openApplicationModal('Мерія штату')">
-
-                    Звернутися →
-
-                </button>
-
-            </div>
-
-
-            <!-- ОФІС ГУБЕРНАТОРА -->
-
-            <div class="contact-card">
-
-                <div class="contact-icon">
-                    👑
-                </div>
-
-                <h3>
-                    Офіс губернатора
-                </h3>
-
-                <p>
-                    Офіційні звернення громадян,
-                    державні питання та пропозиції.
-                </p>
-
-                <div class="contact-info">
-
-                    <span>
-                        🏛️ Уряд штату Olymp
-                    </span>
-
-                    <span>
-                        🕐 За попереднім записом
-                    </span>
-
-                </div>
-
-                <button
-                    class="service-button"
-                    onclick="openApplicationModal('Звернення до губернатора')">
-
-                    Подати звернення →
-
-                </button>
-
-            </div>
-
-
-            <!-- ЮРИДИЧНИЙ ВІДДІЛ -->
-
-            <div class="contact-card">
-
-                <div class="contact-icon">
-                    ⚖️
-                </div>
-
-                <h3>
-                    Юридичний відділ
-                </h3>
-
-                <p>
-                    Юридичні консультації, державний
-                    адвокат та правова допомога.
-                </p>
-
-                <div class="contact-info">
-
-                    <span>
-                        ⚖️ Державна адвокатура
-                    </span>
-
-                    <span>
-                        🕐 09:00 — 21:00
-                    </span>
-
-                </div>
-
-                <button
-                    class="service-button"
-                    onclick="openApplicationModal('Державний адвокат')">
-
-                    Отримати допомогу →
-
-                </button>
-
-            </div>
-
-
-            <!-- ГАРЯЧА ЛІНІЯ -->
-
-            <div class="contact-card">
-
-                <div class="contact-icon">
-                    📞
-                </div>
-
-                <h3>
-                    Гаряча лінія
-                </h3>
-
-                <p>
-                    Для термінових звернень та отримання
-                    інформації про державні служби.
-                </p>
-
-                <div class="contact-info">
-
-                    <span>
-                        📞 911
-                    </span>
-
-                    <span>
-                        🕐 Цілодобово
-                    </span>
-
-                </div>
-
-                <a
-                    href="tel:911"
-                    class="service-button">
-
-                    Зателефонувати →
-
-                </a>
-
-            </div>
-
-
-            <!-- ДЕРЖАВНІ СЛУЖБИ -->
-
-            <div class="contact-card">
-
-                <div class="contact-icon">
-                    🚔
-                </div>
-
-                <h3>
-                    Державні служби
-                </h3>
-
-                <p>
-                    Поліція, федеральні служби, національна
-                    гвардія та медичні служби.
-                </p>
-
-                <div class="contact-info">
-
-                    <span>
-                        🚔 LSPD
-                    </span>
-
-                    <span>
-                        🕐 Цілодобово
-                    </span>
-
-                </div>
-
-                <a
-                    href="#service"
-                    class="service-button">
-
-                    Переглянути служби →
-
-                </a>
-
-            </div>
-
-
-            <!-- ЗАГАЛЬНЕ ЗВЕРНЕННЯ -->
-
-            <div class="contact-card">
-
-                <div class="contact-icon">
-                    📩
-                </div>
-
-                <h3>
-                    Загальне звернення
-                </h3>
-
-                <p>
-                    Не знаєте, до якого державного органу
-                    потрібно звернутися?
-                </p>
-
-                <div class="contact-info">
-
-                    <span>
-                        📋 Онлайн-заявка
-                    </span>
-
-                    <span>
-                        🔎 Розгляд звернення
-                    </span>
-
-                </div>
-
-                <button
-                    class="service-button"
-                    onclick="openApplicationModal('Звернення громадянина')">
-
-                    Подати заявку →
-
-                </button>
-
-            </div>
-
-
-        </div>
-
-
-        <!-- CONTACT BOTTOM -->
-
-        <div class="contacts-bottom">
-
-            <div>
-
-                <span>
-                    НЕ ЗНАЄТЕ, КУДИ ЗВЕРНУТИСЯ?
-                </span>
-
-                <h3>
-                    Ми допоможемо знайти потрібний державний орган
-                </h3>
-
-                <p>
-                    Опишіть ваше питання, і відповідальний
-                    співробітник розгляне звернення.
-                </p>
-
-            </div>
-
-
-            <button
-                class="btn btn-primary"
-                onclick="openApplicationModal('Звернення громадянина')">
-
-                Подати звернення
-
-            </button>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     FOOTER
-===================================================== -->
-
-<footer class="footer">
-
-    <div class="container footer-content">
-
-        <div>
-
-            <div class="footer-logo">
-                OLYMP
-            </div>
-
-            <p>
-                Офіційний портал
-                Уряду штату Olymp.
-            </p>
-
-        </div>
-
-
-        <div class="footer-links">
-
-            <a href="#government">
-                Уряд
-            </a>
-
-            <a href="#services">
-                Послуги
-            </a>
-
-            <a href="#laws">
-                Законодавство
-            </a>
-
-            <a href="#contacts">
-                Контакти
-            </a>
-
-        </div>
-
-    </div>
-
-
-    <div class="copyright">
-
-        © 2026 Olymp State Government.
-        Усі права захищені.
-
-    </div>
-
-</footer>
-
-
-<!-- =====================================================
-     SERVICE MODAL
-===================================================== -->
-
-<div
-    class="modal"
-    id="serviceModal"
-    aria-hidden="true">
-
-    <div class="modal-content service-modal">
-
-        <button
-            class="modal-close"
-            onclick="closeServiceModal()">
-
-            ×
-
-        </button>
-
-
-        <div class="modal-icon" id="modalIcon">
-            🏛️
-        </div>
-
-
-        <span
-            class="modal-category"
-            id="modalCategory">
-
-            ДЕРЖАВНА ПОСЛУГА
-
-        </span>
-
-
-        <h2 id="modalTitle">
-            Назва послуги
-        </h2>
-
-
-        <p
-            class="modal-description"
-            id="modalDescription">
-
-            Опис послуги.
-
-        </p>
-
-
-        <div class="modal-block">
-
-            <strong>
-                Необхідні документи
-            </strong>
-
-            <p id="modalRequirements">
-                —
-            </p>
-
-        </div>
-
-
-        <div class="modal-actions">
-
-            <button
-                class="btn btn-primary"
-                id="applyFromService">
-
-                Подати заявку
-
-            </button>
-
-            <button
-                class="btn btn-light"
-                onclick="closeServiceModal()">
-
-                Закрити
-
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     APPLICATION MODAL
-===================================================== -->
-
-<div
-    class="modal"
-    id="applicationModal"
-    aria-hidden="true">
-
-    <div class="modal-content application-modal">
-
-        <button
-            class="modal-close"
-            onclick="closeApplicationModal()">
-
-            ×
-
-        </button>
-
-
-        <span class="modal-category">
-            ДЕРЖАВНА ЗАЯВКА
-        </span>
-
-
-        <h2>
-            Подання заявки
-        </h2>
-
-
-        <p>
-    Заповніть форму нижче.
-    Після відправлення заявка буде
-    автоматично зареєстрована в системі
-    Уряду штату Olymp.
-        </p>
-
-
-        <form
-            id="applicationForm">
-
-
-            <div class="form-group">
-
-                <label>
-                    ПІБ
-                </label>
-
-                <input
-                    type="text"
-                    id="fullName"
-                    placeholder="Ваше ім'я та прізвище"
-                    required>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    Номер посвідчення
-                </label>
-
-                <input
-                    type="text"
-                    id="idNumber"
-                    placeholder="Наприклад: OLYMP-0001"
-                    required>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    Тип послуги
-                </label>
-
-                <select
-                    id="applicationService"
-                    required>
-
-                    <option value="">
-                        Оберіть послугу
-                    </option>
-
-                    <option>
-                        Отримання посвідчення особи
-                    </option>
-
-                    <option>
-                        Державна довідка
-                    </option>
-
-                    <option>
-                        Реєстрація транспортного засобу
-                    </option>
-
-                    <option>
-                        Транспортна ліцензія
-                    </option>
-
-                    <option>
-                        Реєстрація підприємства
-                    </option>
-
-                    <option>
-                        Ліцензія на діяльність
-                    </option>
-
-                    <option>
-                        Державний адвокат
-                    </option>
-
-                    <option>
-                        Юридична консультація
-                    </option>
-
-                    <option>
-                        Звернення до губернатора
-                    </option>
-
-                    <option>
-                        Звернення громадянина
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    Контакт для зв'язку
-                </label>
-
-                <input
-                    type="text"
-                    id="contact"
-                    placeholder="Discord / телефон">
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    Опис звернення
-                </label>
-
-                <textarea
-                    id="message"
-                    rows="4"
-                    placeholder="Опишіть ваше питання..."
-                    required></textarea>
-
-            </div>
-
-
-            <button
-                type="submit"
-                class="btn btn-primary form-submit">
-
-                Надіслати заявку
-
-            </button>
-
-
-        </form>
-
-
-<div
-    class="success-message"
-    id="successMessage">
-
-    <div class="success-icon">
-        ✓
-    </div>
-
-    <h3>
-        Заявку прийнято
-    </h3>
-
-    <p>
-        Ваше звернення успішно сформовано.
-    </p>
-
-    <strong
-        class="application-number"
-        id="applicationNumber">
-        № OLYMP-000001
-    </strong>
-
-    <div
-        class="application-status"
-        id="applicationStatus">
-
-        <span class="status-label">
-            Статус:
-        </span>
-
-        <span class="status-badge pending">
-            🟡 На розгляді
-        </span>
-
-    </div>
-
-    <button
-        class="btn btn-primary"
-        onclick="closeApplicationModal()">
-
-        Закрити
-
-    </button>
-
-</div>
-
-    </div>
-
-</div>
-
-
-<script src="script.js"></script>
-
-</body>
-</html>
+console.log(
+    "OLYMP Government script loaded successfully"
+);
