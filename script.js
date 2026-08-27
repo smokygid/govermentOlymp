@@ -1,36 +1,458 @@
 /* =========================================================
    OLYMP GOVERNMENT
-   MAIN SCRIPT
+   MAIN SCRIPT 6.1
+   GOOGLE APPS SCRIPT INTEGRATION
 ========================================================= */
+
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const OLYMP_API_URL =
+    "https://script.google.com/macros/s/AKfycbyynbAxu6A_tU5nBEUum357BCY6o8D-3e44wEtR-AlyOtV5un8mNgpmkvU6dtrIy0RvfQ/exec";
+
+
+/* =========================================================
+   GLOBAL USER STATE
+========================================================= */
+
+let currentUser = null;
+let currentSessionToken = null;
+
+
+/* =========================================================
+   LOAD SESSION
+========================================================= */
+
+function loadSession() {
+
+    try {
+
+        currentSessionToken =
+            localStorage.getItem(
+                "olymp_session_token"
+            );
+
+        const savedUser =
+            localStorage.getItem(
+                "olymp_user"
+            );
+
+        if (savedUser) {
+
+            currentUser =
+                JSON.parse(savedUser);
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Помилка завантаження сесії:",
+            error
+        );
+
+        currentSessionToken = null;
+        currentUser = null;
+
+    }
+
+}
+
+
+/* =========================================================
+   SAVE SESSION
+========================================================= */
+
+function saveSession(
+    token,
+    user
+) {
+
+    currentSessionToken =
+        token || null;
+
+    currentUser =
+        user || null;
+
+
+    if (token) {
+
+        localStorage.setItem(
+            "olymp_session_token",
+            token
+        );
+
+    }
+
+
+    if (user) {
+
+        localStorage.setItem(
+            "olymp_user",
+            JSON.stringify(user)
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CLEAR SESSION
+========================================================= */
+
+function clearSession() {
+
+    currentSessionToken = null;
+    currentUser = null;
+
+    localStorage.removeItem(
+        "olymp_session_token"
+    );
+
+    localStorage.removeItem(
+        "olymp_user"
+    );
+
+}
+
+
+/* =========================================================
+   API REQUEST
+========================================================= */
+
+async function olympApi(
+    action,
+    data = {}
+) {
+
+    if (
+        !OLYMP_API_URL ||
+        OLYMP_API_URL.indexOf("ВСТАВЬ_СЮДА") !== -1
+    ) {
+
+        throw new Error(
+            "Не налаштовано URL Google Apps Script."
+        );
+
+    }
+
+
+    const params =
+        new URLSearchParams();
+
+
+    params.append(
+        "action",
+        action
+    );
+
+
+    Object.keys(data).forEach(
+        key => {
+
+            const value =
+                data[key];
+
+            if (
+                value !== undefined &&
+                value !== null
+            ) {
+
+                params.append(
+                    key,
+                    String(value)
+                );
+
+            }
+
+        }
+    );
+
+
+    const response =
+        await fetch(
+            OLYMP_API_URL,
+            {
+
+                method: "POST",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/x-www-form-urlencoded;charset=UTF-8"
+
+                },
+
+                body:
+                    params.toString()
+
+            }
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Помилка HTTP: " +
+            response.status
+        );
+
+    }
+
+
+    const result =
+        await response.json();
+
+
+    return result;
+
+}
+
+
+/* =========================================================
+   VALIDATE SESSION
+========================================================= */
+
+async function validateCurrentSession() {
+
+    if (!currentSessionToken) {
+
+        return false;
+
+    }
+
+
+    try {
+
+        const result =
+            await olympApi(
+                "validate",
+                {
+
+                    sessionToken:
+                        currentSessionToken
+
+                }
+            );
+
+
+        if (
+            result &&
+            result.success
+        ) {
+
+            return true;
+
+        }
+
+
+        clearSession();
+
+        return false;
+
+    } catch (error) {
+
+        console.error(
+            "Помилка перевірки сесії:",
+            error
+        );
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   GET PROFILE
+========================================================= */
+
+async function loadCurrentProfile() {
+
+    if (!currentSessionToken) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        const result =
+            await olympApi(
+                "profile",
+                {
+
+                    olympId:
+                        currentUser
+                            ? currentUser.olympId
+                            : "",
+
+                    sessionToken:
+                        currentSessionToken
+
+                }
+            );
+
+
+        if (
+            result &&
+            result.success
+        ) {
+
+            currentUser =
+                result.citizen ||
+                result.profile ||
+                result.user ||
+                null;
+
+
+            if (currentUser) {
+
+                localStorage.setItem(
+                    "olymp_user",
+                    JSON.stringify(
+                        currentUser
+                    )
+                );
+
+            }
+
+
+            return result;
+
+        }
+
+
+        return null;
+
+    } catch (error) {
+
+        console.error(
+            "Помилка завантаження профілю:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+/* =========================================================
+   REQUIRE LOGIN
+========================================================= */
+
+async function requireLogin() {
+
+    loadSession();
+
+
+    if (!currentSessionToken) {
+
+        alert(
+            "Для подання заявки необхідно увійти до особистого кабінету."
+        );
+
+        window.location.href =
+            "cabinet.html";
+
+        return false;
+
+    }
+
+
+    const valid =
+        await validateCurrentSession();
+
+
+    if (!valid) {
+
+        alert(
+            "Ваша сесія завершена. Увійдіть до особистого кабінету повторно."
+        );
+
+        window.location.href =
+            "cabinet.html";
+
+        return false;
+
+    }
+
+
+    if (!currentUser) {
+
+        await loadCurrentProfile();
+
+    }
+
+
+    return true;
+
+}
 
 
 /* =========================================================
    MOBILE MENU
 ========================================================= */
 
-const menuButton = document.getElementById("menuButton");
-const menu = document.querySelector(".menu");
+const menuButton =
+    document.getElementById(
+        "menuButton"
+    );
 
-if (menuButton && menu) {
+const menu =
+    document.querySelector(
+        ".menu"
+    );
 
-    menuButton.addEventListener("click", () => {
-        menu.classList.toggle("active");
-    });
+
+if (
+    menuButton &&
+    menu
+) {
+
+    menuButton.addEventListener(
+        "click",
+        () => {
+
+            menu.classList.toggle(
+                "active"
+            );
+
+        }
+    );
 
 }
 
 
-/* Закрытие мобильного меню */
-
 if (menu) {
 
-    document.querySelectorAll(".menu a").forEach(link => {
+    document
+        .querySelectorAll(
+            ".menu a"
+        )
+        .forEach(
+            link => {
 
-        link.addEventListener("click", () => {
-            menu.classList.remove("active");
-        });
+                link.addEventListener(
+                    "click",
+                    () => {
 
-    });
+                        menu.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+            }
+        );
 
 }
 
@@ -39,113 +461,166 @@ if (menu) {
    SERVICE MODAL
 ========================================================= */
 
-const serviceModal = document.getElementById("serviceModal");
+const serviceModal =
+    document.getElementById(
+        "serviceModal"
+    );
 
 const modalTitle =
-    document.getElementById("modalTitle");
+    document.getElementById(
+        "modalTitle"
+    );
 
 const modalDescription =
-    document.getElementById("modalDescription");
+    document.getElementById(
+        "modalDescription"
+    );
 
 const modalRequirements =
-    document.getElementById("modalRequirements");
+    document.getElementById(
+        "modalRequirements"
+    );
 
 const modalIcon =
-    document.getElementById("modalIcon");
+    document.getElementById(
+        "modalIcon"
+    );
 
 const modalCategory =
-    document.getElementById("modalCategory");
+    document.getElementById(
+        "modalCategory"
+    );
 
 const applyFromService =
-    document.getElementById("applyFromService");
+    document.getElementById(
+        "applyFromService"
+    );
 
-
-/*
-   Текущая выбранная услуга
-*/
 
 let selectedService = "";
 
 
-/*
-   Открытие информации об услуге
-*/
+/* =========================================================
+   OPEN SERVICE
+========================================================= */
 
-window.openService = function (button) {
+window.openService =
+function(button) {
 
     if (!serviceModal) {
-        console.error("serviceModal не найден");
+
+        console.error(
+            "serviceModal не найден"
+        );
+
         return;
+
     }
 
 
-    /*
-       Получаем карточку услуги
-    */
+    const card =
+        button.closest(
+            ".service-item"
+        );
 
-    const card = button.closest(".service-item");
 
     if (!card) {
 
         console.error(
-            "Карточка услуги не найдена"
+            "Карточка послуги не знайдена"
         );
 
         return;
+
     }
 
-
-    /*
-       Получаем данные из data-атрибутов
-    */
 
     const title =
-        card.dataset.title || "Державна послуга";
+        card.dataset.title ||
+        "Державна послуга";
+
 
     const description =
-        card.dataset.description || "";
+        card.dataset.description ||
+        "";
+
 
     const requirements =
-        card.dataset.requirements || "—";
+        card.dataset.requirements ||
+        "—";
 
 
-    selectedService = title;
+    selectedService =
+        title;
 
-
-    /*
-       Заполняем модальное окно
-    */
 
     if (modalTitle) {
-        modalTitle.textContent = title;
+
+        modalTitle.textContent =
+            title;
+
     }
+
 
     if (modalDescription) {
-        modalDescription.textContent = description;
+
+        modalDescription.textContent =
+            description;
+
     }
 
+
     if (modalRequirements) {
-        modalRequirements.textContent = requirements;
+
+        modalRequirements.textContent =
+            requirements;
+
     }
+
+
+    if (modalIcon) {
+
+        const icon =
+            card.querySelector(
+                ".service-icon"
+            );
+
+        if (icon) {
+
+            modalIcon.textContent =
+                icon.textContent.trim();
+
+        }
+
+    }
+
 
     if (modalCategory) {
 
         const category =
-            card.dataset.category || "government";
+            card.dataset.category ||
+            "government";
+
 
         const categories = {
 
-            documents: "ДОКУМЕНТИ",
+            documents:
+                "ДОКУМЕНТИ",
 
-            transport: "ТРАНСПОРТ",
+            transport:
+                "ТРАНСПОРТ",
 
-            business: "БІЗНЕС",
+            business:
+                "БІЗНЕС",
 
-            legal: "ЮРИДИЧНІ",
+            legal:
+                "ЮРИДИЧНІ",
 
-            government: "УРЯДОВІ"
+            government:
+                "УРЯДОВІ"
 
         };
+
 
         modalCategory.textContent =
             categories[category] ||
@@ -154,64 +629,79 @@ window.openService = function (button) {
     }
 
 
-    /*
-       Открываем окно
-    */
+    serviceModal.classList.add(
+        "active"
+    );
 
-    serviceModal.classList.add("active");
 
     serviceModal.setAttribute(
         "aria-hidden",
         "false"
     );
 
-    document.body.style.overflow = "hidden";
+
+    document.body.style.overflow =
+        "hidden";
 
 };
 
 
-/*
-   Закрытие окна услуги
-*/
+/* =========================================================
+   CLOSE SERVICE
+========================================================= */
 
-window.closeServiceModal = function () {
+window.closeServiceModal =
+function() {
 
     if (!serviceModal) {
+
         return;
+
     }
 
-    serviceModal.classList.remove("active");
+
+    serviceModal.classList.remove(
+        "active"
+    );
+
 
     serviceModal.setAttribute(
         "aria-hidden",
         "true"
     );
 
-    document.body.style.overflow = "";
+
+    document.body.style.overflow =
+        "";
 
 };
 
 
-/*
-   Совместимость со старым названием
-*/
+window.closeService =
+function() {
 
-window.closeService = function () {
     window.closeServiceModal();
+
 };
 
-
-/* Закрытие услуги по фону */
 
 if (serviceModal) {
 
-    serviceModal.addEventListener("click", event => {
+    serviceModal.addEventListener(
+        "click",
+        event => {
 
-        if (event.target === serviceModal) {
-            window.closeServiceModal();
+            if (
+                event.target ===
+                serviceModal
+            ) {
+
+                window.closeServiceModal();
+
+            }
+
         }
-
-    });
+    );
 
 }
 
@@ -221,20 +711,42 @@ if (serviceModal) {
 ========================================================= */
 
 const applicationModal =
-    document.getElementById("applicationModal");
+    document.getElementById(
+        "applicationModal"
+    );
 
 const applicationForm =
-    document.getElementById("applicationForm");
+    document.getElementById(
+        "applicationForm"
+    );
 
 const applicationService =
-    document.getElementById("applicationService");
+    document.getElementById(
+        "applicationService"
+    );
+
+const successMessage =
+    document.getElementById(
+        "successMessage"
+    );
+
+const applicationNumber =
+    document.getElementById(
+        "applicationNumber"
+    );
+
+const applicationStatus =
+    document.getElementById(
+        "applicationStatus"
+    );
 
 
-/*
-   Открытие формы заявки
-*/
+/* =========================================================
+   OPEN APPLICATION MODAL
+========================================================= */
 
-window.openApplicationModal = function (serviceName) {
+window.openApplicationModal =
+async function(serviceName) {
 
     if (!applicationModal) {
 
@@ -243,20 +755,36 @@ window.openApplicationModal = function (serviceName) {
         );
 
         return;
+
     }
 
 
     /*
-       Если передали услугу —
-       автоматически выбираем её
-    */
+     * Спочатку перевіряємо авторизацію.
+     */
+
+    const loggedIn =
+        await requireLogin();
+
+
+    if (!loggedIn) {
+
+        return;
+
+    }
+
+
+    /*
+     * Вибір послуги.
+     */
 
     if (
         serviceName &&
         applicationService
     ) {
 
-        let optionExists = false;
+        let found = false;
+
 
         for (
             const option
@@ -264,21 +792,58 @@ window.openApplicationModal = function (serviceName) {
         ) {
 
             if (
-                option.textContent.trim() ===
-                serviceName.trim()
+                option.textContent
+                    .trim()
+                    .toLowerCase() ===
+                serviceName
+                    .trim()
+                    .toLowerCase()
             ) {
 
-                optionExists = true;
+                applicationService.value =
+                    option.value;
+
+                found = true;
+
                 break;
+
             }
 
         }
 
 
-        if (optionExists) {
+        /*
+         * Якщо точної опції немає —
+         * пробуємо додати значення.
+         */
 
-            applicationService.value =
-                serviceName;
+        if (
+            !found &&
+            serviceName
+        ) {
+
+            let option =
+                Array.from(
+                    applicationService.options
+                ).find(
+                    item =>
+                        item.textContent
+                            .trim()
+                            .toLowerCase()
+                            .includes(
+                                serviceName
+                                    .trim()
+                                    .toLowerCase()
+                            )
+                );
+
+
+            if (option) {
+
+                applicationService.value =
+                    option.value;
+
+            }
 
         }
 
@@ -286,46 +851,72 @@ window.openApplicationModal = function (serviceName) {
 
 
     /*
-       Открываем модальное окно
-    */
+     * Скидаємо повідомлення про успіх.
+     */
 
-    applicationModal.classList.add("active");
+    if (successMessage) {
+
+        successMessage.style.display =
+            "none";
+
+    }
+
+
+    if (applicationForm) {
+
+        applicationForm.style.display =
+            "";
+
+    }
+
+
+    applicationModal.classList.add(
+        "active"
+    );
+
 
     applicationModal.setAttribute(
         "aria-hidden",
         "false"
     );
 
-    document.body.style.overflow = "hidden";
+
+    document.body.style.overflow =
+        "hidden";
 
 };
 
 
-/*
-   Закрытие формы заявки
-*/
+/* =========================================================
+   CLOSE APPLICATION
+========================================================= */
 
-window.closeApplicationModal = function () {
+window.closeApplicationModal =
+function() {
 
     if (!applicationModal) {
+
         return;
+
     }
 
-    applicationModal.classList.remove("active");
+
+    applicationModal.classList.remove(
+        "active"
+    );
+
 
     applicationModal.setAttribute(
         "aria-hidden",
         "true"
     );
 
-    document.body.style.overflow = "";
+
+    document.body.style.overflow =
+        "";
 
 };
 
-
-/*
-   Закрытие по фону
-*/
 
 if (applicationModal) {
 
@@ -349,18 +940,18 @@ if (applicationModal) {
 
 
 /* =========================================================
-   ПОДАТИ ЗАЯВКУ З КАРТКИ ПОСЛУГИ
+   APPLY FROM SERVICE
 ========================================================= */
 
 if (applyFromService) {
 
     applyFromService.addEventListener(
         "click",
-        () => {
+        async () => {
 
             window.closeServiceModal();
 
-            window.openApplicationModal(
+            await window.openApplicationModal(
                 selectedService
             );
 
@@ -371,25 +962,303 @@ if (applyFromService) {
 
 
 /* =========================================================
-   APPLICATION FORM
+   APPLICATION SUBMIT
 ========================================================= */
 
 if (applicationForm) {
 
     applicationForm.addEventListener(
         "submit",
-        event => {
-
-            /*
-               Пока только предотвращаем
-               перезагрузку страницы.
-            */
+        async event => {
 
             event.preventDefault();
 
-            console.log(
-                "Форма заявки отправлена"
-            );
+
+            /*
+             * Повторно перевіряємо сесію.
+             */
+
+            const loggedIn =
+                await requireLogin();
+
+
+            if (!loggedIn) {
+
+                return;
+
+            }
+
+
+            /*
+             * Перевіряємо профіль.
+             */
+
+            if (!currentUser) {
+
+                const profile =
+                    await loadCurrentProfile();
+
+
+                if (!profile) {
+
+                    alert(
+                        "Не вдалося завантажити ваш профіль."
+                    );
+
+                    return;
+
+                }
+
+            }
+
+
+            /*
+             * Отримуємо поля форми.
+             */
+
+            const service =
+                applicationService
+                    ? applicationService.value.trim()
+                    : "";
+
+
+            const contactInput =
+                document.getElementById(
+                    "contact"
+                );
+
+
+            const messageInput =
+                document.getElementById(
+                    "message"
+                );
+
+
+            const contact =
+                contactInput
+                    ? contactInput.value.trim()
+                    : "";
+
+
+            const message =
+                messageInput
+                    ? messageInput.value.trim()
+                    : "";
+
+
+            if (!service) {
+
+                alert(
+                    "Оберіть державну послугу."
+                );
+
+                return;
+
+            }
+
+
+            if (!message) {
+
+                alert(
+                    "Вкажіть опис звернення."
+                );
+
+                return;
+
+            }
+
+
+            /*
+             * Кнопка.
+             */
+
+            const submitButton =
+                applicationForm.querySelector(
+                    ".form-submit"
+                );
+
+
+            const oldButtonText =
+                submitButton
+                    ? submitButton.textContent
+                    : "";
+
+
+            if (submitButton) {
+
+                submitButton.disabled =
+                    true;
+
+                submitButton.textContent =
+                    "Відправлення...";
+
+            }
+
+
+            try {
+
+                /*
+                 * Відправляємо заявку.
+                 *
+                 * ПІБ, OLYMP-ID, телефон,
+                 * Email, Discord беруться
+                 * з профілю автоматично.
+                 */
+
+                const result =
+                    await olympApi(
+                        "saveapplication",
+                        {
+
+                            olympId:
+                                currentUser.olympId,
+
+                            sessionToken:
+                                currentSessionToken,
+
+                            service:
+                                service,
+
+                            contact:
+                                contact ||
+                                currentUser.contact ||
+                                currentUser.preferredContact ||
+                                "",
+
+                            message:
+                                message
+
+                        }
+                    );
+
+
+                if (
+                    !result ||
+                    !result.success
+                ) {
+
+                    throw new Error(
+                        result &&
+                        result.message
+                            ? result.message
+                            : "Не вдалося подати заявку."
+                    );
+
+                }
+
+
+                /*
+                 * Заявка успішно створена.
+                 */
+
+                const application =
+                    result.application ||
+                    {};
+
+
+                const number =
+                    result.applicationNumber ||
+                    result.number ||
+                    application.number ||
+                    "—";
+
+
+                /*
+                 * Показуємо номер заявки.
+                 */
+
+                if (applicationNumber) {
+
+                    applicationNumber.textContent =
+                        "№ " + number;
+
+                }
+
+
+                if (applicationStatus) {
+
+                    applicationStatus.innerHTML =
+                        `
+                        <span class="status-label">
+                            Статус:
+                        </span>
+
+                        <span class="status-badge pending">
+                            🟡 На розгляді
+                        </span>
+                        `;
+
+                }
+
+
+                /*
+                 * Приховуємо форму.
+                 */
+
+                applicationForm.style.display =
+                    "none";
+
+
+                /*
+                 * Показуємо success.
+                 */
+
+                if (successMessage) {
+
+                    successMessage.style.display =
+                        "block";
+
+                }
+
+
+                /*
+                 * Очищаємо поля.
+                 */
+
+                applicationForm.reset();
+
+
+                /*
+                 * Оновлюємо локальні дані.
+                 */
+
+                await loadCurrentProfile();
+
+
+                console.log(
+                    "Заявка успішно створена:",
+                    result
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Помилка подання заявки:",
+                    error
+                );
+
+
+                alert(
+                    error.message ||
+                    "Сталася помилка під час подання заявки."
+                );
+
+
+            } finally {
+
+                if (submitButton) {
+
+                    submitButton.disabled =
+                        false;
+
+                    submitButton.textContent =
+                        oldButtonText ||
+                        "Надіслати заявку";
+
+                }
+
+            }
 
         }
     );
@@ -405,8 +1274,13 @@ document.addEventListener(
     "keydown",
     event => {
 
-        if (event.key !== "Escape") {
+        if (
+            event.key !==
+            "Escape"
+        ) {
+
             return;
+
         }
 
 
@@ -438,7 +1312,8 @@ document.addEventListener(
         }
 
 
-        document.body.style.overflow = "";
+        document.body.style.overflow =
+            "";
 
     }
 );
@@ -449,7 +1324,10 @@ document.addEventListener(
 ========================================================= */
 
 const header =
-    document.querySelector(".header");
+    document.querySelector(
+        ".header"
+    );
+
 
 if (header) {
 
@@ -457,7 +1335,9 @@ if (header) {
         "scroll",
         () => {
 
-            if (window.scrollY > 50) {
+            if (
+                window.scrollY > 50
+            ) {
 
                 header.style.boxShadow =
                     "0 5px 30px rgba(0,0,0,0.25)";
@@ -480,25 +1360,38 @@ if (header) {
 ========================================================= */
 
 const serviceSearch =
-    document.getElementById("serviceSearch");
+    document.getElementById(
+        "serviceSearch"
+    );
 
 const clearSearch =
-    document.getElementById("clearSearch");
+    document.getElementById(
+        "clearSearch"
+    );
 
 const servicesGrid =
-    document.getElementById("servicesGrid");
+    document.getElementById(
+        "servicesGrid"
+    );
 
 const noResults =
-    document.getElementById("noResults");
+    document.getElementById(
+        "noResults"
+    );
 
 const categoryButtons =
-    document.querySelectorAll(".category-btn");
+    document.querySelectorAll(
+        ".category-btn"
+    );
 
 const serviceItems =
-    document.querySelectorAll(".service-item");
+    document.querySelectorAll(
+        ".service-item"
+    );
 
 
-let currentCategory = "all";
+let currentCategory =
+    "all";
 
 
 function filterServices() {
@@ -511,55 +1404,67 @@ function filterServices() {
             : "";
 
 
-    let visibleCount = 0;
+    let visibleCount =
+        0;
 
 
-    serviceItems.forEach(item => {
+    serviceItems.forEach(
+        item => {
 
-        const title =
-            (
-                item.dataset.title ||
-                ""
-            ).toLowerCase();
-
-        const description =
-            (
-                item.dataset.description ||
-                ""
-            ).toLowerCase();
-
-        const category =
-            item.dataset.category ||
-            "";
+            const title =
+                (
+                    item.dataset.title ||
+                    ""
+                ).toLowerCase();
 
 
-        const matchesSearch =
-            !searchText ||
-            title.includes(searchText) ||
-            description.includes(searchText);
+            const description =
+                (
+                    item.dataset.description ||
+                    ""
+                ).toLowerCase();
 
 
-        const matchesCategory =
-            currentCategory === "all" ||
-            category === currentCategory;
+            const category =
+                item.dataset.category ||
+                "";
 
 
-        if (
-            matchesSearch &&
-            matchesCategory
-        ) {
+            const matchesSearch =
+                !searchText ||
+                title.includes(
+                    searchText
+                ) ||
+                description.includes(
+                    searchText
+                );
 
-            item.style.display = "";
 
-            visibleCount++;
+            const matchesCategory =
+                currentCategory === "all" ||
+                category ===
+                    currentCategory;
 
-        } else {
 
-            item.style.display = "none";
+            if (
+                matchesSearch &&
+                matchesCategory
+            ) {
+
+                item.style.display =
+                    "";
+
+                visibleCount++;
+
+            } else {
+
+                item.style.display =
+                    "none";
+
+            }
 
         }
-
-    });
+    );
 
 
     if (noResults) {
@@ -574,10 +1479,6 @@ function filterServices() {
 }
 
 
-/*
-   Поиск
-*/
-
 if (serviceSearch) {
 
     serviceSearch.addEventListener(
@@ -588,10 +1489,6 @@ if (serviceSearch) {
 }
 
 
-/*
-   Очистка поиска
-*/
-
 if (clearSearch) {
 
     clearSearch.addEventListener(
@@ -599,7 +1496,10 @@ if (clearSearch) {
         () => {
 
             if (serviceSearch) {
-                serviceSearch.value = "";
+
+                serviceSearch.value =
+                    "";
+
             }
 
             filterServices();
@@ -610,39 +1510,41 @@ if (clearSearch) {
 }
 
 
-/*
-   Категории
-*/
+categoryButtons.forEach(
+    button => {
 
-categoryButtons.forEach(button => {
+        button.addEventListener(
+            "click",
+            () => {
 
-    button.addEventListener(
-        "click",
-        () => {
+                categoryButtons.forEach(
+                    btn => {
 
-            categoryButtons.forEach(
-                btn => {
-                    btn.classList.remove(
-                        "active"
-                    );
-                }
-            );
+                        btn.classList.remove(
+                            "active"
+                        );
 
-
-            button.classList.add("active");
+                    }
+                );
 
 
-            currentCategory =
-                button.dataset.category ||
-                "all";
+                button.classList.add(
+                    "active"
+                );
 
 
-            filterServices();
+                currentCategory =
+                    button.dataset.category ||
+                    "all";
 
-        }
-    );
 
-});
+                filterServices();
+
+            }
+        );
+
+    }
+);
 
 
 /* =========================================================
@@ -680,6 +1582,7 @@ if (
                             entry.target.style.transform =
                                 "translateY(0)";
 
+
                             observer.unobserve(
                                 entry.target
                             );
@@ -691,7 +1594,9 @@ if (
 
             },
             {
+
                 threshold: 0.1
+
             }
         );
 
@@ -699,7 +1604,8 @@ if (
     animatedElements.forEach(
         element => {
 
-            element.style.opacity = "0";
+            element.style.opacity =
+                "0";
 
             element.style.transform =
                 "translateY(20px)";
@@ -708,7 +1614,9 @@ if (
                 "opacity .5s ease, " +
                 "transform .5s ease";
 
-            observer.observe(element);
+            observer.observe(
+                element
+            );
 
         }
     );
@@ -718,7 +1626,8 @@ if (
     animatedElements.forEach(
         element => {
 
-            element.style.opacity = "1";
+            element.style.opacity =
+                "1";
 
             element.style.transform =
                 "translateY(0)";
@@ -730,12 +1639,21 @@ if (
 
 
 /* =========================================================
-   INITIAL FILTER
+   INITIALIZATION
 ========================================================= */
+
+loadSession();
 
 filterServices();
 
 
 console.log(
-    "OLYMP Government script loaded successfully"
+    "OLYMP Government script 6.1 loaded successfully."
+);
+
+console.log(
+    "Session:",
+    currentSessionToken
+        ? "FOUND"
+        : "NOT FOUND"
 );
